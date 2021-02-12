@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<robot name="irb6400r" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find wire_cutting)/urdf/irb6400r_macro.xacro"/>
+  <xacro:irb6400r prefix=""/>
+</robot>
+
