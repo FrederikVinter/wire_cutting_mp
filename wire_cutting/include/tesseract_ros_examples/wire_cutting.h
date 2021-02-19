@@ -28,7 +28,7 @@ public:
 
 private:
   ros::NodeHandle nh_;
-  tesseract_environment::Command::Ptr addPointCloud();
+  tesseract_common::VectorIsometry3d loadToolPoses();
 };
 
 }  // namespace tesseract_ros_examples

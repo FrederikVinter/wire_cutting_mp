@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
+  
   <xacro:macro name="irb6400r" params="prefix">
     <!-- link list -->
     <link name="${prefix}base_link">
@@ -106,6 +107,19 @@
     </link>
     <link name="${prefix}tool0"/>
     
+    <link name="${prefix}carbon_hotwire" >
+      <visual>
+        <geometry>
+          <mesh filename="package://wire_cutting/meshes/carbon_hotwire.stl" />
+        </geometry>>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://wire_cutting/meshes/carbon_hotwire.stl" />
+        </geometry>
+      </collision>
+    </link>
+    
     <!--Cylinder and piston -->
     <!--link name="${prefix}link_cylinder">
       <collision name="collision">
@@ -144,14 +158,14 @@
       <axis xyz="0 0 1"/>
       <parent link="${prefix}base_link"/>
       <child link="${prefix}link_1"/>
-      <limit effort="0" lower="-2.967" upper="2.967" velocity="1.7453"/>
+      <limit effort="0" lower="-3.14" upper="3.14" velocity="1.57"/>
     </joint>
     <joint type="revolute" name="${prefix}joint_2">
       <origin xyz="0.240 0. 0.53" rpy="0 0 0"/>
       <axis xyz="0 1 0"/>
       <parent link="${prefix}link_1"/>
       <child link="${prefix}link_2"/>
-      <limit effort="0" lower="-1.134" upper="1.4855" velocity="1.5707"/>
+      <limit effort="0" lower="-1.22" upper="1.48" velocity="1.22"/>
     </joint>
     <!-- TODO fix 3rd axis geometry -->
     <joint type="revolute" name="${prefix}joint_3">
@@ -159,7 +173,7 @@
       <axis xyz="0 1 0"/>
       <parent link="${prefix}link_2"/>
       <child link="${prefix}link_3"/>
-      <limit effort="0" lower="-3.142" upper="1.222" velocity="1.5707"/>
+      <limit effort="0" lower="-0.489" upper="1.92" velocity="1.22"/>
     </joint>
     <!-- TODO find isue with 4-5 axis joint position -->
     <joint type="revolute" name="${prefix}joint_4">
@@ -167,14 +181,14 @@
       <axis xyz="1 0 0"/>
       <parent link="${prefix}link_3"/>
       <child link="${prefix}link_4"/>
-      <limit effort="0" lower="-5.236" upper="5.236" velocity="2.9671"/>
+      <limit effort="0" lower="-5.23" upper="5.23" velocity="1.91"/>
     </joint>
     <joint type="revolute" name="${prefix}joint_5">
-      <origin xyz="1.485 0 0 " rpy="0 0 0"/>
+      <origin xyz="1.725 0 0 " rpy="0 0 0"/>
       <axis xyz="0 1 0"/>
       <parent link="${prefix}link_4"/>
       <child link="${prefix}link_5"/>
-      <limit effort="0" lower="-2.094" upper="2.094" velocity="2.4435"/>
+      <limit effort="0" lower="-2.094" upper="2.094" velocity="1.91"/>
     </joint>
      <!-- TODO verify 0.145! -->
     <joint type="revolute" name="${prefix}joint_6">
@@ -182,13 +196,19 @@
       <axis xyz="1 0 0"/>
       <parent link="${prefix}link_5"/>
       <child link="${prefix}link_6"/>
-      <limit effort="0" lower="-6.283" upper="6.283" velocity="3.3161"/>
+      <limit effort="0" lower="-5.23" upper="5.23" velocity="1.91"/>
     </joint>
     <joint type="fixed" name="${prefix}joint_6-tool0">
       <parent link="${prefix}link_6"/>
       <child link="${prefix}tool0"/>
       <origin xyz=".037 0 0" rpy="0 1.57079632679 0"/>
     </joint>
+    <joint type="fixed" name="${prefix}tool0-carbon_hotwire">
+      <parent link="${prefix}tool0"/>
+      <child link="${prefix}carbon_hotwire"/>
+      <origin xyz="0 0 1.861" rpy="0 0 0"/>
+    </joint>
+    
     
     <!--<joint type="fixed" name="${prefix}joint_cylinder">
       <origin xyz="-0.365 -0.1895 0.405" rpy="0 -0.170 0"/>

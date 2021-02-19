@@ -41,6 +41,9 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <tesseract_command_language/command_language.h>
 #include <tesseract_command_language/utils/utils.h>
 #include <tesseract_process_managers/taskflow_generators/trajopt_taskflow.h>
+#include <tesseract_motion_planners/trajopt/profile/trajopt_default_plan_profile.h>
+#include <tesseract_motion_planners/trajopt/profile/trajopt_default_composite_profile.h>
+#include <tesseract_motion_planners/trajopt/profile/trajopt_default_solver_profile.h>
 #include <tesseract_process_managers/core/process_planning_server.h>
 #include <tesseract_process_managers/core/default_process_planners.h>
 #include <tesseract_planning_server/tesseract_planning_server.h>
@@ -64,6 +67,50 @@ const std::string EXAMPLE_MONITOR_NAMESPACE = "tesseract_ros_examples";
 
 namespace tesseract_ros_examples
 {
+tesseract_common::VectorIsometry3d WireCutting::loadToolPoses()
+{
+  tesseract_common::VectorIsometry3d path;  // results
+  std::ifstream indata;                     // input file
+
+  // You could load your parts from anywhere, but we are transporting them with
+  // the git repo
+  std::string filename = ros::package::getPath("wire_cutting") + "/config/tool_poses.csv";
+
+  // In a non-trivial app, you'll of course want to check that calls like 'open'
+  // succeeded
+  indata.open(filename);
+
+  std::string line;
+  int lnum = 0;
+  while (std::getline(indata, line))
+  {
+    ++lnum;
+    if (lnum < 3)
+      continue;
+
+    std::stringstream lineStream(line);
+    std::string cell;
+    Eigen::Matrix<double, 7, 1> xyzWXYZ;
+    int i = -2;
+    while (std::getline(lineStream, cell, ','))
+    {
+      ++i;
+      if (i == -1)
+        continue;
+
+      xyzWXYZ(i) = std::stod(cell);
+    }
+
+
+    Eigen::Isometry3d pose = Eigen::Isometry3d::Identity() * Eigen::Translation3d(xyzWXYZ(0), xyzWXYZ(1), xyzWXYZ(2)) *
+                                   Eigen::Quaterniond(xyzWXYZ(3), xyzWXYZ(4), xyzWXYZ(5), 0);
+   
+    path.push_back(pose);
+  }
+  indata.close();
+
+  return path;
+}
 
 WireCutting::WireCutting(const ros::NodeHandle& nh, bool plotting, bool rviz)
   : Example(plotting, rviz), nh_(nh)
@@ -100,18 +147,11 @@ bool WireCutting::run()
   if (rviz_)
     monitor_->startPublishingEnvironment(tesseract_monitoring::EnvironmentMonitor::UPDATE_ENVIRONMENT);
 
-  // Create octomap and add it to the local environment
-  //Command::Ptr cmd = addPointCloud();
-  //if (!monitor_->applyCommand(*cmd))
-  //  return false;
-
   // Create plotting tool
   ROSPlottingPtr plotter = std::make_shared<ROSPlotting>(monitor_->getSceneGraph()->getRoot());
   if (rviz_)
     plotter->waitForConnection();
   
-  plotter->waitForInput();
-
   // Set the robot initial state
   std::vector<std::string> joint_names;
   joint_names.push_back("joint_1");
@@ -122,53 +162,52 @@ bool WireCutting::run()
   joint_names.push_back("joint_6");
 
   Eigen::VectorXd joint_pos(6);
-  joint_pos(0) = -0.4;
-  joint_pos(1) = 0.2762;
-  joint_pos(2) = 0.0;
-  joint_pos(3) = -1.3348;
-  joint_pos(4) = 0.0;
-  joint_pos(5) = 1.4959;
+  joint_pos(0) = 0;
+  joint_pos(1) = 0;
+  joint_pos(2) = -0.3;
+  joint_pos(3) = 0;
+  joint_pos(4) = 1.57;
+  joint_pos(5) = 0;
+
+  //auto g = env_.get()->getSceneGraph(); 
+  //g->saveDOT("/home/frederik/ws_tesseract_wirecut/test.dot");
 
   env_->setState(joint_names, joint_pos);
+
+  tesseract_common::VectorIsometry3d tool_poses = loadToolPoses();
 
   plotter->waitForInput();
 
   // Create Program
   CompositeInstruction program("cartesian_program", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
 
-  // Start Joint Position for the program
-  Waypoint wp0 = StateWaypoint(joint_names, joint_pos);
-  PlanInstruction start_instruction(wp0, PlanInstructionType::START);
-  program.setStartInstruction(start_instruction);
-
   // Create cartesian waypoint
-  Waypoint wp1 = CartesianWaypoint(Eigen::Isometry3d::Identity() * Eigen::Translation3d(1.0, -0.2, 0.62) *
-                                   Eigen::Quaterniond(0, 0, 1.0, 0));
+  Waypoint wp = CartesianWaypoint(tool_poses[0]);
+  PlanInstruction plan_instruction(wp, PlanInstructionType::START, "wire_cutting");
+  plan_instruction.setDescription("from_start_plan");
+  program.setStartInstruction(plan_instruction);
 
-  Waypoint wp2 = CartesianWaypoint(Eigen::Isometry3d::Identity() * Eigen::Translation3d(1.0, 0.3, 0.62) *
-                                   Eigen::Quaterniond(0, 0, 1.0, 0));
-
-  // Plan freespace from start
-  PlanInstruction plan_f0(wp1, PlanInstructionType::FREESPACE, "freespace_profile");
-  plan_f0.setDescription("from_start_plan");
-
-  // Plan linear move
-  PlanInstruction plan_c0(wp2, PlanInstructionType::LINEAR, "RASTER");
-
-  // Plan freespace to end
-  PlanInstruction plan_f1(wp0, PlanInstructionType::FREESPACE, "freespace_profile");
-  plan_f1.setDescription("to_end_plan");
-
-  // Add Instructions to program
-  program.push_back(plan_f0);
-  program.push_back(plan_c0);
-  program.push_back(plan_f1);
-
-  ROS_INFO("basic cartesian plan example");
+  for (std::size_t i = 1; i < tool_poses.size(); ++i)
+  {
+    Waypoint wp = CartesianWaypoint(tool_poses[i]);
+    PlanInstruction plan_instruction(wp, PlanInstructionType::LINEAR, "wire_cutting");
+    plan_instruction.setDescription("waypoint_" + std::to_string(i));
+    program.push_back(plan_instruction);
+  }
 
   // Create Process Planning Server
   ProcessPlanningServer planning_server(std::make_shared<ROSProcessEnvironmentCache>(monitor_), 5);
-  planning_server.loadDefaultProcessPlanners();
+  planning_server.loadDefaultProcessPlanners()
+;
+  // Create TrajOpt Profile
+  auto trajopt_plan_profile = std::make_shared<tesseract_planning::TrajOptDefaultPlanProfile>();
+  trajopt_plan_profile->term_type = trajopt::TermType::TT_COST;
+  trajopt_plan_profile->cartesian_coeff = Eigen::VectorXd::Constant(6, 1, 10);
+  //trajopt_plan_profile->cartesian_coeff(1) = 1;
+  trajopt_plan_profile->cartesian_coeff(4) = 1;
+
+  // Add profile to Dictionary
+  planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", trajopt_plan_profile);
 
   // Create Process Planning Request
   ProcessPlanningRequest request;
@@ -176,7 +215,7 @@ bool WireCutting::run()
   request.instructions = Instruction(program);
 
   // Print Diagnostics
-  //request.instructions.print("Program: ");
+  //  plotter->waitForInput();request.instructions.print("Program: ");
 
   // Solve process plan
   ProcessPlanningFuture response = planning_server.run(request);
