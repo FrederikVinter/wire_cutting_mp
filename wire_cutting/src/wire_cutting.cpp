@@ -206,6 +206,10 @@ bool WireCutting::run()
   //trajopt_plan_profile->cartesian_coeff(1) = 1;
   trajopt_plan_profile->cartesian_coeff(4) = 1;
 
+  tinyxml2::XMLDocument doc;
+  trajopt_plan_profile->toXML(doc);
+  doc.SaveFile("/home/frederik/test2.xml");
+
   // Add profile to Dictionary
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", trajopt_plan_profile);
 
