@@ -35,6 +35,8 @@ TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
 TESSERACT_COMMON_IGNORE_WARNINGS_POP
 
 #include <wire_cutting.h>
+#include <trajopt_wire_cutting_plan_profile.h>
+
 #include <tesseract_environment/core/utils.h>
 #include <tesseract_rosutils/plotting.h>
 #include <tesseract_rosutils/utils.h>
@@ -179,7 +181,7 @@ bool WireCutting::run()
   plotter->waitForInput();
 
   // Create Program
-  CompositeInstruction program("cartesian_program", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
+  CompositeInstruction program("DEFAULT", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
 
   // Create cartesian waypoint
   Waypoint wp = CartesianWaypoint(tool_poses[0]);
@@ -200,14 +202,31 @@ bool WireCutting::run()
   planning_server.loadDefaultProcessPlanners();
   
   // Create TrajOpt Profile
-  auto trajopt_plan_profile = std::make_shared<tesseract_planning::TrajOptDefaultPlanProfile>();
-  trajopt_plan_profile->term_type = trajopt::TermType::TT_CNT;
-  trajopt_plan_profile->cartesian_coeff = Eigen::VectorXd::Constant(6, 1, 10);
-  trajopt_plan_profile->cartesian_coeff(1) = 0;
-  trajopt_plan_profile->cartesian_coeff(4) = 0;
+  auto trajopt_plan_profile = std::make_shared<TrajOptWireCuttingPlanProfile>();
+  trajopt_plan_profile->term_type = trajopt::TermType::TT_COST;
+  //trajopt_plan_profile->cartesian_coeff = Eigen::VectorXd::Constant(6, 1, 10);
+  //trajopt_plan_profile->cartesian_coeff(1) = 0;
+  //trajopt_plan_profile->cartesian_coeff(4) = 0;
+
+  auto trajopt_composite_profile = std::make_shared<tesseract_planning::TrajOptDefaultCompositeProfile>();
+  trajopt_composite_profile->collision_constraint_config.enabled = false;
+  trajopt_composite_profile->collision_cost_config.enabled = true;
+  trajopt_composite_profile->collision_cost_config.safety_margin = 0.025;
+  trajopt_composite_profile->collision_cost_config.type = trajopt::CollisionEvaluatorType::SINGLE_TIMESTEP;
+  trajopt_composite_profile->collision_cost_config.coeff = 1;
+
+  auto trajopt_solver_profile = std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
+  trajopt_solver_profile->convex_solver = sco::ModelType::OSQP;
+  trajopt_solver_profile->opt_info.max_iter = 200;
+  trajopt_solver_profile->opt_info.min_approx_improve = 1e-3;
+  trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
 
   // Add profile to Dictionary
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", trajopt_plan_profile);
+  planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptCompositeProfile>("DEFAULT",
+                                                                                         trajopt_composite_profile);
+  planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("DEFAULT",
+                                                                                      trajopt_solver_profile);
 
   // Create Process Planning Request
   ProcessPlanningRequest request;
