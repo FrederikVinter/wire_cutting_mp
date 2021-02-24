@@ -26,7 +26,7 @@ catkin_package()
 # Load variable for clang tidy args, compiler options and cxx version
 tesseract_variables()
 
-add_library(${PROJECT_NAME}_basic_cartesian_example src/basic_cartesian_example.cpp)
+#[[add_library(${PROJECT_NAME}_basic_cartesian_example src/basic_cartesian_example.cpp)
 target_link_libraries(${PROJECT_NAME}_basic_cartesian_example tesseract::tesseract_environment_core tesseract::tesseract_environment_ofkt tesseract::tesseract_process_managers ${PCL_LIBRARIES} ${catkin_LIBRARIES})
 target_compile_options(${PROJECT_NAME}_basic_cartesian_example PUBLIC ${TESSERACT_COMPILE_OPTIONS})
 target_clang_tidy(${PROJECT_NAME}_basic_cartesian_example ARGUMENTS ${TESSERACT_CLANG_TIDY_ARGS} ENABLE ${TESSERACT_ENABLE_CLANG_TIDY})
@@ -61,7 +61,7 @@ target_include_directories(${PROJECT_NAME}_basic_cartesian_example_node PRIVATE
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     "$<INSTALL_INTERFACE:include>")
 target_include_directories(${PROJECT_NAME}_basic_cartesian_example_node SYSTEM PRIVATE
-    ${catkin_INCLUDE_DIRS})
+    ${catkin_INCLUDE_DIRS})]]
 
 # WIRECUTTING:
 add_library(${PROJECT_NAME}_wire_cutting src/wire_cutting.cpp)
@@ -334,10 +334,10 @@ install(DIRECTORY include/${PROJECT_NAME}
 # Mark executables and/or libraries for installation
 install(
   TARGETS
-    ${PROJECT_NAME}_basic_cartesian_example
-    ${PROJECT_NAME}_basic_cartesian_example_node
-    #${PROJECT_NAME}_wire_cutting
-    #${PROJECT_NAME}_wire_cutting_node
+    #${PROJECT_NAME}_basic_cartesian_example
+    #${PROJECT_NAME}_basic_cartesian_example_node
+    ${PROJECT_NAME}_wire_cutting
+    ${PROJECT_NAME}_wire_cutting_node
     #[[${PROJECT_NAME}_car_seat_example
     ${PROJECT_NAME}_car_seat_example_node
     ${PROJECT_NAME}_freespace_ompl_example

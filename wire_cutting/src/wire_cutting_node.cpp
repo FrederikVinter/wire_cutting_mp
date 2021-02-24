@@ -1,4 +1,4 @@
-#include <tesseract_ros_examples/wire_cutting.h>
+#include <wire_cutting.h>
 
 using namespace tesseract_ros_examples;
 

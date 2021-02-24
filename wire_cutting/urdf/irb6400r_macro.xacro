@@ -167,7 +167,6 @@
       <child link="${prefix}link_2"/>
       <limit effort="0" lower="-1.22" upper="1.48" velocity="1.22"/>
     </joint>
-    <!-- TODO fix 3rd axis geometry -->
     <joint type="revolute" name="${prefix}joint_3">
       <origin xyz="0 0 1.05" rpy="0 0 0"/>
       <axis xyz="0 1 0"/>
@@ -175,9 +174,8 @@
       <child link="${prefix}link_3"/>
       <limit effort="0" lower="-0.489" upper="1.92" velocity="1.22"/>
     </joint>
-    <!-- TODO find isue with 4-5 axis joint position -->
     <joint type="revolute" name="${prefix}joint_4">
-      <origin xyz="0 0 0.225" rpy="0 0 0"/>
+      <origin xyz="0.0 0 0.225" rpy="0 0 0"/>
       <axis xyz="1 0 0"/>
       <parent link="${prefix}link_3"/>
       <child link="${prefix}link_4"/>

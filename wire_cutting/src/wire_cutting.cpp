@@ -34,7 +34,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
 #include <sensor_msgs/point_cloud_conversion.h>
 TESSERACT_COMMON_IGNORE_WARNINGS_POP
 
-#include <tesseract_ros_examples/wire_cutting.h>
+#include <wire_cutting.h>
 #include <tesseract_environment/core/utils.h>
 #include <tesseract_rosutils/plotting.h>
 #include <tesseract_rosutils/utils.h>
@@ -197,18 +197,14 @@ bool WireCutting::run()
 
   // Create Process Planning Server
   ProcessPlanningServer planning_server(std::make_shared<ROSProcessEnvironmentCache>(monitor_), 5);
-  planning_server.loadDefaultProcessPlanners()
-;
+  planning_server.loadDefaultProcessPlanners();
+  
   // Create TrajOpt Profile
   auto trajopt_plan_profile = std::make_shared<tesseract_planning::TrajOptDefaultPlanProfile>();
-  trajopt_plan_profile->term_type = trajopt::TermType::TT_COST;
+  trajopt_plan_profile->term_type = trajopt::TermType::TT_CNT;
   trajopt_plan_profile->cartesian_coeff = Eigen::VectorXd::Constant(6, 1, 10);
-  //trajopt_plan_profile->cartesian_coeff(1) = 1;
-  trajopt_plan_profile->cartesian_coeff(4) = 1;
-
-  tinyxml2::XMLDocument doc;
-  trajopt_plan_profile->toXML(doc);
-  doc.SaveFile("/home/frederik/test2.xml");
+  trajopt_plan_profile->cartesian_coeff(1) = 0;
+  trajopt_plan_profile->cartesian_coeff(4) = 0;
 
   // Add profile to Dictionary
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", trajopt_plan_profile);
@@ -217,6 +213,7 @@ bool WireCutting::run()
   ProcessPlanningRequest request;
   request.name = tesseract_planning::process_planner_names::TRAJOPT_PLANNER_NAME;
   request.instructions = Instruction(program);
+  
 
   // Print Diagnostics
   //  plotter->waitForInput();request.instructions.print("Program: ");
