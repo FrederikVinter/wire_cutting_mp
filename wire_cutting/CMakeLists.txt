@@ -29,8 +29,8 @@ tesseract_variables()
 
 # WIRECUTTING:
 add_library(${PROJECT_NAME}_wire_cutting src/wire_cutting.cpp 
-                                         src/trajopt_wire_cutting_plan_profile.cpp
-                                         /home/frederik/ws_tesseract/src/tesseract_planning/tesseract_motion_planners/include/tesseract_motion_planners/trajopt/profile/trajopt_profile.h)
+                                         src/trajopt_wire_cutting_plan_profile.cpp)
+                                         
 
 target_link_libraries(${PROJECT_NAME}_wire_cutting tesseract::tesseract_environment_core tesseract::tesseract_environment_ofkt tesseract::tesseract_process_managers ${catkin_LIBRARIES})
 target_compile_options(${PROJECT_NAME}_wire_cutting PUBLIC ${TESSERACT_COMPILE_OPTIONS})

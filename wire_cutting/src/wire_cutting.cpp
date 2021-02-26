@@ -143,7 +143,7 @@ bool WireCutting::run()
   ResourceLocator::Ptr locator = std::make_shared<tesseract_rosutils::ROSResourceLocator>();
   if (!env_->init<OFKTStateSolver>(urdf_xml_string, srdf_xml_string, locator))
     return false;
-
+  
   // Create monitor
   monitor_ = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_, EXAMPLE_MONITOR_NAMESPACE);
   if (rviz_)
@@ -193,7 +193,7 @@ bool WireCutting::run()
   {
     Waypoint wp = CartesianWaypoint(tool_poses[i]);
     PlanInstruction plan_instruction(wp, PlanInstructionType::LINEAR, "wire_cutting");
-    plan_instruction.setDescription("waypoint_" + std::to_string(i));
+    plan_instruction.setDescription("waypoint_" + std::to_string(i)); 
     program.push_back(plan_instruction);
   }
 
@@ -203,10 +203,6 @@ bool WireCutting::run()
   
   // Create TrajOpt Profile
   auto trajopt_plan_profile = std::make_shared<TrajOptWireCuttingPlanProfile>();
-  trajopt_plan_profile->term_type = trajopt::TermType::TT_COST;
-  //trajopt_plan_profile->cartesian_coeff = Eigen::VectorXd::Constant(6, 1, 10);
-  //trajopt_plan_profile->cartesian_coeff(1) = 0;
-  //trajopt_plan_profile->cartesian_coeff(4) = 0;
 
   auto trajopt_composite_profile = std::make_shared<tesseract_planning::TrajOptDefaultCompositeProfile>();
   trajopt_composite_profile->collision_constraint_config.enabled = false;
@@ -216,10 +212,11 @@ bool WireCutting::run()
   trajopt_composite_profile->collision_cost_config.coeff = 1;
 
   auto trajopt_solver_profile = std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
-  trajopt_solver_profile->convex_solver = sco::ModelType::OSQP;
+  trajopt_solver_profile->convex_solver = sco::ModelType::BPMPD;
   trajopt_solver_profile->opt_info.max_iter = 200;
   trajopt_solver_profile->opt_info.min_approx_improve = 1e-3;
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
+  trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
 
   // Add profile to Dictionary
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", trajopt_plan_profile);
@@ -241,6 +238,7 @@ bool WireCutting::run()
   ProcessPlanningFuture response = planning_server.run(request);
   planning_server.waitForAll();
 
+  
   // Plot Process Trajectory
   if (rviz_ && plotter != nullptr && plotter->isConnected())
   {

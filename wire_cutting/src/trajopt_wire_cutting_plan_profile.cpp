@@ -111,69 +111,6 @@ void TrajOptWireCuttingPlanProfile::apply(trajopt::ProblemConstructionInfo& pci,
   ManipulatorInfo mi = manip_info.getCombined(base_instruction->getManipulatorInfo());
   Eigen::Isometry3d tcp = pci.env->findTCP(mi);
 
-  trajopt::TermInfo::Ptr ti{ nullptr };
-
-  /* Check if this cartesian waypoint is dynamic
-   * (i.e. defined relative to a frame that will move with the kinematic chain)
-   */
-  /*auto it = std::find(active_links.begin(), active_links.end(), mi.working_frame);
-  if (it != active_links.end())
-  {
-    if (cartesian_waypoint.isToleranced())
-      CONSOLE_BRIDGE_logWarn("Toleranced cartesian waypoints are not supported in this version of TrajOpt.");
-
-    if (mi.tcp.isExternal() && mi.tcp.isString())
-    {
-      // If external, the part is attached to the robot so working frame is passed as link instead of target frame
-      // Since it is a link name then it has the possibility to also be dynamic so need to check
-      auto tcp_it = std::find(active_links.begin(), active_links.end(), mi.tcp.getString());
-      if (tcp_it != active_links.end())
-      {
-        // target_tcp, index, target, tcp relative to robot tip link, coeffs, robot tip link, term_type
-        ti = createDynamicCartesianWaypointTermInfo(Eigen::Isometry3d::Identity(),
-                                                    index,
-                                                    mi.tcp.getString(),
-                                                    cartesian_waypoint,
-                                                    cartesian_coeff,
-                                                    mi.working_frame,
-                                                    term_type);
-      }
-      else
-      {
-        ti = createCartesianWaypointTermInfo(
-            tcp, index, "", cartesian_waypoint, cartesian_coeff, mi.working_frame, term_type);
-      }
-    }
-    else if (mi.tcp.isExternal())
-    {
-      // If external, the part is attached to the robot so working frame is passed as link instead of target frame
-      ti = createCartesianWaypointTermInfo(
-          tcp, index, mi.tcp.getExternalFrame(), cartesian_waypoint, cartesian_coeff, mi.working_frame, term_type);
-    }
-    else
-    {
-      // target_tcp, index, target, tcp relative to robot tip link, coeffs, robot tip link, term_type
-      ti = createDynamicCartesianWaypointTermInfo(
-          cartesian_waypoint, index, mi.working_frame, tcp, cartesian_coeff, pci.kin->getTipLinkName(), term_type);
-    }
-  }
-  else
-  {
-    ti = createCartesianWaypointTermInfo(
-        cartesian_waypoint, index, mi.working_frame, tcp, cartesian_coeff, pci.kin->getTipLinkName(), term_type);
-  }
-
-  if (term_type == trajopt::TermType::TT_CNT)
-    pci.cnt_infos.push_back(ti);
-  else
-    pci.cost_infos.push_back(ti);
-
-  // Add constraints from error functions if available.
-  addConstraintErrorFunctions(pci, index);
-
-  */
-
-
   Eigen::VectorXd cart_coeff1 = Eigen::VectorXd::Constant(6, 1, 1);
   cart_coeff1(1) = 0;
   cart_coeff1(4) = 0;
