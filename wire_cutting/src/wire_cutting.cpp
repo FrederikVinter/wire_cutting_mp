@@ -118,6 +118,30 @@ tesseract_common::VectorIsometry3d WireCutting::loadToolPoses()
   return path;
 }
 
+tesseract_environment::Command::Ptr WireCutting::addBoundingBox(Eigen::VectorXd position, Eigen::VectorXd size)
+{
+  // Add sphere to environment
+  auto link_bounding_box = std::make_shared<Link>("bounding_box");
+
+  Visual::Ptr visual = std::make_shared<Visual>();
+  visual->origin = Eigen::Isometry3d::Identity();
+  visual->origin.translation() = position;
+  visual->geometry = std::make_shared<tesseract_geometry::Box>(size[0], size[1], size[2]);
+  link_bounding_box->visual.push_back(visual);
+
+  Collision::Ptr collision = std::make_shared<Collision>();
+  collision->origin = visual->origin;
+  collision->geometry = visual->geometry;
+  link_bounding_box->collision.push_back(collision);
+
+  auto joint_sphere = std::make_shared<Joint>("joint_bounding_box_attached");
+  joint_sphere->parent_link_name = "base_link";
+  joint_sphere->child_link_name = link_bounding_box->getName();
+  joint_sphere->type = JointType::FIXED;
+
+  return std::make_shared<tesseract_environment::AddCommand>(link_bounding_box, joint_sphere);
+}
+
 WireCutting::WireCutting(const ros::NodeHandle& nh, bool plotting, bool rviz)
   : Example(plotting, rviz), nh_(nh)
 {
@@ -160,6 +184,13 @@ bool WireCutting::run()
   ROSPlottingPtr plotter = std::make_shared<ROSPlotting>(monitor_->getSceneGraph()->getRoot());
   if (rviz_)
     plotter->waitForConnection();
+
+  Eigen::VectorXd pos(3), size(3);
+  pos << 1.5, 0, 0.8;
+  size << 0.2, 0.3, 0.4;
+  /*Command::Ptr cmd = addBoundingBox(pos, size);
+  if (!monitor_->applyCommand(*cmd))
+    return false;*/
   
   // Set the robot initial state
   std::vector<std::string> joint_names;
@@ -173,7 +204,7 @@ bool WireCutting::run()
   Eigen::VectorXd joint_pos(6);
   joint_pos(0) = 0;
   joint_pos(1) = 0;
-  joint_pos(2) = -0.3;
+  joint_pos(2) = 0;
   joint_pos(3) = 0;
   joint_pos(4) = 1.57;
   joint_pos(5) = 0;
@@ -242,9 +273,9 @@ bool WireCutting::run()
   auto trajopt_composite_profile = std::make_shared<tesseract_planning::TrajOptDefaultCompositeProfile>();
   trajopt_composite_profile->collision_constraint_config.enabled = false;
   trajopt_composite_profile->collision_cost_config.enabled = true;
-  trajopt_composite_profile->collision_cost_config.safety_margin = 0.025;
+  trajopt_composite_profile->collision_cost_config.safety_margin = 0.050;
   trajopt_composite_profile->collision_cost_config.type = trajopt::CollisionEvaluatorType::SINGLE_TIMESTEP;
-  trajopt_composite_profile->collision_cost_config.coeff = 1;
+  trajopt_composite_profile->collision_cost_config.coeff = 30;
 
   auto trajopt_solver_profile = std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
   trajopt_solver_profile->convex_solver = sco::ModelType::OSQP;

@@ -29,6 +29,7 @@ public:
 private:
   ros::NodeHandle nh_;
   tesseract_common::VectorIsometry3d loadToolPoses();
+  tesseract_environment::Command::Ptr addBoundingBox(Eigen::VectorXd position, Eigen::VectorXd size);
 };
 
 }  // namespace tesseract_ros_examples

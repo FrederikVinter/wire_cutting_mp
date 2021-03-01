@@ -110,16 +110,17 @@
     <link name="${prefix}tool0"/>
     
     <link name="${prefix}carbon_hotwire" >
+      <collision>
+        <geometry>
+          <convex_mesh filename="package://wire_cutting/meshes/carbon_hotwire.stl" />
+        </geometry>
+        <material name="yellow"/>
+      </collision>
       <visual>
         <geometry>
           <mesh filename="package://wire_cutting/meshes/carbon_hotwire.stl" />
         </geometry>>
       </visual>
-      <collision>
-        <geometry>
-          <mesh filename="package://wire_cutting/meshes/carbon_hotwire.stl" />
-        </geometry>
-      </collision>
     </link>
     
    

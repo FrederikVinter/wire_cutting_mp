@@ -90,8 +90,8 @@ void TrajOptWireCuttingPlanProfile::apply(trajopt::ProblemConstructionInfo& pci,
   cart_coeff1(4) = 0;
 
   Eigen::VectorXd cart_coeff2 = Eigen::VectorXd::Constant(6, 1, 0);
-  cart_coeff2(1) = 10;
-  cart_coeff2(4) = 5;
+  cart_coeff2(1) = 2;
+  cart_coeff2(4) = 1;
 
   auto ti1 = createCartesianWaypointTermInfo(
       cartesian_waypoint, index, mi.working_frame, tcp, cart_coeff1, pci.kin->getTipLinkName(), trajopt::TermType::TT_CNT);
