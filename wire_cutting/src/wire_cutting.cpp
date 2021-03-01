@@ -36,6 +36,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 
 #include <wire_cutting.h>
 #include <trajopt_wire_cutting_plan_profile.h>
+#include <four_bar_linkage_constraint.h>
 
 #include <tesseract_environment/core/utils.h>
 #include <tesseract_rosutils/plotting.h>
@@ -52,11 +53,14 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <tesseract_motion_planners/core/utils.h>
 #include <tesseract_visualization/markers/toolpath_marker.h>
 
+#include <tinyxml2.h>
+
 using namespace tesseract_environment;
 using namespace tesseract_scene_graph;
 using namespace tesseract_collision;
 using namespace tesseract_rosutils;
 using namespace tesseract_visualization;
+using namespace tinyxml2;
 
 /** @brief Default ROS parameter for robot description */
 const std::string ROBOT_DESCRIPTION_PARAM = "robot_description";
@@ -135,6 +139,8 @@ bool WireCutting::run()
   using tesseract_planning::Waypoint;
   using tesseract_planning_server::ROSProcessEnvironmentCache;
 
+  console_bridge::setLogLevel(console_bridge::LogLevel::CONSOLE_BRIDGE_LOG_DEBUG);
+
   // Initial setup
   std::string urdf_xml_string, srdf_xml_string;
   nh_.getParam(ROBOT_DESCRIPTION_PARAM, urdf_xml_string);
@@ -143,6 +149,7 @@ bool WireCutting::run()
   ResourceLocator::Ptr locator = std::make_shared<tesseract_rosutils::ROSResourceLocator>();
   if (!env_->init<OFKTStateSolver>(urdf_xml_string, srdf_xml_string, locator))
     return false;
+
   
   // Create monitor
   monitor_ = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_, EXAMPLE_MONITOR_NAMESPACE);
@@ -171,8 +178,11 @@ bool WireCutting::run()
   joint_pos(4) = 1.57;
   joint_pos(5) = 0;
 
-  //auto g = env_.get()->getSceneGraph(); 
-  //g->saveDOT("/home/frederik/ws_tesseract_wirecut/test.dot");
+  /*SceneGraph::ConstPtr g = env_.get()->getSceneGraph(); 
+  g->saveDOT("/home/frederik/ws_tesseract_wirecut/scenegraph.dot");
+  auto mimic = g->getJoint("joint_p")->mimic;
+  std::string s = mimic->joint_name;
+  ROS_INFO(s.c_str());*/
 
   env_->setState(joint_names, joint_pos);
 
@@ -200,9 +210,34 @@ bool WireCutting::run()
   // Create Process Planning Server
   ProcessPlanningServer planning_server(std::make_shared<ROSProcessEnvironmentCache>(monitor_), 5);
   planning_server.loadDefaultProcessPlanners();
-  
+
   // Create TrajOpt Profile
   auto trajopt_plan_profile = std::make_shared<TrajOptWireCuttingPlanProfile>();
+  FourBarLinkageConstraint cnt1(env_);
+  JointTwoLimitsConstraint cnt2(env_);
+  JointThreeLimitsConstraint cnt3(env_);
+  std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function1 = cnt1;
+  std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function2 = cnt2;
+  std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function3 = cnt3;
+  sco::VectorOfVector::func temp_1 = temp_function1;
+  sco::VectorOfVector::func temp_2 = temp_function2;
+  sco::VectorOfVector::func temp_3 = temp_function3;
+
+  sco::ConstraintType a = sco::ConstraintType::EQ;
+  Eigen::VectorXd error_coeff(1);
+  error_coeff << 0.5;
+
+  std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple1(temp_1,nullptr,a,error_coeff);
+  std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple2(temp_2,nullptr,a,error_coeff);
+  std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple3(temp_3,nullptr,a,error_coeff);
+  std::vector<std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd>>
+  constraint_error_functions;
+
+  constraint_error_functions.push_back(temp_tuple1);
+  constraint_error_functions.push_back(temp_tuple2);
+  constraint_error_functions.push_back(temp_tuple3);
+
+  trajopt_plan_profile->constraint_error_functions = constraint_error_functions;
 
   auto trajopt_composite_profile = std::make_shared<tesseract_planning::TrajOptDefaultCompositeProfile>();
   trajopt_composite_profile->collision_constraint_config.enabled = false;
@@ -212,7 +247,7 @@ bool WireCutting::run()
   trajopt_composite_profile->collision_cost_config.coeff = 1;
 
   auto trajopt_solver_profile = std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
-  trajopt_solver_profile->convex_solver = sco::ModelType::BPMPD;
+  trajopt_solver_profile->convex_solver = sco::ModelType::OSQP;
   trajopt_solver_profile->opt_info.max_iter = 200;
   trajopt_solver_profile->opt_info.min_approx_improve = 1e-3;
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
@@ -237,7 +272,6 @@ bool WireCutting::run()
   // Solve process plan
   ProcessPlanningFuture response = planning_server.run(request);
   planning_server.waitForAll();
-
   
   // Plot Process Trajectory
   if (rviz_ && plotter != nullptr && plotter->isConnected())
@@ -250,8 +284,20 @@ bool WireCutting::run()
     plotter->plotTrajectory(trajectory, env_->getStateSolver());
   }
 
+  tinyxml2::XMLDocument xmlDoc;
+
+  XMLNode * pRoot = xmlDoc.NewElement("Instructions");    // Creat root element
+  xmlDoc.InsertFirstChild(pRoot);                 // Insert element
+
+  XMLElement * pResults = response.results->toXML(xmlDoc);
+  pRoot->InsertEndChild(pResults);                // insert element as child
+
+  const char* fileName = "/home/frederik/ws_tesseract_wirecut/trajopt_results.xml";
+  tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);
+
   ROS_INFO("Final trajectory is collision free");
   return true;
 }
 
-}  // namespace tesseract_ros_examples
+} // Namespace 
+

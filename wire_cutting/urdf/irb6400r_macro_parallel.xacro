@@ -63,6 +63,8 @@
         <material name="orange"/>
       </visual>
     </link>
+    <link name="${prefix}link_p"> <!-- Virtual link related to four bar linkage -->
+    </link>
     <link name="${prefix}link_4">
       <collision name="collision">
         <geometry>
@@ -120,39 +122,7 @@
       </collision>
     </link>
     
-    <!--Cylinder and piston -->
-    <!--link name="${prefix}link_cylinder">
-      <collision name="collision">
-        <geometry>
-          <mesh filename="package://wire_cutting/meshes/irb6400r/collision/cylinder.stl"/>
-        </geometry>
-        <material name="yellow"/>
-      </collision>
-      <visual name="visual">
-        <geometry>
-          <mesh filename="package://wire_cutting/meshes/irb6400r/visual/cylinder.stl"/>
-        </geometry>
-        <material name="orange"/>
-      </visual>
-    </link>
-    <link name="${prefix}link_piston">
-      <collision name="collision">
-        <geometry>
-          <mesh filename="package://wire_cutting/meshes/irb6400r/collision/piston.stl"/>
-        </geometry>
-        <material name="yellow"/>
-      </collision>
-      <visual name="visual">
-        <geometry>
-          <mesh filename="package://wire_cutting/meshes/irb6400r/visual/piston.stl"/>
-        </geometry>
-        <material name="orange"/>
-      </visual>
-    </link> -->
-    <!-- end of link list --> 
-    
-    <!-- joint list -->
-    <!-- TODO update limits and velocities (bar linkage between axis 2 and 3!)-->
+   
     <joint type="revolute" name="${prefix}joint_1">
       <origin xyz="0 0 0.27" rpy="0 0 0"/>
       <axis xyz="0 0 1"/>
@@ -167,10 +137,18 @@
       <child link="${prefix}link_2"/>
       <limit effort="0" lower="-1.22" upper="1.48" velocity="1.22"/>
     </joint>
-    <joint type="revolute" name="${prefix}joint_3">
+    <joint type="revolute" name="${prefix}joint_p"> <!-- Virtualt joint related to four bar linkage -->
       <origin xyz="0 0 1.05" rpy="0 0 0"/>
       <axis xyz="0 1 0"/>
       <parent link="${prefix}link_2"/>
+      <child link="${prefix}link_p"/>
+      <limit effort="0" lower="-1.48" upper="1.22" velocity="1.22"/>
+      <!--<mimic joint="${prefix}joint_2" multiplier="-1" offset="0" /> Mimic not used, constraints instead-->
+    </joint>
+    <joint type="revolute" name="${prefix}joint_3">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <parent link="${prefix}link_p"/>
       <child link="${prefix}link_3"/>
       <limit effort="0" lower="-0.489" upper="1.92" velocity="1.22"/>
     </joint>
@@ -206,24 +184,7 @@
       <child link="${prefix}carbon_hotwire"/>
       <origin xyz="0 0 1.861" rpy="0 0 0"/>
     </joint>
-    
-    
-    <!--<joint type="fixed" name="${prefix}joint_cylinder">
-      <origin xyz="-0.365 -0.1895 0.405" rpy="0 -0.170 0"/>
-      <axis xyz="0 1 0"/>
-      <parent link="${prefix}link_1"/>
-      <child link="${prefix}link_cylinder"/>
-      <limit effort="0" lower="-2.96705973" upper="2.96705973" velocity="0"/>
-    </joint>
-    <joint type="fixed" name="${prefix}joint_piston">
-      <origin xyz="0.475 0 0" rpy="0 0 0"/>
-      <axis xyz="1 0 0"/>
-      <parent link="${prefix}link_cylinder"/>
-      <child link="${prefix}link_piston"/>
-      <limit effort="0" lower="0" upper="0.6" velocity="0"/>
-    </joint>-->
-    <!-- end of joint list -->
-    
+        
     <!-- ROS base_link to ABB World Coordinates transform -->
     <link name="${prefix}base" />
     <joint name="${prefix}base_link-base" type="fixed">
@@ -233,4 +194,3 @@
     </joint>
   </xacro:macro>
 </robot>
-
