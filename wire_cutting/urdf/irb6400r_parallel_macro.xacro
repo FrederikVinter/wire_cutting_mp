@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  
-  <xacro:macro name="irb6400r" params="prefix">
+	
+  <xacro:macro name="irb6400r_robot" params="prefix">
     <!-- link list -->
     <link name="${prefix}base_link">
       <collision name="collision">
@@ -109,7 +109,7 @@
     </link>
     <link name="${prefix}tool0"/>
     
-    <link name="${prefix}carbon_hotwire" >
+    <!--<link name="${prefix}carbon_hotwire" >
       <collision>
         <geometry>
           <convex_mesh filename="package://wire_cutting/meshes/carbon_hotwire.stl" />
@@ -121,7 +121,7 @@
           <mesh filename="package://wire_cutting/meshes/carbon_hotwire.stl" />
         </geometry>>
       </visual>
-    </link>
+    </link>-->
     
    
     <joint type="revolute" name="${prefix}joint_1">
@@ -180,11 +180,12 @@
       <child link="${prefix}tool0"/>
       <origin xyz=".037 0 0" rpy="0 1.57079632679 0"/>
     </joint>
-    <joint type="fixed" name="${prefix}tool0-carbon_hotwire">
+    
+    <!--<joint type="fixed" name="${prefix}tool0-carbon_hotwire">
       <parent link="${prefix}tool0"/>
       <child link="${prefix}carbon_hotwire"/>
       <origin xyz="0 0 1.861" rpy="0 0 0"/>
-    </joint>
+    </joint>-->
         
     <!-- ROS base_link to ABB World Coordinates transform -->
     <link name="${prefix}base" />

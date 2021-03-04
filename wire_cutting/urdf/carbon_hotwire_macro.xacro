@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:macro name="carbon_hotwire" params="prefix">
+  
+    <link name="${prefix}carbon_hotwire_mount" />
+    
+    <link name="${prefix}carbon_hotwire" >
+      <collision>
+        <geometry>
+          <convex_mesh filename="package://wire_cutting/meshes/carbon_hotwire.stl" convert="true"/>
+        </geometry>
+        <material name="yellow"/>
+      </collision>
+      <visual>
+        <geometry>
+          <mesh filename="package://wire_cutting/meshes/carbon_hotwire.stl" />
+        </geometry>>
+      </visual>
+    </link>
+    
+   <joint type="fixed" name="mount">
+  	<parent link="carbon_hotwire_mount"/>
+  	<child link="carbon_hotwire"/>
+  	<origin xyz="0 0 1.861" rpy="0 0 0"/>
+  </joint>
+   
+
+  </xacro:macro>
+</robot>

@@ -9,7 +9,7 @@
   <arg name="testing" default="false"/>
 
   <!-- Load universal robot description format (URDF) -->
-  <param name="$(arg robot_description)" command="$(find xacro)/xacro --inorder '$(find wire_cutting)/urdf/irb6400r.xacro'" />
+  <param name="$(arg robot_description)" command="$(find xacro)/xacro --inorder '$(find wire_cutting)/urdf/wire_cutting_workcell.xacro'" />
 
   <!-- The semantic description that corresponds to the URDF -->
   <param name="$(arg robot_description)_semantic" textfile="$(find wire_cutting)/config/irb6400r.srdf" />

@@ -172,8 +172,7 @@ bool WireCutting::run()
 
   ResourceLocator::Ptr locator = std::make_shared<tesseract_rosutils::ROSResourceLocator>();
   if (!env_->init<OFKTStateSolver>(urdf_xml_string, srdf_xml_string, locator))
-    return false;
-
+    return false;  
   
   // Create monitor
   monitor_ = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_, EXAMPLE_MONITOR_NAMESPACE);
@@ -213,7 +212,8 @@ bool WireCutting::run()
   g->saveDOT("/home/frederik/ws_tesseract_wirecut/scenegraph.dot");
   auto mimic = g->getJoint("joint_p")->mimic;
   std::string s = mimic->joint_name;
-  ROS_INFO(s.c_str());*/
+  ROS_INFO(s.c_str());
+  SceneGraph::Ptr g1 = g->clone();*/
 
   env_->setState(joint_names, joint_pos);
 
