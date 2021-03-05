@@ -37,6 +37,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <wire_cutting.h>
 #include <trajopt_wire_cutting_plan_profile.h>
 #include <four_bar_linkage_constraint.h>
+#include <wc_utils.h>
 
 #include <tesseract_environment/core/utils.h>
 #include <tesseract_rosutils/plotting.h>
@@ -134,12 +135,12 @@ tesseract_environment::Command::Ptr WireCutting::addBoundingBox(Eigen::VectorXd 
   collision->geometry = visual->geometry;
   link_bounding_box->collision.push_back(collision);
 
-  auto joint_sphere = std::make_shared<Joint>("joint_bounding_box_attached");
-  joint_sphere->parent_link_name = "base_link";
-  joint_sphere->child_link_name = link_bounding_box->getName();
-  joint_sphere->type = JointType::FIXED;
+  auto joint_bounding_box = std::make_shared<Joint>("joint_bounding_box_attached");
+  joint_bounding_box->parent_link_name = "base_link";
+  joint_bounding_box->child_link_name = link_bounding_box->getName();
+  joint_bounding_box->type = JointType::FIXED;
 
-  return std::make_shared<tesseract_environment::AddCommand>(link_bounding_box, joint_sphere);
+  return std::make_shared<tesseract_environment::AddCommand>(link_bounding_box, joint_bounding_box);
 }
 
 WireCutting::WireCutting(const ros::NodeHandle& nh, bool plotting, bool rviz)
@@ -185,11 +186,11 @@ bool WireCutting::run()
     plotter->waitForConnection();
 
   Eigen::VectorXd pos(3), size(3);
-  pos << 1.5, 0, 0.8;
+  pos << 2.0, 0, 0.8;
   size << 0.2, 0.3, 0.4;
-  /*Command::Ptr cmd = addBoundingBox(pos, size);
+  Command::Ptr cmd = addBoundingBox(pos, size);
   if (!monitor_->applyCommand(*cmd))
-    return false;*/
+    return false;
   
   // Set the robot initial state
   std::vector<std::string> joint_names;
@@ -217,7 +218,7 @@ bool WireCutting::run()
 
   env_->setState(joint_names, joint_pos);
 
-  tesseract_common::VectorIsometry3d tool_poses = loadToolPoses();
+  tesseract_common::VectorIsometry3d tool_poses = loadToolPosesFromPrg("test");
 
   plotter->waitForInput();
 
@@ -275,7 +276,7 @@ bool WireCutting::run()
   trajopt_composite_profile->collision_cost_config.enabled = true;
   trajopt_composite_profile->collision_cost_config.safety_margin = 0.050;
   trajopt_composite_profile->collision_cost_config.type = trajopt::CollisionEvaluatorType::SINGLE_TIMESTEP;
-  trajopt_composite_profile->collision_cost_config.coeff = 30;
+  trajopt_composite_profile->collision_cost_config.coeff = 1;
 
   auto trajopt_solver_profile = std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
   trajopt_solver_profile->convex_solver = sco::ModelType::OSQP;
@@ -296,7 +297,12 @@ bool WireCutting::run()
   request.name = tesseract_planning::process_planner_names::TRAJOPT_PLANNER_NAME;
   request.instructions = Instruction(program);
   
-
+  /*tesseract_planning::CompositeInstruction naive_seed;
+  {
+    auto lock = monitor_->lockEnvironmentRead();
+    naive_seed = tesseract_planning::generateNaiveSeed(program, *(monitor_->getEnvironment()));
+  }
+  request.seed = Instruction(naive_seed);*/
   // Print Diagnostics
   //  plotter->waitForInput();request.instructions.print("Program: ");
 

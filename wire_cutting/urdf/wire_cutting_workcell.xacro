@@ -9,6 +9,6 @@
    <joint type="fixed" name="tool">
   	<parent link="tool0"/>
   	<child link="carbon_hotwire_mount"/>
-  	<origin xyz="0 0 0" rpy="0 0 0"/>
+  	<origin xyz="0 0 0" rpy="0 0 3.14"/>
   </joint>
 </robot>

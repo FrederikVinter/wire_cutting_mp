@@ -7,13 +7,13 @@
     <link name="${prefix}carbon_hotwire" >
       <collision>
         <geometry>
-          <convex_mesh filename="package://wire_cutting/meshes/carbon_hotwire.stl" convert="true"/>
+          <convex_mesh filename="package://wire_cutting/meshes/CH_top.stl" convert="true"/>
         </geometry>
         <material name="yellow"/>
       </collision>
       <visual>
         <geometry>
-          <mesh filename="package://wire_cutting/meshes/carbon_hotwire.stl" />
+          <mesh filename="package://wire_cutting/meshes/CH_top.stl" />
         </geometry>>
       </visual>
     </link>
@@ -24,6 +24,42 @@
   	<origin xyz="0 0 1.861" rpy="0 0 0"/>
   </joint>
    
+  <link name="${prefix}CH_left" >
+      <collision>
+        <geometry>
+          <convex_mesh filename="package://wire_cutting/meshes/CH_left.stl" convert="true"/>
+        </geometry>
+        <material name="yellow"/>
+      </collision>
+      <visual>
+        <geometry>
+          <mesh filename="package://wire_cutting/meshes/CH_left.stl" />
+        </geometry>>
+      </visual>
+  </link>
+  <link name="${prefix}CH_right" >
+      <collision>
+        <geometry>
+          <convex_mesh filename="package://wire_cutting/meshes/CH_right.stl" convert="true"/>
+        </geometry>
+        <material name="yellow"/>
+      </collision>
+      <visual>
+        <geometry>
+          <mesh filename="package://wire_cutting/meshes/CH_right.stl" />
+        </geometry>>
+      </visual>
+  </link>
+  <joint type="fixed" name="top-left">
+  	<parent link="carbon_hotwire"/>
+  	<child link="CH_left"/>
+  	<origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <joint type="fixed" name="top-right">
+  	<parent link="carbon_hotwire"/>
+  	<child link="CH_right"/>
+  	<origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
 
   </xacro:macro>
 </robot>
