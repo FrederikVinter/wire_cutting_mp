@@ -10,6 +10,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
 TESSERACT_COMMON_IGNORE_WARNINGS_POP
 
 
-tesseract_common::VectorIsometry3d loadToolPosesFromPrg(const std::string& file);
+std::vector<tesseract_common::VectorIsometry3d> loadToolPosesFromPrg(const std::string& file);
+tesseract_common::VectorIsometry3d loadToolPoses();
 
 #endif

@@ -135,9 +135,6 @@ bool WireCutting::run()
   ResourceLocator::Ptr locator = std::make_shared<tesseract_rosutils::ROSResourceLocator>();
   if (!env_->init<OFKTStateSolver>(urdf_xml_string_freespace, srdf_xml_string_freespace, locator))
     return false; 
-
-
-
   
   // Create monitor
   monitor_ = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_, EXAMPLE_MONITOR_NAMESPACE);
@@ -182,7 +179,7 @@ bool WireCutting::run()
 
   env_->setState(joint_names, joint_pos);
 
-  tesseract_common::VectorIsometry3d tool_poses = loadToolPosesFromPrg("test");
+  std::vector<tesseract_common::VectorIsometry3d> tool_poses = loadToolPosesFromPrg("test");
 
   plotter->waitForInput();
 
@@ -190,17 +187,25 @@ bool WireCutting::run()
   CompositeInstruction program("DEFAULT", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
 
   // Create cartesian waypoint
-  Waypoint wp = CartesianWaypoint(tool_poses[0]);
+  Waypoint wp = CartesianWaypoint(tool_poses[0][0]);
   PlanInstruction plan_instruction(wp, PlanInstructionType::START, "wire_cutting");
   plan_instruction.setDescription("from_start_plan");
   program.setStartInstruction(plan_instruction);
 
-  for (std::size_t i = 1; i < tool_poses.size(); ++i)
+  for (std::size_t i = 0; i < tool_poses.size(); ++i)
   {
-    Waypoint wp = CartesianWaypoint(tool_poses[i]);
-    PlanInstruction plan_instruction(wp, PlanInstructionType::LINEAR, "wire_cutting");
-    plan_instruction.setDescription("waypoint_" + std::to_string(i)); 
-    program.push_back(plan_instruction);
+    if(i != 0)
+      Waypoint wp = CartesianWaypoint(tool_poses[i][0]);
+      PlanInstruction plan_instruction(wp, PlanInstructionType::FREESPACE, "FREESPACE");
+      program.push_back(plan_instruction);
+      plan_instruction.setDescription("waypoint_" + std::to_string(i) + ",0"); 
+    for (std::size_t j = 1; j < tool_poses[i].size(); j++)
+    {
+      Waypoint wp = CartesianWaypoint(tool_poses[i][j]);
+      PlanInstruction plan_instruction(wp, PlanInstructionType::LINEAR, "wire_cutting");
+      plan_instruction.setDescription("waypoint_" + std::to_string(i) + "," + std::to_string(j)); 
+      program.push_back(plan_instruction);
+    }
   }
 
   // Create Process Planning Server
