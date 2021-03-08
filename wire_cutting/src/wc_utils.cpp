@@ -45,10 +45,11 @@ tesseract_common::VectorIsometry3d loadToolPosesFromPrg(const std::string& file)
       if(movel_instructions > 10){
         Eigen::Isometry3d pose = Eigen::Isometry3d::Identity() * Eigen::Translation3d(xyzWXYZ(0) / 1000.0, xyzWXYZ(1) / 1000.0 , xyzWXYZ(2) / 1000.0 ) *
                                       Eigen::Quaterniond(xyzWXYZ(3), xyzWXYZ(4), xyzWXYZ(5), xyzWXYZ(6));
-        path.push_back(pose);
+        if(movel_instructions%10 == 0)
+          path.push_back(pose);
       }
     }
-    if(path.size() > 700)
+    if(path.size() > 400)
       break;
   }
   indata.close();

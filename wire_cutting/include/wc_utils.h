@@ -7,10 +7,6 @@
 #include <tesseract_common/types.h>
 TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
 #include <string>
-#include <memory>
-#include <ros/ros.h>
-#include <ros/console.h>
-#include <ros/service_client.h>
 TESSERACT_COMMON_IGNORE_WARNINGS_POP
 
 

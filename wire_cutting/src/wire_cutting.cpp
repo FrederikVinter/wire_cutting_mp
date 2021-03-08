@@ -65,59 +65,17 @@ using namespace tinyxml2;
 
 /** @brief Default ROS parameter for robot description */
 const std::string ROBOT_DESCRIPTION_PARAM = "robot_description";
+const std::string ROBOT_DESCRIPTION_FREESPACE_PARAM = "robot_description_freespace";
 
 /** @brief Default ROS parameter for robot description */
 const std::string ROBOT_SEMANTIC_PARAM = "robot_description_semantic";
+const std::string ROBOT_SEMANTIC_FREESPACE_PARAM = "robot_description_freespace_semantic";
 
 /** @brief RViz Example Namespace */
 const std::string EXAMPLE_MONITOR_NAMESPACE = "tesseract_ros_examples";
 
 namespace tesseract_ros_examples
 {
-tesseract_common::VectorIsometry3d WireCutting::loadToolPoses()
-{
-  tesseract_common::VectorIsometry3d path;  // results
-  std::ifstream indata;                     // input file
-
-  // You could load your parts from anywhere, but we are transporting them with
-  // the git repo
-  std::string filename = ros::package::getPath("wire_cutting") + "/config/tool_poses.csv";
-
-  // In a non-trivial app, you'll of course want to check that calls like 'open'
-  // succeeded
-  indata.open(filename);
-
-  std::string line;
-  int lnum = 0;
-  while (std::getline(indata, line))
-  {
-    ++lnum;
-    if (lnum < 3)
-      continue;
-
-    std::stringstream lineStream(line);
-    std::string cell;
-    Eigen::Matrix<double, 7, 1> xyzWXYZ;
-    int i = -2;
-    while (std::getline(lineStream, cell, ','))
-    {
-      ++i;
-      if (i == -1)
-        continue;
-
-      xyzWXYZ(i) = std::stod(cell);
-    }
-
-
-    Eigen::Isometry3d pose = Eigen::Isometry3d::Identity() * Eigen::Translation3d(xyzWXYZ(0), xyzWXYZ(1), xyzWXYZ(2)) *
-                                   Eigen::Quaterniond(xyzWXYZ(3), xyzWXYZ(4), xyzWXYZ(5), 0);
-   
-    path.push_back(pose);
-  }
-  indata.close();
-
-  return path;
-}
 
 tesseract_environment::Command::Ptr WireCutting::addBoundingBox(Eigen::VectorXd position, Eigen::VectorXd size)
 {
@@ -167,13 +125,19 @@ bool WireCutting::run()
   console_bridge::setLogLevel(console_bridge::LogLevel::CONSOLE_BRIDGE_LOG_DEBUG);
 
   // Initial setup
-  std::string urdf_xml_string, srdf_xml_string;
+  std::string urdf_xml_string, srdf_xml_string, urdf_xml_string_freespace, srdf_xml_string_freespace;
   nh_.getParam(ROBOT_DESCRIPTION_PARAM, urdf_xml_string);
   nh_.getParam(ROBOT_SEMANTIC_PARAM, srdf_xml_string);
+  nh_.getParam(ROBOT_DESCRIPTION_FREESPACE_PARAM, urdf_xml_string_freespace);
+  nh_.getParam(ROBOT_SEMANTIC_FREESPACE_PARAM, srdf_xml_string_freespace);
+
 
   ResourceLocator::Ptr locator = std::make_shared<tesseract_rosutils::ROSResourceLocator>();
-  if (!env_->init<OFKTStateSolver>(urdf_xml_string, srdf_xml_string, locator))
-    return false;  
+  if (!env_->init<OFKTStateSolver>(urdf_xml_string_freespace, srdf_xml_string_freespace, locator))
+    return false; 
+
+
+
   
   // Create monitor
   monitor_ = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_, EXAMPLE_MONITOR_NAMESPACE);
@@ -209,7 +173,7 @@ bool WireCutting::run()
   joint_pos(4) = 1.57;
   joint_pos(5) = 0;
 
-  /*SceneGraph::ConstPtr g = env_.get()->getSceneGraph(); 
+  /*SceneGraph::ConstPtr g = env_freespace.get()->getSceneGraph(); 
   g->saveDOT("/home/frederik/ws_tesseract_wirecut/scenegraph.dot");
   auto mimic = g->getJoint("joint_p")->mimic;
   std::string s = mimic->joint_name;

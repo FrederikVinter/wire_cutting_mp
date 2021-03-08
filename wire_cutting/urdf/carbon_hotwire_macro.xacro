@@ -50,6 +50,7 @@
         </geometry>>
       </visual>
   </link>
+
   <joint type="fixed" name="top-left">
   	<parent link="carbon_hotwire"/>
   	<child link="CH_left"/>

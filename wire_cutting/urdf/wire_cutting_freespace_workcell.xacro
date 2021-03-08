@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<robot name="irb6400r" xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:include filename="$(find wire_cutting)/urdf/irb6400r_parallel_macro.xacro" />
+  <xacro:include filename="$(find wire_cutting)/urdf/carbon_hotwire_freespace_macro.xacro" />
+  
+  <xacro:irb6400r_robot prefix=""/>
+  <xacro:carbon_hotwire_freespace prefix=""/>
+  
+  <joint type="fixed" name="tool">
+  	<parent link="tool0"/>
+  	<child link="carbon_hotwire_freespace_mount"/>
+  	<origin xyz="0 0 0" rpy="0 0 3.14"/>
+  </joint>
+</robot>

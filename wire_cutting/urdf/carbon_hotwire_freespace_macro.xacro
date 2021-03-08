@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:macro name="carbon_hotwire_freespace" params="prefix">
+  
+    <link name="${prefix}carbon_hotwire_freespace_mount" />
+    
+    <link name="${prefix}carbon_hotwire_freespace" >
+      <collision>
+        <geometry>
+          <convex_mesh filename="package://wire_cutting/meshes/CH_top.stl" convert="true"/>
+        </geometry>
+        <material name="yellow"/>
+      </collision>
+      <visual>
+        <geometry>
+          <mesh filename="package://wire_cutting/meshes/CH_top.stl" />
+        </geometry>>
+      </visual>
+    </link>
+    
+   <joint type="fixed" name="mount">
+  	<parent link="carbon_hotwire_freespace_mount"/>
+  	<child link="carbon_hotwire_freespace"/>
+  	<origin xyz="0 0 1.861" rpy="0 0 0"/>
+  </joint>
+   
+
+  <link name="${prefix}CH_left_right" >
+      <collision>
+        <geometry>
+          <convex_mesh filename="package://wire_cutting/meshes/CH_left_right.stl" convert="true"/>
+        </geometry>
+        <material name="yellow"/>
+      </collision>
+      <visual>
+        <geometry>
+          <mesh filename="package://wire_cutting/meshes/CH_left_right.stl" />
+        </geometry>>
+      </visual>
+  </link>
+
+  <joint type="fixed" name="top-left-right">
+  	<parent link="carbon_hotwire_freespace"/>
+  	<child link="CH_left_right"/>
+  	<origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  </xacro:macro>
+</robot>
