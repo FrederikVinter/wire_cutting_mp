@@ -38,6 +38,8 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <trajopt_wire_cutting_plan_profile.h>
 #include <four_bar_linkage_constraint.h>
 #include <wc_utils.h>
+#include <trajopt_wire_cutting_composite_profile.h>
+#include <wire_cutting_problem_generator.h>
 
 #include <tesseract_environment/core/utils.h>
 #include <tesseract_rosutils/plotting.h>
@@ -133,9 +135,9 @@ bool WireCutting::run()
 
 
   ResourceLocator::Ptr locator = std::make_shared<tesseract_rosutils::ROSResourceLocator>();
-  if (!env_->init<OFKTStateSolver>(urdf_xml_string_freespace, srdf_xml_string_freespace, locator))
+  if (!env_->init<OFKTStateSolver>(urdf_xml_string, srdf_xml_string, locator))
     return false; 
-  
+ 
   // Create monitor
   monitor_ = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_, EXAMPLE_MONITOR_NAMESPACE);
   if (rviz_)
@@ -147,7 +149,7 @@ bool WireCutting::run()
     plotter->waitForConnection();
 
   Eigen::VectorXd pos(3), size(3);
-  pos << 2.0, 0, 0.8;
+  pos << 0, 2.4, 0.8;
   size << 0.2, 0.3, 0.4;
   Command::Ptr cmd = addBoundingBox(pos, size);
   if (!monitor_->applyCommand(*cmd))
@@ -178,69 +180,20 @@ bool WireCutting::run()
   SceneGraph::Ptr g1 = g->clone();*/
 
   env_->setState(joint_names, joint_pos);
-
-  std::vector<tesseract_common::VectorIsometry3d> tool_poses = loadToolPosesFromPrg("test");
+  tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
+  std::vector<tesseract_common::VectorIsometry3d> tool_poses;
+  tool_poses.push_back(temp_poses);
 
   plotter->waitForInput();
 
   // Create Program
   CompositeInstruction program("DEFAULT", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
 
-  // Create cartesian waypoint
-  Waypoint wp = CartesianWaypoint(tool_poses[0][0]);
-  PlanInstruction plan_instruction(wp, PlanInstructionType::START, "wire_cutting");
-  plan_instruction.setDescription("from_start_plan");
-  program.setStartInstruction(plan_instruction);
-
-  for (std::size_t i = 0; i < tool_poses.size(); ++i)
-  {
-    if(i != 0)
-      Waypoint wp = CartesianWaypoint(tool_poses[i][0]);
-      PlanInstruction plan_instruction(wp, PlanInstructionType::FREESPACE, "FREESPACE");
-      program.push_back(plan_instruction);
-      plan_instruction.setDescription("waypoint_" + std::to_string(i) + ",0"); 
-    for (std::size_t j = 1; j < tool_poses[i].size(); j++)
-    {
-      Waypoint wp = CartesianWaypoint(tool_poses[i][j]);
-      PlanInstruction plan_instruction(wp, PlanInstructionType::LINEAR, "wire_cutting");
-      plan_instruction.setDescription("waypoint_" + std::to_string(i) + "," + std::to_string(j)); 
-      program.push_back(plan_instruction);
-    }
-  }
-
   // Create Process Planning Server
   ProcessPlanningServer planning_server(std::make_shared<ROSProcessEnvironmentCache>(monitor_), 5);
   planning_server.loadDefaultProcessPlanners();
 
-  // Create TrajOpt Profile
-  auto trajopt_plan_profile = std::make_shared<TrajOptWireCuttingPlanProfile>();
-  FourBarLinkageConstraint cnt1(env_);
-  JointTwoLimitsConstraint cnt2(env_);
-  JointThreeLimitsConstraint cnt3(env_);
-  std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function1 = cnt1;
-  std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function2 = cnt2;
-  std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function3 = cnt3;
-  sco::VectorOfVector::func temp_1 = temp_function1;
-  sco::VectorOfVector::func temp_2 = temp_function2;
-  sco::VectorOfVector::func temp_3 = temp_function3;
-
-  sco::ConstraintType a = sco::ConstraintType::EQ;
-  Eigen::VectorXd error_coeff(1);
-  error_coeff << 0.5;
-
-  std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple1(temp_1,nullptr,a,error_coeff);
-  std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple2(temp_2,nullptr,a,error_coeff);
-  std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple3(temp_3,nullptr,a,error_coeff);
-  std::vector<std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd>>
-  constraint_error_functions;
-
-  constraint_error_functions.push_back(temp_tuple1);
-  constraint_error_functions.push_back(temp_tuple2);
-  constraint_error_functions.push_back(temp_tuple3);
-
-  trajopt_plan_profile->constraint_error_functions = constraint_error_functions;
-
-  auto trajopt_composite_profile = std::make_shared<tesseract_planning::TrajOptDefaultCompositeProfile>();
+  auto trajopt_composite_profile = std::make_shared<tesseract_planning::TrajOptWireCuttingCompositeProfile>();
   trajopt_composite_profile->collision_constraint_config.enabled = false;
   trajopt_composite_profile->collision_cost_config.enabled = true;
   trajopt_composite_profile->collision_cost_config.safety_margin = 0.050;
@@ -254,13 +207,14 @@ bool WireCutting::run()
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
   trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
 
-  // Add profile to Dictionary
-  planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", trajopt_plan_profile);
+  // Add profiles to Dictionary
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptCompositeProfile>("DEFAULT",
                                                                                          trajopt_composite_profile);
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("DEFAULT",
                                                                                       trajopt_solver_profile);
-
+  
+  WireCuttingProblemGenerator problem_generator(nh_);
+  auto req = problem_generator.construct_request_cut(tool_poses[0]);
   // Create Process Planning Request
   ProcessPlanningRequest request;
   request.name = tesseract_planning::process_planner_names::TRAJOPT_PLANNER_NAME;
@@ -276,7 +230,7 @@ bool WireCutting::run()
   //  plotter->waitForInput();request.instructions.print("Program: ");
 
   // Solve process plan
-  ProcessPlanningFuture response = planning_server.run(request);
+  ProcessPlanningFuture response = planning_server.run(req);
   planning_server.waitForAll();
   
   // Plot Process Trajectory

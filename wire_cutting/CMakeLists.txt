@@ -31,7 +31,9 @@ tesseract_variables()
 add_library(${PROJECT_NAME}_wire_cutting src/wire_cutting.cpp 
                                          src/trajopt_wire_cutting_plan_profile.cpp
                                          src/four_bar_linkage_constraint.cpp
-                                         src/wc_utils.cpp)
+                                         src/wc_utils.cpp
+                                         src/trajopt_wire_cutting_composite_profile.cpp
+                                         src/wire_cutting_problem_generator.cpp)
                                          
 
 target_link_libraries(${PROJECT_NAME}_wire_cutting tesseract::tesseract_environment_core tesseract::tesseract_environment_ofkt tesseract::tesseract_process_managers ${catkin_LIBRARIES})
