@@ -55,6 +55,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <tesseract_planning_server/tesseract_planning_server.h>
 #include <tesseract_motion_planners/core/utils.h>
 #include <tesseract_visualization/markers/toolpath_marker.h>
+#include <tesseract_motion_planners/ompl/profile/ompl_default_plan_profile.h>
 
 #include <tinyxml2.h>
 
@@ -136,12 +137,19 @@ bool WireCutting::run()
 
   ResourceLocator::Ptr locator = std::make_shared<tesseract_rosutils::ROSResourceLocator>();
   if (!env_->init<OFKTStateSolver>(urdf_xml_string, srdf_xml_string, locator))
-    return false; 
+    return false;
  
   // Create monitor
   monitor_ = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_, EXAMPLE_MONITOR_NAMESPACE);
   if (rviz_)
     monitor_->startPublishingEnvironment(tesseract_monitoring::EnvironmentMonitor::UPDATE_ENVIRONMENT);
+
+  // Get manipulator
+  tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
+  {  // Need to lock monitor for read
+    auto lock = monitor_->lockEnvironmentRead();
+    fwd_kin = monitor_->getEnvironment()->getManipulatorManager()->getFwdKinematicSolver("manipulator");
+  }
 
   // Create plotting tool
   ROSPlottingPtr plotter = std::make_shared<ROSPlotting>(monitor_->getSceneGraph()->getRoot());
@@ -149,7 +157,7 @@ bool WireCutting::run()
     plotter->waitForConnection();
 
   Eigen::VectorXd pos(3), size(3);
-  pos << 0, 2.4, 0.8;
+  pos << 2.4, -2.4, 0.8;
   size << 0.2, 0.3, 0.4;
   Command::Ptr cmd = addBoundingBox(pos, size);
   if (!monitor_->applyCommand(*cmd))
@@ -165,7 +173,7 @@ bool WireCutting::run()
   joint_names.push_back("joint_6");
 
   Eigen::VectorXd joint_pos(6);
-  joint_pos(0) = 0;
+  joint_pos(0) = 1.57;
   joint_pos(1) = 0;
   joint_pos(2) = 0;
   joint_pos(3) = 0;
@@ -180,14 +188,11 @@ bool WireCutting::run()
   SceneGraph::Ptr g1 = g->clone();*/
 
   env_->setState(joint_names, joint_pos);
-  tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
-  std::vector<tesseract_common::VectorIsometry3d> tool_poses;
-  tool_poses.push_back(temp_poses);
+  //tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
+  std::vector<tesseract_common::VectorIsometry3d> tool_poses  = loadToolPosesFromPrg("test");;
+  //tool_poses.push_back(temp_poses);
 
   plotter->waitForInput();
-
-  // Create Program
-  CompositeInstruction program("DEFAULT", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
 
   // Create Process Planning Server
   ProcessPlanningServer planning_server(std::make_shared<ROSProcessEnvironmentCache>(monitor_), 5);
@@ -207,18 +212,19 @@ bool WireCutting::run()
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
   trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
 
+  WireCuttingProblemGenerator problem_generator(nh_);
+  problem_generator.m_env_cut = env_;
+
   // Add profiles to Dictionary
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptCompositeProfile>("DEFAULT",
                                                                                          trajopt_composite_profile);
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("DEFAULT",
                                                                                       trajopt_solver_profile);
   
-  WireCuttingProblemGenerator problem_generator(nh_);
-  auto req = problem_generator.construct_request_cut(tool_poses[0]);
-  // Create Process Planning Request
-  ProcessPlanningRequest request;
-  request.name = tesseract_planning::process_planner_names::TRAJOPT_PLANNER_NAME;
-  request.instructions = Instruction(program);
+  planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", problem_generator.m_plan_cut);
+  auto req1 = problem_generator.construct_request_cut(tool_poses[0]);
+  auto req2 = problem_generator.construct_request_cut(tool_poses[1]);
+
   
   /*tesseract_planning::CompositeInstruction naive_seed;
   {
@@ -230,7 +236,8 @@ bool WireCutting::run()
   //  plotter->waitForInput();request.instructions.print("Program: ");
 
   // Solve process plan
-  ProcessPlanningFuture response = planning_server.run(req);
+  ProcessPlanningFuture response = planning_server.run(req1);
+  ProcessPlanningFuture response2 = planning_server.run(req2);
   planning_server.waitForAll();
   
   // Plot Process Trajectory
@@ -238,9 +245,45 @@ bool WireCutting::run()
   {
     plotter->waitForInput();
     const auto* ci = response.results->cast_const<tesseract_planning::CompositeInstruction>();
+    const auto* ci2 = response2.results->cast_const<tesseract_planning::CompositeInstruction>();
     tesseract_common::Toolpath toolpath = tesseract_planning::toToolpath(*ci, env_);
+    tesseract_common::Toolpath toolpath2 = tesseract_planning::toToolpath(*ci2, env_);
     tesseract_common::JointTrajectory trajectory = tesseract_planning::toJointTrajectory(*ci);
+    tesseract_common::JointTrajectory trajectory2 = tesseract_planning::toJointTrajectory(*ci2);
+
+    JointState end1 = trajectory.back();
+    JointState start2 = trajectory2.front();
+
+    Eigen::Isometry3d initial_pose;
+    Eigen::Isometry3d end_pose;
+    tesseract_common::VectorIsometry3d free_targets;
+
+    fwd_kin->calcFwdKin(initial_pose, end1.position);
+    fwd_kin->calcFwdKin(end_pose, start2.position);
+    free_targets.push_back(initial_pose);
+    free_targets.push_back(end_pose);
+
+  
+    auto req_free = problem_generator.construct_request_freespace(end1, start2);
+
+    plotter->waitForInput();
+    ProcessPlanningFuture response_free = planning_server.run(req_free);
+    planning_server.waitForAll();
+    plotter->waitForInput();
+    
+    const auto* ci_free = response_free.results->cast_const<tesseract_planning::CompositeInstruction>();
+    
+    tesseract_common::Toolpath toolpath_free = tesseract_planning::toToolpath(*ci_free, env_);
+    
+    tesseract_common::JointTrajectory trajectory_free = tesseract_planning::toJointTrajectory(*ci_free);
+    
+
+    toolpath.insert( toolpath.end(), toolpath_free.begin(), toolpath_free.end() );
+    toolpath.insert( toolpath.end(), toolpath2.begin(), toolpath2.end() );
     plotter->plotMarker(ToolpathMarker(toolpath));
+
+    trajectory.insert( trajectory.end(), trajectory_free.begin(), trajectory_free.end());
+    trajectory.insert( trajectory.end(), trajectory2.begin(), trajectory2.end());
     plotter->plotTrajectory(trajectory, env_->getStateSolver());
   }
 

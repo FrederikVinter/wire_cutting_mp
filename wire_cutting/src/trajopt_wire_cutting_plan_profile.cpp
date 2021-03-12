@@ -103,9 +103,6 @@ void TrajOptWireCuttingPlanProfile::apply(trajopt::ProblemConstructionInfo& pci,
   pci.cost_infos.push_back(ti2);
 
   addConstraintErrorFunctions(pci, index);
-
-  for(auto link : active_links)
-    std::cout << link << std::endl;
 }
 
 void TrajOptWireCuttingPlanProfile::apply(trajopt::ProblemConstructionInfo& pci,

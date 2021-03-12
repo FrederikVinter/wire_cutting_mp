@@ -52,6 +52,18 @@ struct JointThreeLimitsConstraint : public trajopt::TrajOptVectorOfVector
     Eigen::VectorXd operator()(const Eigen::VectorXd& current_joints_pos) const override;
 };
 
+struct JointThreeAbsoluteLimitsConstraint : public trajopt::TrajOptVectorOfVector
+{
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    tesseract_environment::Environment::Ptr env_;
+
+    JointThreeAbsoluteLimitsConstraint(tesseract_environment::Environment::Ptr env):env_(env){}
+
+    void Plot(const tesseract_visualization::Visualization::Ptr& plotter, const Eigen::VectorXd& dof_vals) override;
+
+    Eigen::VectorXd operator()(const Eigen::VectorXd& current_joints_pos) const override;
+};
+
 
 
 #endif

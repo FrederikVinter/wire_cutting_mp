@@ -18,7 +18,7 @@ WireCuttingProblemGenerator::WireCuttingProblemGenerator(const ros::NodeHandle& 
 
 
     m_plan_cut = std::make_shared<TrajOptWireCuttingPlanProfile>();
-    FourBarLinkageConstraint cnt1(m_env_cut);
+    JointThreeAbsoluteLimitsConstraint cnt1(m_env_cut);
     JointTwoLimitsConstraint cnt2(m_env_cut);
     JointThreeLimitsConstraint cnt3(m_env_cut);
     std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function1 = cnt1;
@@ -42,7 +42,7 @@ WireCuttingProblemGenerator::WireCuttingProblemGenerator(const ros::NodeHandle& 
     constraint_error_functions.push_back(temp_tuple2);
     constraint_error_functions.push_back(temp_tuple3);
 
-    m_plan_cut->constraint_error_functions = constraint_error_functions;
+    //m_plan_cut->constraint_error_functions = constraint_error_functions;
 }
 
 WireCuttingProblemGenerator::WireCuttingProblemGenerator(const Environment::Ptr env_cut,
@@ -72,6 +72,33 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut(const 
     plan_instruction.setDescription("waypoint_" + std::to_string(i)); 
     program.push_back(plan_instruction);
   }
+  ProcessPlanningRequest request;
+  request.name = tesseract_planning::process_planner_names::TRAJOPT_PLANNER_NAME;
+  request.instructions = Instruction(program);
+
+  return request;
+}
+
+ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_freespace(const JointState& start, const JointState& end)
+{
+  /*for(auto joint : start.joint_names)
+    std::cout << joint << std::endl;
+
+  std::cout << std::endl << start.position << std::endl << std::endl;
+  std::cout << end.position << std::endl;*/
+
+  CompositeInstruction program("DEFAULT", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
+
+  Waypoint wp_start = StateWaypoint(start.joint_names, start.position);
+  Waypoint wp_end = StateWaypoint(end.joint_names, end.position);
+
+  PlanInstruction start_instruction(wp_start, PlanInstructionType::START, "wire_cutting");
+  program.setStartInstruction(start_instruction);
+
+  PlanInstruction plan_f0(wp_end, PlanInstructionType::FREESPACE, "wire_cutting");
+
+  program.push_back(plan_f0);
+
   ProcessPlanningRequest request;
   request.name = tesseract_planning::process_planner_names::TRAJOPT_PLANNER_NAME;
   request.instructions = Instruction(program);

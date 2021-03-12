@@ -10,6 +10,7 @@
 #include <tesseract_process_managers/core/process_planning_server.h>
 #include <ros/ros.h>
 
+#include <tesseract_motion_planners/interface_utils.h>
 #include <tesseract_motion_planners/trajopt/profile/trajopt_default_composite_profile.h>
 #include <tesseract_motion_planners/trajopt/profile/trajopt_default_solver_profile.h>
 #include <trajopt_wire_cutting_composite_profile.h>
@@ -37,12 +38,12 @@ public:
                                 TrajOptPlanProfile::Ptr plan_free);
 
     ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& cartesian_targets);
+    ProcessPlanningRequest construct_request_freespace(const JointState& start, const JointState& end);
 
-    
-private:  
+    TrajOptWireCuttingPlanProfile::Ptr m_plan_cut;
     Environment::Ptr m_env_cut;
     Environment::Ptr m_env_free;
-    TrajOptWireCuttingPlanProfile::Ptr m_plan_cut;
+private:  
     TrajOptPlanProfile::Ptr m_plan_free;
 
 };
