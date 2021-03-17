@@ -37,6 +37,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <tesseract_motion_planners/trajopt/trajopt_collision_config.h>
 #include <tesseract_motion_planners/trajopt/profile/trajopt_profile.h>
 
+#include <wc_utils.h>
 #ifdef SWIG
 %shared_ptr(tesseract_planning::TrajOptWireCuttingCompositeProfile)
 #endif  // SWIG
@@ -81,6 +82,7 @@ public:
   bool avoid_singularity = false;
   /** @brief Optimization weight associated with kinematic singularity avoidance */
   double avoid_singularity_coeff = 5.0;
+
 
   /** @brief Set the resolution at which state validity needs to be verified in order for a motion between two states
    * to be considered valid in post checking of trajectory returned by trajopt.

@@ -106,3 +106,24 @@ tesseract_common::VectorIsometry3d loadToolPoses()
 
   return path;
 }
+
+trajopt::TermInfo::Ptr createVelocityTermInfo(double max_displacement,
+                                                int start_index,
+                                                int end_index,
+                                                const std::string& link,
+                                                trajopt::TermType type)
+{
+  if ((end_index - start_index) < 2)
+    throw std::runtime_error("TrajOpt CartVelTermInfo requires at least two states!");
+
+  std::shared_ptr<trajopt::CartVelTermInfo> term = std::make_shared<trajopt::CartVelTermInfo>();
+  term->first_step = start_index;
+
+  // end_index-1 is done since velocity requires step_i and step_i+1
+  term->last_step = end_index-1;
+  term->max_displacement = max_displacement;
+  term->link = link;
+  term->term_type = type;  
+
+  return term;
+}

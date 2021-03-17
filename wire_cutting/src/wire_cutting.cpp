@@ -188,9 +188,9 @@ bool WireCutting::run()
   SceneGraph::Ptr g1 = g->clone();*/
 
   env_->setState(joint_names, joint_pos);
-  //tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
-  std::vector<tesseract_common::VectorIsometry3d> tool_poses  = loadToolPosesFromPrg("test");;
-  //tool_poses.push_back(temp_poses);
+  tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
+  std::vector<tesseract_common::VectorIsometry3d> tool_poses;//  = loadToolPoses("test");;
+  tool_poses.push_back(temp_poses);
 
   plotter->waitForInput();
 
@@ -201,7 +201,7 @@ bool WireCutting::run()
   auto trajopt_composite_profile = std::make_shared<tesseract_planning::TrajOptWireCuttingCompositeProfile>();
   trajopt_composite_profile->collision_constraint_config.enabled = false;
   trajopt_composite_profile->collision_cost_config.enabled = true;
-  trajopt_composite_profile->collision_cost_config.safety_margin = 0.050;
+  trajopt_composite_profile->collision_cost_config.safety_margin = 0.080;
   trajopt_composite_profile->collision_cost_config.type = trajopt::CollisionEvaluatorType::SINGLE_TIMESTEP;
   trajopt_composite_profile->collision_cost_config.coeff = 1;
 
@@ -223,7 +223,7 @@ bool WireCutting::run()
   
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", problem_generator.m_plan_cut);
   auto req1 = problem_generator.construct_request_cut(tool_poses[0]);
-  auto req2 = problem_generator.construct_request_cut(tool_poses[1]);
+  //auto req2 = problem_generator.construct_request_cut(tool_poses[1]);
 
   
   /*tesseract_planning::CompositeInstruction naive_seed;
@@ -237,21 +237,23 @@ bool WireCutting::run()
 
   // Solve process plan
   ProcessPlanningFuture response = planning_server.run(req1);
-  ProcessPlanningFuture response2 = planning_server.run(req2);
   planning_server.waitForAll();
   
   // Plot Process Trajectory
   if (rviz_ && plotter != nullptr && plotter->isConnected())
   {
     plotter->waitForInput();
+    //ProcessPlanningFuture response2 = planning_server.run(req2);
+    //planning_server.waitForAll();
+    //plotter->waitForInput();
     const auto* ci = response.results->cast_const<tesseract_planning::CompositeInstruction>();
-    const auto* ci2 = response2.results->cast_const<tesseract_planning::CompositeInstruction>();
+    //const auto* ci2 = response2.results->cast_const<tesseract_planning::CompositeInstruction>();
     tesseract_common::Toolpath toolpath = tesseract_planning::toToolpath(*ci, env_);
-    tesseract_common::Toolpath toolpath2 = tesseract_planning::toToolpath(*ci2, env_);
+    //tesseract_common::Toolpath toolpath2 = tesseract_planning::toToolpath(*ci2, env_);
     tesseract_common::JointTrajectory trajectory = tesseract_planning::toJointTrajectory(*ci);
-    tesseract_common::JointTrajectory trajectory2 = tesseract_planning::toJointTrajectory(*ci2);
+    //tesseract_common::JointTrajectory trajectory2 = tesseract_planning::toJointTrajectory(*ci2);
 
-    JointState end1 = trajectory.back();
+    /*JointState end1 = trajectory.back();
     JointState start2 = trajectory2.front();
 
     Eigen::Isometry3d initial_pose;
@@ -279,11 +281,11 @@ bool WireCutting::run()
     
 
     toolpath.insert( toolpath.end(), toolpath_free.begin(), toolpath_free.end() );
-    toolpath.insert( toolpath.end(), toolpath2.begin(), toolpath2.end() );
+    toolpath.insert( toolpath.end(), toolpath2.begin(), toolpath2.end() );*/
     plotter->plotMarker(ToolpathMarker(toolpath));
 
-    trajectory.insert( trajectory.end(), trajectory_free.begin(), trajectory_free.end());
-    trajectory.insert( trajectory.end(), trajectory2.begin(), trajectory2.end());
+    /*trajectory.insert( trajectory.end(), trajectory_free.begin(), trajectory_free.end());
+    trajectory.insert( trajectory.end(), trajectory2.begin(), trajectory2.end());*/
     plotter->plotTrajectory(trajectory, env_->getStateSolver());
   }
 

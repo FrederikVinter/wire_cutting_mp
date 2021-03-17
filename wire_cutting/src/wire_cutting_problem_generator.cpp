@@ -42,7 +42,7 @@ WireCuttingProblemGenerator::WireCuttingProblemGenerator(const ros::NodeHandle& 
     constraint_error_functions.push_back(temp_tuple2);
     constraint_error_functions.push_back(temp_tuple3);
 
-    //m_plan_cut->constraint_error_functions = constraint_error_functions;
+    m_plan_cut->constraint_error_functions = constraint_error_functions;
 }
 
 WireCuttingProblemGenerator::WireCuttingProblemGenerator(const Environment::Ptr env_cut,

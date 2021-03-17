@@ -90,7 +90,7 @@ void TrajOptWireCuttingPlanProfile::apply(trajopt::ProblemConstructionInfo& pci,
   cart_coeff1(4) = 0;
 
   Eigen::VectorXd cart_coeff2 = Eigen::VectorXd::Constant(6, 1, 0);
-  cart_coeff2(1) = 2;
+  cart_coeff2(1) = 0.1;
   cart_coeff2(4) = 1;
 
   auto ti1 = createCartesianWaypointTermInfo(
@@ -141,6 +141,7 @@ void TrajOptWireCuttingPlanProfile::addConstraintErrorFunctions(trajopt::Problem
     pci.cnt_infos.push_back(ef);
   }
 }
+
 
 tinyxml2::XMLElement* TrajOptWireCuttingPlanProfile::toXML(tinyxml2::XMLDocument& doc) const
 {

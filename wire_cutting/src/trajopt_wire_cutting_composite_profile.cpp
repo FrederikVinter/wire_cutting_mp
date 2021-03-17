@@ -212,6 +212,8 @@ void TrajOptWireCuttingCompositeProfile::apply(trajopt::ProblemConstructionInfo&
   if (smooth_jerks)
     addJerkSmoothing(pci, start_index, end_index, fixed_indices);
 
+  addVelocityConstraint(pci, 0, start_index, end_index, pci.kin->getTipLinkName(), trajopt::TermType::TT_COST, fixed_indices);
+
   //  if (!constraint_error_functions.empty())
   //    addConstraintErrorFunctions(pci, start_index, end_index, fixed_indices);
 
@@ -299,6 +301,22 @@ tinyxml2::XMLElement* TrajOptWireCuttingCompositeProfile::toXML(tinyxml2::XMLDoc
   xml_planner->InsertEndChild(xml_trajopt);
 
   return xml_planner;
+}
+
+void TrajOptWireCuttingCompositeProfile::addVelocityConstraint(trajopt::ProblemConstructionInfo& pci,
+                                                               double max_displacement,
+                                                               int start_index,
+                                                               int end_index,
+                                                               const std::string& link,
+                                                               trajopt::TermType type,
+                                                               const std::vector<int>& /*fixed_indices*/) const
+{
+  if(type == trajopt::TermType::TT_CNT) {
+    pci.cnt_infos.push_back(createVelocityTermInfo(max_displacement, start_index, end_index, link, type));
+  }
+  else {
+    pci.cost_infos.push_back(createVelocityTermInfo(max_displacement, start_index, end_index, link, type));
+  }
 }
 
 void TrajOptWireCuttingCompositeProfile::addCollisionCost(trajopt::ProblemConstructionInfo& pci,
