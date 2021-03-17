@@ -188,9 +188,10 @@ bool WireCutting::run()
   SceneGraph::Ptr g1 = g->clone();*/
 
   env_->setState(joint_names, joint_pos);
-  tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
-  std::vector<tesseract_common::VectorIsometry3d> tool_poses;//  = loadToolPoses("test");;
-  tool_poses.push_back(temp_poses);
+  //tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
+  std::vector<tesseract_common::VectorIsometry3d> tool_poses = loadToolPosesFromPrg("test");
+  assert(!tool_poses.empty());
+  //tool_poses.push_back(temp_poses);
 
   plotter->waitForInput();
 
@@ -203,7 +204,7 @@ bool WireCutting::run()
   trajopt_composite_profile->collision_cost_config.enabled = true;
   trajopt_composite_profile->collision_cost_config.safety_margin = 0.080;
   trajopt_composite_profile->collision_cost_config.type = trajopt::CollisionEvaluatorType::SINGLE_TIMESTEP;
-  trajopt_composite_profile->collision_cost_config.coeff = 1;
+  trajopt_composite_profile->collision_cost_config.coeff = 1; 
 
   auto trajopt_solver_profile = std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
   trajopt_solver_profile->convex_solver = sco::ModelType::OSQP;
@@ -222,74 +223,86 @@ bool WireCutting::run()
                                                                                       trajopt_solver_profile);
   
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", problem_generator.m_plan_cut);
-  auto req1 = problem_generator.construct_request_cut(tool_poses[0]);
-  //auto req2 = problem_generator.construct_request_cut(tool_poses[1]);
-
   
-  /*tesseract_planning::CompositeInstruction naive_seed;
-  {
-    auto lock = monitor_->lockEnvironmentRead();
-    naive_seed = tesseract_planning::generateNaiveSeed(program, *(monitor_->getEnvironment()));
-  }
-  request.seed = Instruction(naive_seed);*/
-  // Print Diagnostics
-  //  plotter->waitForInput();request.instructions.print("Program: ");
+  plotter->waitForInput();
+  // Generate cut requests from tool poses
+  std::size_t segments = tool_poses.size();
+   std::cout << "Number of segments: " << segments << std::endl;
+  std::vector<ProcessPlanningRequest> cut_requests(segments);
+  for(std::size_t i = 0; i < segments; i++)
+    cut_requests[i] = problem_generator.construct_request_cut(tool_poses[i]);
 
-  // Solve process plan
-  ProcessPlanningFuture response = planning_server.run(req1);
+
+  // Solve process plans for cuts
+  std::vector<ProcessPlanningFuture> cut_responses(segments);
+  for(std::size_t i = 0; i < segments; i++)
+    cut_responses[i] = planning_server.run(cut_requests[i]);
   planning_server.waitForAll();
+
+  // Cast responses to composite instructions
+  std::vector<const CompositeInstruction*> cis(segments);
+  for(std::size_t i = 0; i < segments; i++)
+    cis[i] = cut_responses[i].results->cast_const<tesseract_planning::CompositeInstruction>();
+
+
+  // Convert CIs to joint trajectories
+  std::vector<JointTrajectory> trajectories(segments);
+  for(std::size_t i = 0; i < segments; i++)
+    trajectories[i] = tesseract_planning::toJointTrajectory(*cis[i]);
+
+  plotter->waitForInput();
+  ROS_INFO("Generate point to point requests");
+  // Generate point to point requests
+  std::vector<ProcessPlanningRequest> p2p_requests;
+  for(std::size_t i = 1; i < segments; i++)
+  {
+    JointState last = trajectories[i-1].back();
+    JointState first = trajectories[i].front();
+
+    p2p_requests.push_back(problem_generator.construct_request_p2p(last, first));
+  }
+
+  plotter->waitForInput();
+  ROS_INFO("Solve process plans for point to point");
+  // Solve process plans for point to point
+  std::size_t p2p_moves = p2p_requests.size();
+  std::vector<ProcessPlanningFuture> p2p_responses(p2p_moves);
+  for(std::size_t i = 0; i < p2p_moves; i++)
+    p2p_responses[i] = planning_server.run(p2p_requests[i]);
+  planning_server.waitForAll();
+
+  plotter->waitForInput();
+  ROS_INFO("Combine toolpath and trajectory for cut and p2p");
+  // Combine toolpath and trajectory for cut and p2p
+  Toolpath combined_toolpath;
+  JointTrajectory combined_trajectory;
+
+  assert(cut_responses.size() == p2p_responses.size()+1);
+  for(std::size_t i = 0; i < cut_responses.size()+p2p_responses.size(); i++)
+  {
+    const CompositeInstruction* ci;
+    if(i%2 == 0)
+      ci = cut_responses[i/2].results->cast_const<tesseract_planning::CompositeInstruction>();
+    else
+      ci = p2p_responses[i/2].results->cast_const<tesseract_planning::CompositeInstruction>();
   
+    tesseract_common::Toolpath toolpath = tesseract_planning::toToolpath(*ci, env_);
+    tesseract_common::JointTrajectory trajectory = tesseract_planning::toJointTrajectory(*ci);
+
+    combined_toolpath.insert(combined_toolpath.end(), toolpath.begin(), toolpath.end());
+    combined_trajectory.insert(combined_trajectory.end(), trajectory.begin(), trajectory.end());
+  }
+
   // Plot Process Trajectory
   if (rviz_ && plotter != nullptr && plotter->isConnected())
   {
     plotter->waitForInput();
-    //ProcessPlanningFuture response2 = planning_server.run(req2);
-    //planning_server.waitForAll();
-    //plotter->waitForInput();
-    const auto* ci = response.results->cast_const<tesseract_planning::CompositeInstruction>();
-    //const auto* ci2 = response2.results->cast_const<tesseract_planning::CompositeInstruction>();
-    tesseract_common::Toolpath toolpath = tesseract_planning::toToolpath(*ci, env_);
-    //tesseract_common::Toolpath toolpath2 = tesseract_planning::toToolpath(*ci2, env_);
-    tesseract_common::JointTrajectory trajectory = tesseract_planning::toJointTrajectory(*ci);
-    //tesseract_common::JointTrajectory trajectory2 = tesseract_planning::toJointTrajectory(*ci2);
 
-    /*JointState end1 = trajectory.back();
-    JointState start2 = trajectory2.front();
-
-    Eigen::Isometry3d initial_pose;
-    Eigen::Isometry3d end_pose;
-    tesseract_common::VectorIsometry3d free_targets;
-
-    fwd_kin->calcFwdKin(initial_pose, end1.position);
-    fwd_kin->calcFwdKin(end_pose, start2.position);
-    free_targets.push_back(initial_pose);
-    free_targets.push_back(end_pose);
-
-  
-    auto req_free = problem_generator.construct_request_freespace(end1, start2);
-
-    plotter->waitForInput();
-    ProcessPlanningFuture response_free = planning_server.run(req_free);
-    planning_server.waitForAll();
-    plotter->waitForInput();
-    
-    const auto* ci_free = response_free.results->cast_const<tesseract_planning::CompositeInstruction>();
-    
-    tesseract_common::Toolpath toolpath_free = tesseract_planning::toToolpath(*ci_free, env_);
-    
-    tesseract_common::JointTrajectory trajectory_free = tesseract_planning::toJointTrajectory(*ci_free);
-    
-
-    toolpath.insert( toolpath.end(), toolpath_free.begin(), toolpath_free.end() );
-    toolpath.insert( toolpath.end(), toolpath2.begin(), toolpath2.end() );*/
-    plotter->plotMarker(ToolpathMarker(toolpath));
-
-    /*trajectory.insert( trajectory.end(), trajectory_free.begin(), trajectory_free.end());
-    trajectory.insert( trajectory.end(), trajectory2.begin(), trajectory2.end());*/
-    plotter->plotTrajectory(trajectory, env_->getStateSolver());
+    plotter->plotMarker(ToolpathMarker(combined_toolpath));
+    plotter->plotTrajectory(combined_trajectory, env_->getStateSolver());
   }
 
-  tinyxml2::XMLDocument xmlDoc;
+  /*tinyxml2::XMLDocument xmlDoc;
 
   XMLNode * pRoot = xmlDoc.NewElement("Instructions");    // Creat root element
   xmlDoc.InsertFirstChild(pRoot);                 // Insert element
@@ -298,7 +311,7 @@ bool WireCutting::run()
   pRoot->InsertEndChild(pResults);                // insert element as child
 
   const char* fileName = "/home/frederik/ws_tesseract_wirecut/trajopt_results.xml";
-  tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);
+  tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);*/
 
   ROS_INFO("Final trajectory is collision free");
   return true;

@@ -212,7 +212,8 @@ void TrajOptWireCuttingCompositeProfile::apply(trajopt::ProblemConstructionInfo&
   if (smooth_jerks)
     addJerkSmoothing(pci, start_index, end_index, fixed_indices);
 
-  addVelocityConstraint(pci, 0, start_index, end_index, pci.kin->getTipLinkName(), trajopt::TermType::TT_COST, fixed_indices);
+  if (constrain_velocity)
+    addVelocityConstraint(pci, 0, start_index, end_index, pci.kin->getTipLinkName(), trajopt::TermType::TT_COST, fixed_indices);
 
   //  if (!constraint_error_functions.empty())
   //    addConstraintErrorFunctions(pci, start_index, end_index, fixed_indices);

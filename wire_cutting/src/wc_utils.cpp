@@ -29,7 +29,8 @@ std::vector<tesseract_common::VectorIsometry3d> loadToolPosesFromPrg(const std::
     {
       if(cell == "PROC" && !segment.empty())
       {
-        path.push_back(segment);
+        if(!segment.empty())
+          path.push_back(segment);
         segment.clear();
       }
       if(!(cell == "MoveL"))
@@ -47,15 +48,16 @@ std::vector<tesseract_common::VectorIsometry3d> loadToolPosesFromPrg(const std::
     
     if(movel_not_found == 0) {
       movel_instructions++;
-      if(movel_instructions > 10){
+      if(movel_instructions >= 0){
         Eigen::Isometry3d pose = Eigen::Isometry3d::Identity() * Eigen::Translation3d(xyzWXYZ(0) / 1000.0, xyzWXYZ(1) / 1000.0 , xyzWXYZ(2) / 1000.0 ) *
                                       Eigen::Quaterniond(xyzWXYZ(3), xyzWXYZ(4), xyzWXYZ(5), xyzWXYZ(6));
-        if(movel_instructions%20 == 0)
+        if(movel_instructions%100 == 0)
           segment.push_back(pose);
       }
     }
   }
-  path.push_back(segment);
+  if(!segment.empty())
+    path.push_back(segment);
   indata.close();
   std::cout << "PATH SIZE: " << path.size() << std::endl;
   for(auto seg : path)

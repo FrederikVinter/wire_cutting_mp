@@ -38,7 +38,7 @@ public:
                                 TrajOptPlanProfile::Ptr plan_free);
 
     ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& cartesian_targets);
-    ProcessPlanningRequest construct_request_freespace(const JointState& start, const JointState& end);
+    ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end);
 
     TrajOptWireCuttingPlanProfile::Ptr m_plan_cut;
     Environment::Ptr m_env_cut;
