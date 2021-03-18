@@ -9,29 +9,48 @@ using namespace tesseract_planning;
 
 TrajOptWireCuttingPlanProfile::TrajOptWireCuttingPlanProfile(const tinyxml2::XMLElement& xml_element)
 {
-  const tinyxml2::XMLElement* cartesian_coeff_element = xml_element.FirstChildElement("CartesianCoeff");
-  const tinyxml2::XMLElement* joint_coeff_element = xml_element.FirstChildElement("JointCoeff");
+  const tinyxml2::XMLElement* cartesian_coeff_cnt_element = xml_element.FirstChildElement("CartesianCoefficientsConstraint");
+  const tinyxml2::XMLElement* cartesian_coeff_cost_element = xml_element.FirstChildElement("CartesianCoefficientsCost");
+  const tinyxml2::XMLElement* joint_coeff_element = xml_element.FirstChildElement("JointCoefficients");
   const tinyxml2::XMLElement* term_type_element = xml_element.FirstChildElement("Term");
   const tinyxml2::XMLElement* cnt_error_fn_element = xml_element.FirstChildElement("ConstraintErrorFunctions");
 
   tinyxml2::XMLError status;
 
-  if (cartesian_coeff_element)
+  if (cartesian_coeff_cnt_element)
   {
-    std::vector<std::string> cart_coeff_tokens;
-    std::string cart_coeff_string;
-    status = tesseract_common::QueryStringText(cartesian_coeff_element, cart_coeff_string);
+    std::vector<std::string> cart_coeff_cnt_tokens;
+    std::string cart_coeff_cnt_string;
+    status = tesseract_common::QueryStringText(cartesian_coeff_cnt_element, cart_coeff_cnt_string);
     if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
-      throw std::runtime_error("TrajoptPlanProfile: Error parsing CartesianCoeff string");
+      throw std::runtime_error("TrajoptPlanProfile: Error parsing CartesianCoeffCNT string");
 
-    boost::split(cart_coeff_tokens, cart_coeff_string, boost::is_any_of(" "), boost::token_compress_on);
+    boost::split(cart_coeff_cnt_tokens, cart_coeff_cnt_string, boost::is_any_of(" "), boost::token_compress_on);
 
-    if (!tesseract_common::isNumeric(cart_coeff_tokens))
-      throw std::runtime_error("TrajoptPlanProfile: CartesianCoeff are not all numeric values.");
+    if (!tesseract_common::isNumeric(cart_coeff_cnt_tokens))
+      throw std::runtime_error("TrajoptPlanProfile: CartesianCoeffCOST are not all numeric values.");
 
-    cartesian_coeff.resize(static_cast<long>(cart_coeff_tokens.size()));
-    for (std::size_t i = 0; i < cart_coeff_tokens.size(); ++i)
-      tesseract_common::toNumeric<double>(cart_coeff_tokens[i], cartesian_coeff[static_cast<long>(i)]);
+    cart_coeff_cnt.resize(static_cast<long>(cart_coeff_cnt_tokens.size()));
+    for (std::size_t i = 0; i < cart_coeff_cnt_tokens.size(); ++i)
+      tesseract_common::toNumeric<double>(cart_coeff_cnt_tokens[i], cart_coeff_cnt[static_cast<long>(i)]);
+  }
+
+  if (cartesian_coeff_cost_element)
+  {
+    std::vector<std::string> cart_coeff_cost_tokens;
+    std::string cart_coeff_cost_string;
+    status = tesseract_common::QueryStringText(cartesian_coeff_cost_element, cart_coeff_cost_string);
+    if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+      throw std::runtime_error("TrajoptPlanProfile: Error parsing CartesianCoeffCOST string");
+
+    boost::split(cart_coeff_cost_tokens, cart_coeff_cost_string, boost::is_any_of(" "), boost::token_compress_on);
+
+    if (!tesseract_common::isNumeric(cart_coeff_cost_tokens))
+      throw std::runtime_error("TrajoptPlanProfile: CartesianCoeffCOST are not all numeric values.");
+
+    cart_coeff_cost.resize(static_cast<long>(cart_coeff_cost_tokens.size()));
+    for (std::size_t i = 0; i < cart_coeff_cost_tokens.size(); ++i)
+      tesseract_common::toNumeric<double>(cart_coeff_cost_tokens[i], cart_coeff_cost[static_cast<long>(i)]);
   }
 
   if (joint_coeff_element)
@@ -85,19 +104,11 @@ void TrajOptWireCuttingPlanProfile::apply(trajopt::ProblemConstructionInfo& pci,
   ManipulatorInfo mi = manip_info.getCombined(base_instruction->getManipulatorInfo());
   Eigen::Isometry3d tcp = pci.env->findTCP(mi);
 
-  Eigen::VectorXd cart_coeff1 = Eigen::VectorXd::Constant(6, 1, 1);
-  cart_coeff1(1) = 0;
-  cart_coeff1(4) = 0;
-
-  Eigen::VectorXd cart_coeff2 = Eigen::VectorXd::Constant(6, 1, 0);
-  cart_coeff2(1) = 0.1;
-  cart_coeff2(4) = 1;
-
   auto ti1 = createCartesianWaypointTermInfo(
-      cartesian_waypoint, index, mi.working_frame, tcp, cart_coeff1, pci.kin->getTipLinkName(), trajopt::TermType::TT_CNT);
+      cartesian_waypoint, index, mi.working_frame, tcp, cart_coeff_cnt, pci.kin->getTipLinkName(), trajopt::TermType::TT_CNT);
   
   auto ti2 = createCartesianWaypointTermInfo(
-      cartesian_waypoint, index, mi.working_frame, tcp, cart_coeff2, pci.kin->getTipLinkName(), trajopt::TermType::TT_COST);
+      cartesian_waypoint, index, mi.working_frame, tcp, cart_coeff_cost, pci.kin->getTipLinkName(), trajopt::TermType::TT_COST);
   
   pci.cnt_infos.push_back(ti1);
   pci.cost_infos.push_back(ti2);
@@ -123,6 +134,8 @@ void TrajOptWireCuttingPlanProfile::apply(trajopt::ProblemConstructionInfo& pci,
     pci.cnt_infos.push_back(ti);
   else
     pci.cost_infos.push_back(ti);
+
+  addConstraintErrorFunctions(pci, index);
 }
 
 void TrajOptWireCuttingPlanProfile::addConstraintErrorFunctions(trajopt::ProblemConstructionInfo& pci, int index) const
@@ -142,6 +155,30 @@ void TrajOptWireCuttingPlanProfile::addConstraintErrorFunctions(trajopt::Problem
   }
 }
 
+void TrajOptWireCuttingPlanProfile::addFourBarLinkageConstraints()
+{
+  JointThreeAbsoluteLimitsConstraint cnt1;
+  JointTwoLimitsConstraint cnt2;
+  JointThreeLimitsConstraint cnt3;
+  std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function1 = cnt1;
+  std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function2 = cnt2;
+  std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function3 = cnt3;
+  sco::VectorOfVector::func temp_1 = temp_function1;
+  sco::VectorOfVector::func temp_2 = temp_function2;
+  sco::VectorOfVector::func temp_3 = temp_function3;
+
+  sco::ConstraintType a = sco::ConstraintType::EQ;
+  Eigen::VectorXd error_coeff(1);
+  error_coeff << 0.5;
+
+  std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple1(temp_1,nullptr,a,error_coeff);
+  std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple2(temp_2,nullptr,a,error_coeff);
+  std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple3(temp_3,nullptr,a,error_coeff);
+
+  constraint_error_functions.push_back(temp_tuple1);
+  constraint_error_functions.push_back(temp_tuple2);
+  constraint_error_functions.push_back(temp_tuple3);
+}
 
 tinyxml2::XMLElement* TrajOptWireCuttingPlanProfile::toXML(tinyxml2::XMLDocument& doc) const
 {
@@ -152,11 +189,17 @@ tinyxml2::XMLElement* TrajOptWireCuttingPlanProfile::toXML(tinyxml2::XMLDocument
 
   tinyxml2::XMLElement* xml_trajopt = doc.NewElement("TrajoptPlanProfile");
 
-  tinyxml2::XMLElement* xml_cart_coeff = doc.NewElement("CartesianCoefficients");
-  std::stringstream cart_coeff;
-  cart_coeff << cartesian_coeff.format(eigen_format);
-  xml_cart_coeff->SetText(cart_coeff.str().c_str());
-  xml_trajopt->InsertEndChild(xml_cart_coeff);
+  tinyxml2::XMLElement* xml_cart_coeff_cnt = doc.NewElement("CartesianCoefficientsConstraint");
+  std::stringstream cart_coeff_cnt_ss;
+  cart_coeff_cnt_ss << cart_coeff_cnt.format(eigen_format);
+  xml_cart_coeff_cnt->SetText(cart_coeff_cnt_ss.str().c_str());
+  xml_trajopt->InsertEndChild(xml_cart_coeff_cnt);
+
+  tinyxml2::XMLElement* xml_cart_coeff_cost = doc.NewElement("CartesianCoefficientsCost");
+  std::stringstream cart_coeff_cost_ss;
+  cart_coeff_cost_ss << cart_coeff_cost.format(eigen_format);
+  xml_cart_coeff_cost->SetText(cart_coeff_cost_ss.str().c_str());
+  xml_trajopt->InsertEndChild(xml_cart_coeff_cost);
 
   tinyxml2::XMLElement* xml_joint_coeff = doc.NewElement("JointCoefficients");
   std::stringstream jnt_coeff;

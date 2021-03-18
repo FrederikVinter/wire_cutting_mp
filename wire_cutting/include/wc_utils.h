@@ -9,6 +9,7 @@
 TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
 #include <string>
 TESSERACT_COMMON_IGNORE_WARNINGS_POP
+#include <tinyxml2.h>
 
 
 std::vector<tesseract_common::VectorIsometry3d> loadToolPosesFromPrg(const std::string& file);

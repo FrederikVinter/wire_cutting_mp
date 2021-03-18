@@ -1,26 +1,12 @@
 #include <wire_cutting_problem_generator.h>
 
 
-WireCuttingProblemGenerator::WireCuttingProblemGenerator(const ros::NodeHandle& nh)
+WireCuttingProblemGenerator::WireCuttingProblemGenerator()
 {
-    const std::string ROBOT_DESCRIPTION_PARAM = "robot_description";
-    const std::string ROBOT_DESCRIPTION_FREESPACE_PARAM = "robot_description_freespace";
-
-    const std::string ROBOT_SEMANTIC_PARAM = "robot_description_semantic";
-    const std::string ROBOT_SEMANTIC_FREESPACE_PARAM = "robot_description_freespace_semantic";
-
-    // Initial setup
-    std::string urdf_xml_string, srdf_xml_string, urdf_xml_string_freespace, srdf_xml_string_freespace;
-    nh.getParam(ROBOT_DESCRIPTION_PARAM, urdf_xml_string);
-    nh.getParam(ROBOT_SEMANTIC_PARAM, srdf_xml_string);
-    nh.getParam(ROBOT_DESCRIPTION_FREESPACE_PARAM, urdf_xml_string_freespace);
-    nh.getParam(ROBOT_SEMANTIC_FREESPACE_PARAM, srdf_xml_string_freespace);
-
-
     m_plan_cut = std::make_shared<TrajOptWireCuttingPlanProfile>();
-    JointThreeAbsoluteLimitsConstraint cnt1(m_env_cut);
-    JointTwoLimitsConstraint cnt2(m_env_cut);
-    JointThreeLimitsConstraint cnt3(m_env_cut);
+    JointThreeAbsoluteLimitsConstraint cnt1;
+    JointTwoLimitsConstraint cnt2;
+    JointThreeLimitsConstraint cnt3;
     std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function1 = cnt1;
     std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function2 = cnt2;
     std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function3 = cnt3;

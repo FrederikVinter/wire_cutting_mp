@@ -41,8 +41,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 
 static const double LONGEST_VALID_SEGMENT_FRACTION_DEFAULT = 0.01;
 
-namespace tesseract_planning
-{
+
 TrajOptWireCuttingCompositeProfile::TrajOptWireCuttingCompositeProfile(const tinyxml2::XMLElement& xml_element)
 {
   const tinyxml2::XMLElement* contact_test_type_element = xml_element.FirstChildElement("ContactTestType");
@@ -471,4 +470,3 @@ void TrajOptWireCuttingCompositeProfile::addAvoidSingularity(trajopt::ProblemCon
   pci.cost_infos.push_back(ti);
 }
 
-}  // namespace tesseract_planning

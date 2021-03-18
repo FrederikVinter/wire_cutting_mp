@@ -31,7 +31,7 @@ using namespace tesseract_planning;
 class WireCuttingProblemGenerator
 {
 public:
-    WireCuttingProblemGenerator(const ros::NodeHandle& nh);
+    WireCuttingProblemGenerator();
     
     ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& cartesian_targets);
     ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end);

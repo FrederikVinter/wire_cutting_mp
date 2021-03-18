@@ -42,8 +42,8 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 %shared_ptr(tesseract_planning::TrajOptWireCuttingCompositeProfile)
 #endif  // SWIG
 
-namespace tesseract_planning
-{
+using namespace tesseract_planning;
+
 class TrajOptWireCuttingCompositeProfile : public TrajOptCompositeProfile
 {
 public:
@@ -165,6 +165,6 @@ protected:
                          Eigen::VectorXd& coeff,
                          std::size_t& length);
 };
-}  // namespace tesseract_planning
+
 
 #endif  // TESSERACT_MOTION_PLANNERS_TRAJOPT_DEFAULT_COMPOSITE_PROFILE_H

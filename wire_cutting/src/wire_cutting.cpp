@@ -217,13 +217,24 @@ bool WireCutting::run()
   ProcessPlanningServer planning_server_freespace(env_freespace,1,5);
   planning_server_freespace.loadDefaultProcessPlanners();
 
-  auto trajopt_composite_profile = std::make_shared<tesseract_planning::TrajOptWireCuttingCompositeProfile>();
-  trajopt_composite_profile->collision_constraint_config.enabled = false;
-  trajopt_composite_profile->collision_cost_config.enabled = true;
-  trajopt_composite_profile->collision_cost_config.safety_margin = 0.080;
-  trajopt_composite_profile->collision_cost_config.type = trajopt::CollisionEvaluatorType::SINGLE_TIMESTEP;
-  trajopt_composite_profile->collision_cost_config.coeff = 1; 
+  // Load plan profile
+  tinyxml2::XMLDocument xml_plan_cut;
+  std::string plan_cut_path = ros::package::getPath("wire_cutting") + "/planners/plan_cut_profile.xml";
+  xml_plan_cut.LoadFile(plan_cut_path.c_str());
+  XMLElement* planElement = xml_plan_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptPlanProfile");
+  
+  auto plan_profile_cut = std::make_shared<TrajOptWireCuttingPlanProfile>(*planElement);
+  plan_profile_cut->addFourBarLinkageConstraints();
 
+  // Load composite profile
+  tinyxml2::XMLDocument xml_composite_cut;
+  std::string composite_cut_path = ros::package::getPath("wire_cutting") + "/planners/composite_cut_profile.xml";
+  xml_composite_cut.LoadFile(composite_cut_path.c_str());
+  XMLElement* compositeElement = xml_composite_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptCompositeProfile");
+  
+  auto trajopt_composite_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement);
+
+  // Solver profile
   auto trajopt_solver_profile = std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
   trajopt_solver_profile->convex_solver = sco::ModelType::OSQP;
   trajopt_solver_profile->opt_info.max_iter = 200;
@@ -232,32 +243,18 @@ bool WireCutting::run()
   trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
   
 
-  WireCuttingProblemGenerator problem_generator(nh_);
-  problem_generator.m_env_cut = env_;
-
   // Add profiles to Dictionary
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptCompositeProfile>("DEFAULT",
                                                                                          trajopt_composite_profile);
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("DEFAULT",
                                                                                       trajopt_solver_profile);
   
-  planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", problem_generator.m_plan_cut);
+  planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", plan_profile_cut);
   
 
-  auto ompl_profile = std::make_shared<tesseract_planning::OMPLDefaultPlanProfile>();
-  auto ompl_planner_config = std::make_shared<tesseract_planning::RRTConnectConfigurator>();
-  ompl_planner_config->range = 10;
-  ompl_profile->planning_time = 10;
-  ompl_profile->planners = { ompl_planner_config, ompl_planner_config };
-
-  // Add profile to Dictionary
-  planning_server_freespace.getProfiles()->addProfile<tesseract_planning::OMPLPlanProfile>("FREESPACE", ompl_profile);
-
-
-  plotter->waitForInput();
+  WireCuttingProblemGenerator problem_generator;
   // Generate cut requests from tool poses
   std::size_t segments = tool_poses.size();
-   std::cout << "Number of segments: " << segments << std::endl;
   std::vector<ProcessPlanningRequest> cut_requests(segments);
   for(std::size_t i = 0; i < segments; i++)
     cut_requests[i] = problem_generator.construct_request_cut(tool_poses[i]);
@@ -290,8 +287,6 @@ bool WireCutting::run()
     JointState first = trajectories[i].front();
 
     p2p_requests.push_back(problem_generator.construct_request_p2p(last, first));
-
-    env_freespace->setState(joint_names, last.position);
   }
 
   plotter->waitForInput();
@@ -335,16 +330,20 @@ bool WireCutting::run()
     plotter->plotTrajectory(combined_trajectory, env_->getStateSolver());
   }
 
+
   /*tinyxml2::XMLDocument xmlDoc;
 
   XMLNode * pRoot = xmlDoc.NewElement("Instructions");    // Creat root element
   xmlDoc.InsertFirstChild(pRoot);                 // Insert element
 
-  XMLElement * pResults = response.results->toXML(xmlDoc);
+  XMLElement* pResults = trajopt_composite_profile->toXML(xmlDoc);
+  //XMLElement * pResults = response.results->toXML(xmlDoc);
   pRoot->InsertEndChild(pResults);                // insert element as child
 
   const char* fileName = "/home/frederik/ws_tesseract_wirecut/trajopt_results.xml";
   tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);*/
+
+
 
   ROS_INFO("Final trajectory is collision free");
   return true;

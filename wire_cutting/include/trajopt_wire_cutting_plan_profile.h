@@ -6,6 +6,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
 #include <trajopt_sco/modeling_utils.hpp>
 #include <Eigen/Geometry>
 TESSERACT_COMMON_IGNORE_WARNINGS_POP
+#include "four_bar_linkage_constraint.h"
 
 #include <tesseract_command_language/cartesian_waypoint.h>
 #include <tesseract_command_language/joint_waypoint.h>
@@ -27,7 +28,8 @@ public:
   TrajOptWireCuttingPlanProfile(TrajOptWireCuttingPlanProfile&&) = default;
   TrajOptWireCuttingPlanProfile& operator=(TrajOptWireCuttingPlanProfile&&) = default;
 
-  Eigen::VectorXd cartesian_coeff{ Eigen::VectorXd::Constant(1, 1, 5) };
+  Eigen::VectorXd cart_coeff_cnt{ Eigen::VectorXd::Constant(6, 1, 5) };
+  Eigen::VectorXd cart_coeff_cost{ Eigen::VectorXd::Constant(6, 1, 0) };
   Eigen::VectorXd joint_coeff{ Eigen::VectorXd::Constant(1, 1, 5) };
   trajopt::TermType term_type{ trajopt::TermType::TT_CNT };
 
@@ -65,6 +67,8 @@ public:
              const ManipulatorInfo& manip_info,
              const std::vector<std::string>& active_links,
              int index) const override;
+
+  void addFourBarLinkageConstraints();
 
   tinyxml2::XMLElement* toXML(tinyxml2::XMLDocument& doc) const override;
 

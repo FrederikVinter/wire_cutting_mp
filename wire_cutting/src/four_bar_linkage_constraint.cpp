@@ -12,17 +12,6 @@ using namespace Eigen;
 #define DEGREE2RADIAN M_PI/180.0
 #define RADIAN2DEGREE  180.0/M_PI
 
-VectorXd FourBarLinkageConstraint::operator()(const VectorXd& current_joints_pos) const
-{
-    static Eigen::VectorXd violation(1);
-    violation << current_joints_pos(1) + current_joints_pos(2); // joint_p = -joint_2
-    return violation;
-}
-
-void FourBarLinkageConstraint::Plot(const tesseract_visualization::Visualization::Ptr& plotter, const VectorXd& dof_vals)
-{
-
-}
 
 VectorXd JointTwoLimitsConstraint::operator()(const VectorXd& current_joints_pos) const
 {
