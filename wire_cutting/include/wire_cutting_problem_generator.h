@@ -32,11 +32,7 @@ class WireCuttingProblemGenerator
 {
 public:
     WireCuttingProblemGenerator(const ros::NodeHandle& nh);
-    WireCuttingProblemGenerator(Environment::Ptr env_cut,
-                                Environment::Ptr env_free,
-                                TrajOptWireCuttingPlanProfile::Ptr plan_cut,
-                                TrajOptPlanProfile::Ptr plan_free);
-
+    
     ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& cartesian_targets);
     ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end);
 

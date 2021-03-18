@@ -45,15 +45,6 @@ WireCuttingProblemGenerator::WireCuttingProblemGenerator(const ros::NodeHandle& 
     m_plan_cut->constraint_error_functions = constraint_error_functions;
 }
 
-WireCuttingProblemGenerator::WireCuttingProblemGenerator(const Environment::Ptr env_cut,
-                                const Environment::Ptr env_free,
-                                const TrajOptWireCuttingPlanProfile::Ptr plan_cut,
-                                const TrajOptPlanProfile::Ptr plan_free)
-                                : m_env_cut(env_cut),
-                                  m_env_free(env_free),
-                                  m_plan_cut(plan_cut),
-                                  m_plan_free(plan_free) { };
-
 
 ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut(const VectorIsometry3d& tool_poses)
 {
@@ -81,15 +72,17 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut(const 
 
 ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const JointState& start, const JointState& end)
 {
-  CompositeInstruction program("DEFAULT", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
+  std::cout << start.position << std::endl;
+  std::cout << end.position << std::endl;
+  CompositeInstruction program("FREESPACE", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
 
   Waypoint wp_start = StateWaypoint(start.joint_names, start.position);
   Waypoint wp_end = StateWaypoint(start.joint_names, end.position);
 
-  PlanInstruction start_instruction(wp_start, PlanInstructionType::START, "wire_cutting");
+  PlanInstruction start_instruction(wp_start, PlanInstructionType::START);
   program.setStartInstruction(start_instruction);
 
-  PlanInstruction plan_end(wp_end, PlanInstructionType::FREESPACE, "wire_cutting");
+  PlanInstruction plan_end(wp_end, PlanInstructionType::FREESPACE, "FREESPACE");
 
   program.push_back(plan_end);
 

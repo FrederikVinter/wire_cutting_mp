@@ -138,18 +138,29 @@ bool WireCutting::run()
   ResourceLocator::Ptr locator = std::make_shared<tesseract_rosutils::ROSResourceLocator>();
   if (!env_->init<OFKTStateSolver>(urdf_xml_string, srdf_xml_string, locator))
     return false;
- 
+  ROS_INFO("Initialized cut env");
+
+  auto env_freespace = std::make_shared<tesseract_environment::Environment>();
+  if (!env_freespace->init<OFKTStateSolver>(urdf_xml_string_freespace, srdf_xml_string_freespace, locator))
+  {
+    ROS_INFO("Error initializing freespace environment");
+    return false;
+  } 
+  ROS_INFO("Intialized freespace env");
+
+
   // Create monitor
   monitor_ = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_, EXAMPLE_MONITOR_NAMESPACE);
   if (rviz_)
     monitor_->startPublishingEnvironment(tesseract_monitoring::EnvironmentMonitor::UPDATE_ENVIRONMENT);
-
+    
+  auto monitor_freespace = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_freespace, "Freespace");
   // Get manipulator
-  tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
+  /*tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
   {  // Need to lock monitor for read
     auto lock = monitor_->lockEnvironmentRead();
     fwd_kin = monitor_->getEnvironment()->getManipulatorManager()->getFwdKinematicSolver("manipulator");
-  }
+  }*/
 
   // Create plotting tool
   ROSPlottingPtr plotter = std::make_shared<ROSPlotting>(monitor_->getSceneGraph()->getRoot());
@@ -157,10 +168,12 @@ bool WireCutting::run()
     plotter->waitForConnection();
 
   Eigen::VectorXd pos(3), size(3);
-  pos << 2.4, -2.4, 0.8;
+  pos << 0, 1.8, -0.5;
   size << 0.2, 0.3, 0.4;
   Command::Ptr cmd = addBoundingBox(pos, size);
   if (!monitor_->applyCommand(*cmd))
+    return false;
+  if (!monitor_freespace->applyCommand(*cmd))
     return false;
   
   // Set the robot initial state
@@ -188,8 +201,10 @@ bool WireCutting::run()
   SceneGraph::Ptr g1 = g->clone();*/
 
   env_->setState(joint_names, joint_pos);
-  //tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
-  std::vector<tesseract_common::VectorIsometry3d> tool_poses = loadToolPosesFromPrg("test");
+  tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
+  std::vector<tesseract_common::VectorIsometry3d> tool_poses;// = loadToolPosesFromPrg("test");
+  tool_poses.push_back(temp_poses);
+  tool_poses.push_back(temp_poses);
   assert(!tool_poses.empty());
   //tool_poses.push_back(temp_poses);
 
@@ -198,6 +213,9 @@ bool WireCutting::run()
   // Create Process Planning Server
   ProcessPlanningServer planning_server(std::make_shared<ROSProcessEnvironmentCache>(monitor_), 5);
   planning_server.loadDefaultProcessPlanners();
+
+  ProcessPlanningServer planning_server_freespace(env_freespace,1,5);
+  planning_server_freespace.loadDefaultProcessPlanners();
 
   auto trajopt_composite_profile = std::make_shared<tesseract_planning::TrajOptWireCuttingCompositeProfile>();
   trajopt_composite_profile->collision_constraint_config.enabled = false;
@@ -212,6 +230,7 @@ bool WireCutting::run()
   trajopt_solver_profile->opt_info.min_approx_improve = 1e-3;
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
   trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
+  
 
   WireCuttingProblemGenerator problem_generator(nh_);
   problem_generator.m_env_cut = env_;
@@ -224,6 +243,17 @@ bool WireCutting::run()
   
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", problem_generator.m_plan_cut);
   
+
+  auto ompl_profile = std::make_shared<tesseract_planning::OMPLDefaultPlanProfile>();
+  auto ompl_planner_config = std::make_shared<tesseract_planning::RRTConnectConfigurator>();
+  ompl_planner_config->range = 10;
+  ompl_profile->planning_time = 10;
+  ompl_profile->planners = { ompl_planner_config, ompl_planner_config };
+
+  // Add profile to Dictionary
+  planning_server_freespace.getProfiles()->addProfile<tesseract_planning::OMPLPlanProfile>("FREESPACE", ompl_profile);
+
+
   plotter->waitForInput();
   // Generate cut requests from tool poses
   std::size_t segments = tool_poses.size();
@@ -260,6 +290,8 @@ bool WireCutting::run()
     JointState first = trajectories[i].front();
 
     p2p_requests.push_back(problem_generator.construct_request_p2p(last, first));
+
+    env_freespace->setState(joint_names, last.position);
   }
 
   plotter->waitForInput();
@@ -268,8 +300,9 @@ bool WireCutting::run()
   std::size_t p2p_moves = p2p_requests.size();
   std::vector<ProcessPlanningFuture> p2p_responses(p2p_moves);
   for(std::size_t i = 0; i < p2p_moves; i++)
-    p2p_responses[i] = planning_server.run(p2p_requests[i]);
-  planning_server.waitForAll();
+    p2p_responses[i] = planning_server_freespace.run(p2p_requests[i]);  
+
+  planning_server_freespace.waitForAll();
 
   plotter->waitForInput();
   ROS_INFO("Combine toolpath and trajectory for cut and p2p");
