@@ -66,6 +66,93 @@ std::vector<tesseract_common::VectorIsometry3d> loadToolPosesFromPrg(const std::
   return path;
 }
 
+
+PathData loadToolPosesCFR(std::string file)
+{
+  PathData pathData;
+  tesseract_common::VectorIsometry3d segment;
+
+  std::ifstream indata;                     // input file
+
+  // You could load your parts from anywhere, but we are transporting them with
+  std::string filename = ros::package::getPath("wire_cutting") + "/config/" + file;
+  indata.open(filename);
+  assert(indata.is_open());
+  
+  std::string line;
+  while (std::getline(indata, line))
+  {
+    std::stringstream lineStream(line);
+    std::string cell;
+    Eigen::Matrix<double, 7, 1> xyzWXYZ;
+
+
+    std::getline(lineStream, cell, ',');
+    
+      if(cell == "bbox")
+      {
+        pathData.has_bbox = true;
+        int i = 0;
+        while (std::getline(lineStream, cell, ','))
+        {
+          assert(i < 6);
+          if(i < 3)
+            pathData.bbox_pos(i) = (std::stod(cell)/1000);
+          else
+            pathData.bbox_size(i-3) = std::stod(cell)/1000;
+          i++;
+        }
+      }
+      else if(cell == "p2p")
+      {
+        if(!segment.empty())
+          pathData.path.push_back(segment);
+        segment.clear();
+      }
+      else if(cell == "cut")
+      {
+        int i = 0;
+        while (std::getline(lineStream, cell, ',') && i < xyzWXYZ.size())
+        {
+          assert(i < 7);
+          xyzWXYZ(i) = std::stod(cell);
+          i++;
+        }
+        //std::cout << "Pose: " << std::endl << xyzWXYZ << std::endl;
+        Eigen::Isometry3d pose = Eigen::Isometry3d::Identity() * Eigen::Translation3d(xyzWXYZ(0), xyzWXYZ(1), xyzWXYZ(2)) *
+                                   Eigen::Quaterniond(xyzWXYZ(3), xyzWXYZ(4), xyzWXYZ(5), xyzWXYZ(6));
+   
+        segment.push_back(pose);
+      }
+      else
+      {
+        std::cout << "Invalid type: " << cell << std::endl;
+      }
+  }
+  indata.close();
+
+  // Last segment
+  if(!segment.empty())
+  {
+    pathData.path.push_back(segment);
+    segment.clear();
+  }
+
+  // Tesseract uses pos as middle of box
+  if(pathData.has_bbox)
+  {
+    pathData.bbox_pos(0) = pathData.bbox_pos(0) + pathData.bbox_size(0)/2;
+    pathData.bbox_pos(1) = pathData.bbox_pos(1) + pathData.bbox_size(1)/2;
+    pathData.bbox_pos(2) = pathData.bbox_pos(2) + pathData.bbox_size(2)/2;
+  }
+
+  std::cout << "PATH SIZE: " << pathData.path.size() << std::endl;
+  for(auto seg : pathData.path)
+    std::cout << seg.size() << std::endl;
+
+  return pathData;
+}
+
 tesseract_common::VectorIsometry3d loadToolPoses()
 {
   tesseract_common::VectorIsometry3d path;  // results

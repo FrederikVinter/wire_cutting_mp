@@ -167,14 +167,7 @@ bool WireCutting::run()
   if (rviz_)
     plotter->waitForConnection();
 
-  Eigen::VectorXd pos(3), size(3);
-  pos << 0, 1.8, -0.5;
-  size << 0.2, 0.3, 0.4;
-  Command::Ptr cmd = addBoundingBox(pos, size);
-  if (!monitor_->applyCommand(*cmd))
-    return false;
-  if (!monitor_freespace->applyCommand(*cmd))
-    return false;
+
   
   // Set the robot initial state
   std::vector<std::string> joint_names;
@@ -201,12 +194,26 @@ bool WireCutting::run()
   SceneGraph::Ptr g1 = g->clone();*/
 
   env_->setState(joint_names, joint_pos);
-  tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
+  //tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
   std::vector<tesseract_common::VectorIsometry3d> tool_poses;// = loadToolPosesFromPrg("test");
-  tool_poses.push_back(temp_poses);
-  tool_poses.push_back(temp_poses);
-  assert(!tool_poses.empty());
+  PathData pathData = loadToolPosesCFR("HardProb.txt");
+  tool_poses = pathData.path;
   //tool_poses.push_back(temp_poses);
+  //tool_poses.push_back(temp_poses);
+  assert(!tool_poses.empty());
+
+  /*Eigen::VectorXd pos(3), size(3);
+  pos << 0, 1.8, -0.5;
+  size << 0.2, 0.3, 0.4;*/
+  if(pathData.has_bbox)
+  {
+    std::cout << "Adding bbox with pos: " << std::endl << pathData.bbox_pos << std::endl << "size: " << std::endl << pathData.bbox_size << std::endl;
+    Command::Ptr cmd = addBoundingBox(pathData.bbox_pos, pathData.bbox_size);
+    if (!monitor_->applyCommand(*cmd))
+      return false;
+    if (!monitor_freespace->applyCommand(*cmd))
+      return false;
+  }
 
   plotter->waitForInput();
 
@@ -224,23 +231,26 @@ bool WireCutting::run()
   XMLElement* planElement = xml_plan_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptPlanProfile");
   
   auto plan_profile_cut = std::make_shared<TrajOptWireCuttingPlanProfile>(*planElement);
-  plan_profile_cut->addFourBarLinkageConstraints();
+  std::cout << "Plan costs: " << std::endl << plan_profile_cut->cart_coeff_cost << std::endl;
+  std::cout << "Plan cnt: " << std::endl << plan_profile_cut->cart_coeff_cnt << std::endl;
+  //plan_profile_cut->addFourBarLinkageConstraints();
+
 
   // Load composite profile
   tinyxml2::XMLDocument xml_composite_cut;
   std::string composite_cut_path = ros::package::getPath("wire_cutting") + "/planners/composite_cut_profile.xml";
   xml_composite_cut.LoadFile(composite_cut_path.c_str());
   XMLElement* compositeElement = xml_composite_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptCompositeProfile");
-  
   auto trajopt_composite_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement);
+  trajopt_composite_profile->constrain_velocity = false;
 
   // Solver profile
   auto trajopt_solver_profile = std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
   trajopt_solver_profile->convex_solver = sco::ModelType::OSQP;
-  trajopt_solver_profile->opt_info.max_iter = 200;
+  trajopt_solver_profile->opt_info.max_iter = 500;
   trajopt_solver_profile->opt_info.min_approx_improve = 1e-3;
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
-  trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
+  //trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
   
 
   // Add profiles to Dictionary
@@ -248,9 +258,9 @@ bool WireCutting::run()
                                                                                          trajopt_composite_profile);
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("DEFAULT",
                                                                                       trajopt_solver_profile);
-  
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", plan_profile_cut);
   
+  plotter->waitForInput();
 
   WireCuttingProblemGenerator problem_generator;
   // Generate cut requests from tool poses
@@ -263,8 +273,12 @@ bool WireCutting::run()
   // Solve process plans for cuts
   std::vector<ProcessPlanningFuture> cut_responses(segments);
   for(std::size_t i = 0; i < segments; i++)
+  {
     cut_responses[i] = planning_server.run(cut_requests[i]);
-  planning_server.waitForAll();
+    planning_server.waitForAll();
+    std::cout << "path number: " << i << " finished!" << std::endl;
+    plotter->waitForInput();
+  }
 
   // Cast responses to composite instructions
   std::vector<const CompositeInstruction*> cis(segments);
