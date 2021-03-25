@@ -29,6 +29,8 @@ public:
 private:
   ros::NodeHandle nh_;
   tesseract_environment::Command::Ptr addBoundingBox(Eigen::VectorXd position, Eigen::VectorXd size);
+
+  bool iterationDebug = true;
 };
 
 }  // namespace tesseract_ros_examples
