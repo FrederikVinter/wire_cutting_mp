@@ -286,6 +286,7 @@ bool WireCutting::run()
   trajopt_solver_profile->opt_info.min_approx_improve = 1e-3;
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
   trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
+  trajopt_solver_profile->opt_info.log_results = true;
   
   // Add profiles to Dictionary
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptCompositeProfile>("DEFAULT",
@@ -301,7 +302,7 @@ bool WireCutting::run()
   std::size_t segments = tool_poses.size();
   std::vector<ProcessPlanningRequest> cut_requests(segments);
   for(std::size_t i = 0; i < segments; i++)
-    cut_requests[i] = problem_generator.construct_request_cut_descartes(tool_poses[i]);
+    cut_requests[i] = problem_generator.construct_request_cut(tool_poses[i]);
 
 
   // Solve process plans for cuts
@@ -311,10 +312,10 @@ bool WireCutting::run()
   planning_server.waitForAll();
 
   // // Plot optimization iterations
-  // if(iterationDebug) {    
-  //   ROS_INFO("Plotting path iterations");  
-  //   plotIterations(env_, plotter);
-  // }
+  if(iterationDebug) {    
+     ROS_INFO("Plotting path iterations");  
+     plotIterations(env_, plotter);
+  }
 
   // Cast responses to composite instructions
   std::vector<const CompositeInstruction*> cis(segments);

@@ -115,7 +115,7 @@ std::vector<std::vector<Eigen::VectorXd>> loadOptimizationResults()
     std::ifstream indata;      // input file
 
     // std::string filename = ros::package::getPath("wire_cutting") + "/config/trajopt_vars.log";
-    std::string filename = "/home/jonathan/.ros/trajopt_vars.log";
+    std::string filename = "/tmp/trajopt_vars.log";
 
     indata.open(filename);
     assert(indata.is_open());
