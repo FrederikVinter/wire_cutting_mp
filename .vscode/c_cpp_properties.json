@@ -91,7 +91,7 @@
         "/home/frederik/ws_tesseract/src/trajopt/trajopt_utils/src/**",
         "/home/frederik/ws_tesseract/src/trajopt/trajopt_ext/vhacd/src/**",
         "/home/frederik/ws_tesseract_wirecut/src/wire_cutting/src/**",
-        "/usr/include/**"
+        "/usr/include/**",
 
         "/home/frederik/ws_tesseract_wirecut/src/wire_cutting/src/**"
 

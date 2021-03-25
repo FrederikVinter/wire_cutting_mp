@@ -162,7 +162,7 @@ bool WireCutting::run()
   auto monitor_freespace = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_freespace, "Freespace");
 
  // Get manipulator
-  tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
+  /*tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
   tesseract_kinematics::InverseKinematics::Ptr inv_kin;
   {  // Need to lock monitor for read
     auto lock = monitor_->lockEnvironmentRead();
@@ -192,7 +192,7 @@ bool WireCutting::run()
 
     inv_kin = monitor_->getEnvironment()->getManipulatorManager()->getInvKinematicSolver("manipulator");
     std::cout << "Using inv kin solver: " << inv_kin->getSolverName() << "\n";
-  }
+  }*/
 
   // Create plotting tool
   ROSPlottingPtr plotter = std::make_shared<ROSPlotting>(monitor_->getSceneGraph()->getRoot());
@@ -226,11 +226,11 @@ bool WireCutting::run()
   SceneGraph::Ptr g1 = g->clone();*/
 
   env_->setState(joint_names, joint_pos);
-  //tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
-  std::vector<tesseract_common::VectorIsometry3d> tool_poses;// = loadToolPosesFromPrg("test");
+  tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
+  std::vector<tesseract_common::VectorIsometry3d> tool_poses; // = loadToolPoses();
   PathData pathData = loadToolPosesCFR("HardProb.txt");
-  tool_poses = pathData.path;
-  //tool_poses.push_back(temp_poses);
+  //tool_poses = pathData.path;
+  tool_poses.push_back(pathData.path[2]);
   //tool_poses.push_back(temp_poses);
   assert(!tool_poses.empty());
 
@@ -257,7 +257,7 @@ bool WireCutting::run()
   planning_server_freespace.loadDefaultProcessPlanners();
 
   // Create Descartes profile
-  auto descartes_plan_profile = std::make_shared<DescartesDefaultPlanProfileD>();
+  /*auto descartes_plan_profile = std::make_shared<DescartesDefaultPlanProfileD>();
   descartes_plan_profile->enable_collision = false;
   descartes_plan_profile->allow_collision = false;
   descartes_plan_profile->enable_edge_collision = true;
@@ -265,9 +265,9 @@ bool WireCutting::run()
   descartes_plan_profile->target_pose_sampler = [](const Eigen::Isometry3d& tool_pose) {
     // return tesseract_planning::sampleToolAxis(tool_pose, 60 * M_PI * 180.0, Eigen::Vector3d(0, 1, 0)); // sample around Y-axis
     return tesseract_planning::sampleToolYAxis(tool_pose, M_PI);
-  };
+  };*/
 
-  planning_server.getProfiles()->addProfile<tesseract_planning::DescartesDefaultPlanProfileD>("DESCARTES", descartes_plan_profile);
+  //planning_server.getProfiles()->addProfile<tesseract_planning::DescartesDefaultPlanProfileD>("DESCARTES", descartes_plan_profile);
 
   // Load plan profile
   tinyxml2::XMLDocument xml_plan_cut;
@@ -296,7 +296,7 @@ bool WireCutting::run()
   trajopt_solver_profile->opt_info.min_approx_improve = 1e-3;
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
 
-  trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
+  //trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
   trajopt_solver_profile->opt_info.log_results = true;
   
 

@@ -99,10 +99,10 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const 
   Waypoint wp_start = StateWaypoint(start.joint_names, start.position);
   Waypoint wp_end = StateWaypoint(start.joint_names, end.position);
 
-  PlanInstruction start_instruction(wp_start, PlanInstructionType::START, "DESCARTES");
+  PlanInstruction start_instruction(wp_start, PlanInstructionType::START, "FREESPACE");
   program.setStartInstruction(start_instruction);
 
-  PlanInstruction plan_end(wp_end, PlanInstructionType::FREESPACE, "DESCARTES");
+  PlanInstruction plan_end(wp_end, PlanInstructionType::FREESPACE, "FREESPACE");
 
   program.push_back(plan_end);
 
