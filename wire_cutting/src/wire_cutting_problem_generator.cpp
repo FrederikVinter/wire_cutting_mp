@@ -59,7 +59,7 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut(const 
 ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const JointState& start, const JointState& end)
 {
   std::cout << start.position << std::endl;
-  std::cout << end.position << std::endl;
+  std::cout << end.position << std::endl << std::endl;
   CompositeInstruction program("FREESPACE", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
 
   Waypoint wp_start = StateWaypoint(start.joint_names, start.position);

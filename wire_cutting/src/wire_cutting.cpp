@@ -251,8 +251,8 @@ bool WireCutting::run()
   trajopt_solver_profile->opt_info.min_approx_improve = 1e-3;
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
   //trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
-  
 
+ 
   // Add profiles to Dictionary
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptCompositeProfile>("DEFAULT",
                                                                                          trajopt_composite_profile);
