@@ -109,6 +109,79 @@ tesseract_common::VectorIsometry3d loadToolPoses()
   return path;
 }
 
+std::vector<std::vector<Eigen::VectorXd>> loadOptimizationResults()
+{
+    std::vector<std::vector<Eigen::VectorXd>> vector_of_paths;  // results
+    std::ifstream indata;      // input file
+
+    // std::string filename = ros::package::getPath("wire_cutting") + "/config/trajopt_vars.log";
+    std::string filename = "/home/jonathan/.ros/trajopt_vars.log";
+
+    indata.open(filename);
+    assert(indata.is_open());
+
+    std::string line;
+    int lnum = 0;
+    while (std::getline(indata, line))
+    {
+        std::vector<Eigen::VectorXd> path;
+        Eigen::VectorXd joint_pos(6);
+        ++lnum;
+        if (lnum < 2) // skip first line
+            continue;
+
+        std::stringstream lineStream(line);
+        std::string cell;
+        int i = -2;
+        while (std::getline(lineStream, cell, ','))
+        {
+            ++i;
+            if (i == -1)
+                continue;
+            if (i != 0 && i % 6 == 0) {
+                path.push_back(joint_pos);
+                joint_pos.fill(0);
+            }
+            joint_pos(i%6) = std::stod(cell);
+        }
+        vector_of_paths.push_back(path);
+    }
+    indata.close();
+
+    return vector_of_paths;
+}
+
+void plotIterations(const tesseract_environment::Environment::Ptr& env, const tesseract_rosutils::ROSPlottingPtr& plotter) {
+    std::vector<std::vector<Eigen::VectorXd>> opt_joint_results = loadOptimizationResults();
+    for(size_t i = 0; i < opt_joint_results.size(); i++) {
+
+      // Calculate poses
+      auto kin = env->getManipulatorManager()->getFwdKinematicSolver("manipulator");
+      tesseract_common::VectorIsometry3d opt_poses;
+      for (size_t j = 0; j < opt_joint_results[i].size(); ++j) {
+
+        std::cout << "JOINT POSE " << j << "\n" << opt_joint_results[i][j] << "\n";
+
+        Eigen::Isometry3d opt_pose;
+        kin->calcFwdKin(opt_pose, opt_joint_results[i][j]);
+        opt_poses.push_back(opt_pose);
+      }
+
+      // Create toolpath
+      tesseract_common::Toolpath opt_toolpath;
+      opt_toolpath.push_back(opt_poses);
+
+      // Plot toolpath
+      if (plotter != nullptr && plotter->isConnected())
+      {
+        std::cout << "Iteration: " << i << "\n";
+        plotter->plotMarker(tesseract_visualization::ToolpathMarker(opt_toolpath));
+        plotter->waitForInput();
+        plotter->clear();
+      }
+    }
+}
+
 trajopt::TermInfo::Ptr createVelocityTermInfo(double max_displacement,
                                                 int start_index,
                                                 int end_index,

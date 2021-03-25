@@ -57,6 +57,12 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <tesseract_visualization/markers/toolpath_marker.h>
 #include <tesseract_motion_planners/ompl/profile/ompl_default_plan_profile.h>
 
+#include <tesseract_motion_planners/descartes/descartes_collision.h>
+#include <tesseract_motion_planners/descartes/descartes_motion_planner.h>
+#include <tesseract_motion_planners/descartes/descartes_utils.h>
+#include <tesseract_motion_planners/descartes/problem_generators/default_problem_generator.h>
+#include <tesseract_motion_planners/descartes/profile/descartes_default_plan_profile.h>
+
 #include <tinyxml2.h>
 
 using namespace tesseract_environment;
@@ -82,7 +88,6 @@ namespace tesseract_ros_examples
 
 tesseract_environment::Command::Ptr WireCutting::addBoundingBox(Eigen::VectorXd position, Eigen::VectorXd size)
 {
-  // Add sphere to environment
   auto link_bounding_box = std::make_shared<Link>("bounding_box");
 
   Visual::Ptr visual = std::make_shared<Visual>();
@@ -155,12 +160,39 @@ bool WireCutting::run()
     monitor_->startPublishingEnvironment(tesseract_monitoring::EnvironmentMonitor::UPDATE_ENVIRONMENT);
     
   auto monitor_freespace = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_freespace, "Freespace");
-  // Get manipulator
-  /*tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
+
+ // Get manipulator
+  tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
+  tesseract_kinematics::InverseKinematics::Ptr inv_kin;
   {  // Need to lock monitor for read
     auto lock = monitor_->lockEnvironmentRead();
     fwd_kin = monitor_->getEnvironment()->getManipulatorManager()->getFwdKinematicSolver("manipulator");
-  }*/
+
+    // Get group names
+    std::vector<std::string> group_names = monitor_->getEnvironment()->getManipulatorManager()->getGroupNames();
+    std::cout << "Group names: " << "\n";
+    for (size_t i = 0; i < group_names.size(); i++)
+      std::cout << group_names[i] << "\n";
+
+    // Add OPW as inv kin solver
+    OPWKinematicParameters p;
+    p.a1 = 0.240;
+    p.a2 = -0.225;
+    p.b =  0.000;
+    p.c1 = 0.800;
+    p.c2 = 1.05;
+    p.c3 = 1.725;
+    p.c4 = 0.145;
+
+    p.offsets[2] = -M_PI / 2.0;
+
+    if (monitor_->getEnvironment()->getManipulatorManager()->addOPWKinematicsSolver("manipulator", p)) {
+      ROS_INFO("Added OPW as inv kin solver");
+    }
+
+    inv_kin = monitor_->getEnvironment()->getManipulatorManager()->getInvKinematicSolver("manipulator");
+    std::cout << "Using inv kin solver: " << inv_kin->getSolverName() << "\n";
+  }
 
   // Create plotting tool
   ROSPlottingPtr plotter = std::make_shared<ROSPlotting>(monitor_->getSceneGraph()->getRoot());
@@ -217,6 +249,19 @@ bool WireCutting::run()
   ProcessPlanningServer planning_server_freespace(env_freespace,1,5);
   planning_server_freespace.loadDefaultProcessPlanners();
 
+  // Create Descartes profile
+  auto descartes_plan_profile = std::make_shared<DescartesDefaultPlanProfileD>();
+  descartes_plan_profile->enable_collision = false;
+  descartes_plan_profile->allow_collision = false;
+  descartes_plan_profile->enable_edge_collision = true;
+  descartes_plan_profile->debug = true;
+  descartes_plan_profile->target_pose_sampler = [](const Eigen::Isometry3d& tool_pose) {
+    // return tesseract_planning::sampleToolAxis(tool_pose, 60 * M_PI * 180.0, Eigen::Vector3d(0, 1, 0)); // sample around Y-axis
+    return tesseract_planning::sampleToolYAxis(tool_pose, M_PI);
+  };
+
+  planning_server.getProfiles()->addProfile<tesseract_planning::DescartesDefaultPlanProfileD>("DESCARTES", descartes_plan_profile);
+
   // Load plan profile
   tinyxml2::XMLDocument xml_plan_cut;
   std::string plan_cut_path = ros::package::getPath("wire_cutting") + "/planners/plan_cut_profile.xml";
@@ -242,7 +287,6 @@ bool WireCutting::run()
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
   trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
   
-
   // Add profiles to Dictionary
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptCompositeProfile>("DEFAULT",
                                                                                          trajopt_composite_profile);
@@ -257,7 +301,7 @@ bool WireCutting::run()
   std::size_t segments = tool_poses.size();
   std::vector<ProcessPlanningRequest> cut_requests(segments);
   for(std::size_t i = 0; i < segments; i++)
-    cut_requests[i] = problem_generator.construct_request_cut(tool_poses[i]);
+    cut_requests[i] = problem_generator.construct_request_cut_descartes(tool_poses[i]);
 
 
   // Solve process plans for cuts
@@ -265,6 +309,12 @@ bool WireCutting::run()
   for(std::size_t i = 0; i < segments; i++)
     cut_responses[i] = planning_server.run(cut_requests[i]);
   planning_server.waitForAll();
+
+  // // Plot optimization iterations
+  // if(iterationDebug) {    
+  //   ROS_INFO("Plotting path iterations");  
+  //   plotIterations(env_, plotter);
+  // }
 
   // Cast responses to composite instructions
   std::vector<const CompositeInstruction*> cis(segments);
@@ -298,6 +348,12 @@ bool WireCutting::run()
     p2p_responses[i] = planning_server_freespace.run(p2p_requests[i]);  
 
   planning_server_freespace.waitForAll();
+
+  // // Plot optimization iterations
+  // if(iterationDebug) {    
+  //   ROS_INFO("Plotting path iterations");  
+  //   plotIterations(env_, plotter);
+  // }
 
   plotter->waitForInput();
   ROS_INFO("Combine toolpath and trajectory for cut and p2p");

@@ -33,7 +33,8 @@ class WireCuttingProblemGenerator
 public:
     WireCuttingProblemGenerator();
     
-    ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& cartesian_targets);
+    ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& tool_poses);
+    ProcessPlanningRequest construct_request_cut_descartes(const VectorIsometry3d& tool_poses);
     ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end);
 
     TrajOptWireCuttingPlanProfile::Ptr m_plan_cut;
