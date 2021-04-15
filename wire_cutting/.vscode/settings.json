@@ -1,6 +1,7 @@
 {
     "python.autoComplete.extraPaths": [
-        "/home/frederik/ws_tesseract/devel/lib/python3/dist-packages",
-        "/opt/ros/noetic/lib/python3/dist-packages"
-    ]
+        "/home/jonathan/projects/catkin_ws/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages"
+    ],
+    "cmake.configureOnOpen": false
 }

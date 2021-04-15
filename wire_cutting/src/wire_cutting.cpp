@@ -161,8 +161,8 @@ bool WireCutting::run()
     
   auto monitor_freespace = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_freespace, "Freespace");
 
- // Get manipulator
-  /*tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
+ //Get manipulator
+  tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
   tesseract_kinematics::InverseKinematics::Ptr inv_kin;
   {  // Need to lock monitor for read
     auto lock = monitor_->lockEnvironmentRead();
@@ -182,24 +182,48 @@ bool WireCutting::run()
     p.c1 = 0.800;
     p.c2 = 1.05;
     p.c3 = 1.725;
-    p.c4 = 0.145;
+    p.c4 = 0.145 + 1.861;
 
     p.offsets[2] = -M_PI / 2.0;
 
-    if (monitor_->getEnvironment()->getManipulatorManager()->addOPWKinematicsSolver("manipulator", p)) {
-      ROS_INFO("Added OPW as inv kin solver");
-    }
+    // if (monitor_->getEnvironment()->getManipulatorManager()->addOPWKinematicsSolver("manipulator", p)) {
+    //   ROS_INFO("Added OPW as inv kin solver");
+    // }
 
+    std::cout << "Has group TCP: " << monitor_->getEnvironment()->getManipulatorManager()->hasGroupTCP("manipulator", "carbon_hotwire") << "\n";
     inv_kin = monitor_->getEnvironment()->getManipulatorManager()->getInvKinematicSolver("manipulator");
+
     std::cout << "Using inv kin solver: " << inv_kin->getSolverName() << "\n";
-  }*/
+
+    ManipulatorInfo manip_info("manipulator");
+    std::cout << "TCP empty: " <<  manip_info.empty() << "\n";
+
+    // Save manip info
+    tinyxml2::XMLDocument xmlDoc;
+    XMLNode * pRoot = xmlDoc.NewElement("ManipInfo");    // Creat root element
+    xmlDoc.InsertFirstChild(pRoot);                 // Insert element
+
+    XMLElement* pResults = manip_info.toXML(xmlDoc);
+    // XMLElement * pResults = response.results->toXML(xmlDoc);
+    pRoot->InsertEndChild(pResults);                // insert element as child
+
+    const char* fileName = "/home/jonathan/projects/wirecutting_ws/manipulator_info.xml";
+    tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);
+  }
 
   // Create plotting tool
   ROSPlottingPtr plotter = std::make_shared<ROSPlotting>(monitor_->getSceneGraph()->getRoot());
   if (rviz_)
     plotter->waitForConnection();
 
-
+  // Eigen::VectorXd pos(3), size(3);
+  // pos << 0, 2.2, -0.2;
+  // size << 0.3, 0.8, 0.6;
+  // Command::Ptr cmd = addBoundingBox(pos, size);
+  // if (!monitor_->applyCommand(*cmd))
+  //   return false;
+  // if (!monitor_freespace->applyCommand(*cmd))
+  //   return false;
   
   // Set the robot initial state
   std::vector<std::string> joint_names;
@@ -227,25 +251,24 @@ bool WireCutting::run()
 
   env_->setState(joint_names, joint_pos);
   tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
-  std::vector<tesseract_common::VectorIsometry3d> tool_poses; // = loadToolPoses();
-  PathData pathData = loadToolPosesCFR("HardProb.txt");
-  //tool_poses = pathData.path;
-  tool_poses.push_back(pathData.path[2]);
-  //tool_poses.push_back(temp_poses);
+  std::vector<tesseract_common::VectorIsometry3d> tool_poses;// = loadToolPosesFromPrg("test");
+  tool_poses.push_back(temp_poses);
+  tool_poses.push_back(temp_poses);
   assert(!tool_poses.empty());
+  //tool_poses.push_back(temp_poses);
 
   /*Eigen::VectorXd pos(3), size(3);
   pos << 0, 1.8, -0.5;
   size << 0.2, 0.3, 0.4;*/
-  if(pathData.has_bbox)
-  {
-    std::cout << "Adding bbox with pos: " << std::endl << pathData.bbox_pos << std::endl << "size: " << std::endl << pathData.bbox_size << std::endl;
-    Command::Ptr cmd = addBoundingBox(pathData.bbox_pos, pathData.bbox_size);
-    if (!monitor_->applyCommand(*cmd))
-      return false;
-    if (!monitor_freespace->applyCommand(*cmd))
-      return false;
-  }
+  // if(pathData.has_bbox)
+  // {
+  //   std::cout << "Adding bbox with pos: " << std::endl << pathData.bbox_pos << std::endl << "size: " << std::endl << pathData.bbox_size << std::endl;
+  //   Command::Ptr cmd = addBoundingBox(pathData.bbox_pos, pathData.bbox_size);
+  //   if (!monitor_->applyCommand(*cmd))
+  //     return false;
+  //   if (!monitor_freespace->applyCommand(*cmd))
+  //     return false;
+  // }
 
   plotter->waitForInput();
 
@@ -257,17 +280,17 @@ bool WireCutting::run()
   planning_server_freespace.loadDefaultProcessPlanners();
 
   // Create Descartes profile
-  /*auto descartes_plan_profile = std::make_shared<DescartesDefaultPlanProfileD>();
+  auto descartes_plan_profile = std::make_shared<DescartesDefaultPlanProfileD>();
   descartes_plan_profile->enable_collision = false;
   descartes_plan_profile->allow_collision = false;
   descartes_plan_profile->enable_edge_collision = true;
   descartes_plan_profile->debug = true;
   descartes_plan_profile->target_pose_sampler = [](const Eigen::Isometry3d& tool_pose) {
-    // return tesseract_planning::sampleToolAxis(tool_pose, 60 * M_PI * 180.0, Eigen::Vector3d(0, 1, 0)); // sample around Y-axis
-    return tesseract_planning::sampleToolYAxis(tool_pose, M_PI);
-  };*/
+    return tesseract_planning::sampleToolAxis(tool_pose, 60 * M_PI * 180.0, Eigen::Vector3d(0, 1, 0)); // sample around Y-axis
+    // return tesseract_planning::sampleToolYAxis(tool_pose, M_PI);
+  };
 
-  //planning_server.getProfiles()->addProfile<tesseract_planning::DescartesDefaultPlanProfileD>("DESCARTES", descartes_plan_profile);
+  planning_server.getProfiles()->addProfile<tesseract_planning::DescartesDefaultPlanProfileD>("DESCARTES", descartes_plan_profile);
 
   // Load plan profile
   tinyxml2::XMLDocument xml_plan_cut;
@@ -306,28 +329,56 @@ bool WireCutting::run()
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("DEFAULT",
                                                                                       trajopt_solver_profile);
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", plan_profile_cut);
+
+  planning_server_freespace.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("FREESPACE",
+                                                                                      trajopt_solver_profile);
   
   plotter->waitForInput();
 
   WireCuttingProblemGenerator problem_generator;
+
+  // // Generate cut requests from tool poses
+  // std::size_t segments = tool_poses.size();
+  // std::vector<ProcessPlanningRequest> cut_requests(segments);
+  // for(std::size_t i = 0; i < segments; i++)
+  //   cut_requests[i] = problem_generator.construct_request_cut_descartes(tool_poses[i]);
+
   // Generate cut requests from tool poses
   std::size_t segments = tool_poses.size();
-  std::vector<ProcessPlanningRequest> cut_requests(segments);
+  
+  // Generate seed with descartes
+  std::vector<ProcessPlanningRequest> cut_requests_seed(segments);
   for(std::size_t i = 0; i < segments; i++)
+    cut_requests_seed[i] = problem_generator.construct_request_cut_descartes(tool_poses[i]);
+
+  std::vector<ProcessPlanningFuture> cut_responses_seed(segments);
+  for(std::size_t i = 0; i < segments; i++)
+  {
+    cut_responses_seed[i] = planning_server.run(cut_requests_seed[i]);
+    planning_server.waitForAll();
+    std::cout << "Seed for path number: " << i << " finished!" << std::endl;
+    plotter->waitForInput();
+  }
+
+    // Solve process plans for cuts
+  std::vector<ProcessPlanningRequest> cut_requests(segments);
+  for(std::size_t i = 0; i < segments; i++) {
     cut_requests[i] = problem_generator.construct_request_cut(tool_poses[i]);
+    std::cout << "Constructed initial request " << std::endl;
+    cut_requests[i].seed = *cut_responses_seed[i].results.get();
+    std::cout << "Constructed seed " << std::endl;
+  }
 
-
-  // Solve process plans for cuts
   std::vector<ProcessPlanningFuture> cut_responses(segments);
   for(std::size_t i = 0; i < segments; i++)
   {
     cut_responses[i] = planning_server.run(cut_requests[i]);
     planning_server.waitForAll();
-    std::cout << "path number: " << i << " finished!" << std::endl;
+    std::cout << "Seed for path number: " << i << " finished!" << std::endl;
     plotter->waitForInput();
   }
 
-  // // Plot optimization iterations
+  // Plot optimization iterations
   if(iterationDebug) {    
      ROS_INFO("Plotting path iterations");  
      plotIterations(env_, plotter);
@@ -366,11 +417,11 @@ bool WireCutting::run()
 
   planning_server_freespace.waitForAll();
 
-  // // Plot optimization iterations
-  // if(iterationDebug) {    
-  //   ROS_INFO("Plotting path iterations");  
-  //   plotIterations(env_, plotter);
-  // }
+  // Plot optimization iterations
+  if(iterationDebug) {    
+    ROS_INFO("Plotting path iterations");  
+    plotIterations(env_, plotter);
+  }
 
   plotter->waitForInput();
   ROS_INFO("Combine toolpath and trajectory for cut and p2p");

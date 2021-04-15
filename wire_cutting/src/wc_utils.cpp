@@ -246,9 +246,6 @@ void plotIterations(const tesseract_environment::Environment::Ptr& env, const te
       auto kin = env->getManipulatorManager()->getFwdKinematicSolver("manipulator");
       tesseract_common::VectorIsometry3d opt_poses;
       for (size_t j = 0; j < opt_joint_results[i].size(); ++j) {
-
-        std::cout << "JOINT POSE " << j << "\n" << opt_joint_results[i][j] << "\n";
-
         Eigen::Isometry3d opt_pose;
         kin->calcFwdKin(opt_pose, opt_joint_results[i][j]);
         opt_poses.push_back(opt_pose);

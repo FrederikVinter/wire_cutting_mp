@@ -5,14 +5,14 @@
 		<Enabled>true</Enabled>
 		<UseWeightedSum>false</UseWeightedSum>
 		<CollisionEvaluator type="1"/>
-		<BufferMargin>0.025000000000000001</BufferMargin>
-		<SafetyMarginBuffer>0</SafetyMarginBuffer>
+		<BufferMargin>0.075000000000000001</BufferMargin>
+		<SafetyMarginBuffer>0.025</SafetyMarginBuffer>
 		<Coefficient>1</Coefficient>
 	    </CollisionCostConfig>
 	    <CollisionConstraintConfig>
 		<Enabled>false</Enabled>
 		<UseWeightedSum>false</UseWeightedSum>
-		<CollisionEvaluator type="2"/>
+		<CollisionEvaluator type="1"/>
 		<SafetyMargin>0.01</SafetyMargin>
 		<SafetyMarginBuffer>0.050000000000000003</SafetyMarginBuffer>
 		<Coefficient>20</Coefficient>
