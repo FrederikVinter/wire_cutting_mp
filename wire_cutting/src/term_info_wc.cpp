@@ -286,6 +286,96 @@ void CartRotVelTermInfo::hatch(TrajOptProb& prob)
   }
 }
 
+void CartVelTermInfoWC::fromJson(ProblemConstructionInfo& pci, const Json::Value& v)
+{
+  FAIL_IF_FALSE(v.isMember("params"));
+  const Json::Value& params = v["params"];
+  json_marshal::childFromJson(params, first_step, "first_step");
+  json_marshal::childFromJson(params, last_step, "last_step");
+  json_marshal::childFromJson(params, max_displacement, "max_displacement");
+
+  FAIL_IF_FALSE((first_step >= 0) && (first_step <= pci.basic_info.n_steps - 1) && (first_step < last_step));
+  FAIL_IF_FALSE((last_step > 0) && (last_step <= pci.basic_info.n_steps - 1));
+
+  json_marshal::childFromJson(params, link, "link");
+  const std::vector<std::string>& link_names = pci.kin->getActiveLinkNames();
+  if (std::find(link_names.begin(), link_names.end(), link) == link_names.end())
+  {
+    PRINT_AND_THROW(boost::format("invalid link name: %s") % link);
+  }
+
+  const char* all_fields[] = { "first_step", "last_step", "max_displacement", "link" };
+  ensure_only_members(params, all_fields, sizeof(all_fields) / sizeof(char*));
+}
+
+void CartVelTermInfoWC::hatch(TrajOptProb& prob)
+{
+  int n_dof = static_cast<int>(prob.GetKin()->numJoints());
+
+  tesseract_environment::EnvState::ConstPtr state = prob.GetEnv()->getCurrentState();
+  Eigen::Isometry3d world_to_base = Eigen::Isometry3d::Identity();
+  try
+  {
+    world_to_base = state->link_transforms.at(prob.GetKin()->getBaseLinkName());
+  }
+  catch (const std::exception&)
+  {
+    PRINT_AND_THROW(boost::format("Failed to find transform for link '%s'") % prob.GetKin()->getBaseLinkName());
+  }
+
+  tesseract_environment::AdjacencyMap::Ptr adjacency_map = std::make_shared<tesseract_environment::AdjacencyMap>(
+      prob.GetEnv()->getSceneGraph(), prob.GetKin()->getActiveLinkNames(), state->link_transforms);
+
+  if (term_type == (TT_COST | TT_USE_TIME))
+  {
+    CONSOLE_BRIDGE_logError("Use time version of this term has not been defined.");
+  }
+  else if (term_type == (TT_CNT | TT_USE_TIME))
+  {
+    CONSOLE_BRIDGE_logError("Use time version of this term has not been defined.");
+  }
+  else if ((term_type & TT_COST) && ~(term_type | ~TT_USE_TIME))
+  {
+    for (int iStep = first_step; iStep <= last_step; ++iStep)
+    {
+      Eigen::VectorXd coeff(6);
+      coeff << 0, 1, 0, 0, 1, 0;
+      auto f =
+          std::make_shared<CartVelErrCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
+      auto dfdx =
+          std::make_shared<CartVelJacCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
+      prob.addCost(std::make_shared<TrajOptCostFromErrFunc>(
+          f,
+          dfdx,
+          concat(prob.GetVarRow(iStep, 0, n_dof), prob.GetVarRow(iStep + 1, 0, n_dof)),
+          coeff,
+          sco::ABS,
+          name));
+    }
+  }
+  else if ((term_type & TT_CNT) && ~(term_type | ~TT_USE_TIME))
+  {
+    for (int iStep = first_step; iStep <= last_step; ++iStep)
+    {
+      auto f =
+          std::make_shared<CartVelErrCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
+      auto dfdx =
+          std::make_shared<CartVelJacCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
+      prob.addConstraint(std::make_shared<TrajOptConstraintFromErrFunc>(
+          f,
+          dfdx,
+          concat(prob.GetVarRow(iStep, 0, n_dof), prob.GetVarRow(iStep + 1, 0, n_dof)),
+          Eigen::VectorXd::Ones(0),
+          sco::INEQ,
+          "CartVel"));
+    }
+  }
+  else
+  {
+    CONSOLE_BRIDGE_logWarn("CartVelTermInfo does not have a valid term_type defined. No cost/constraint applied");
+  }
+}
+
 
 VectorXd CartRotVelErrCalculator::operator()(const VectorXd& dof_vals) const
 {

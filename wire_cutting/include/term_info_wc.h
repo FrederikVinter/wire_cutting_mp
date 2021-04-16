@@ -69,6 +69,23 @@ struct CartRotVelTermInfo : public TermInfo
   CartRotVelTermInfo() : TermInfo(trajopt::TermType::TT_COST | trajopt::TermType::TT_CNT) {}
 };
 
+struct CartVelTermInfoWC : public TermInfo
+{
+  /** @brief Timesteps over which to apply term */
+  int first_step, last_step;
+  /** @brief Link to which the term is applied */
+  std::string link;
+  double max_displacement;
+  /** @brief Used to add term to pci from json */
+  void fromJson(ProblemConstructionInfo& pci, const Json::Value& v) override;
+  /** @brief Converts term info into cost/constraint and adds it to trajopt problem */
+  void hatch(TrajOptProb& prob) override;
+  DEFINE_CREATE(CartVelTermInfoWC)
+
+  /** @brief Initialize term with it's supported types */
+  CartVelTermInfoWC() : TermInfo(trajopt::TermType::TT_COST | trajopt::TermType::TT_CNT) {}
+};
+
 struct CartRotVelErrCalculator : sco::VectorOfVector
 {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

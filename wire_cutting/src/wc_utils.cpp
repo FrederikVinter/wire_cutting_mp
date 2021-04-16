@@ -279,7 +279,7 @@ trajopt::TermInfo::Ptr createVelocityTermInfo(double max_displacement,
   if ((end_index - start_index) < 2)
     throw std::runtime_error("TrajOpt CartVelTermInfo requires at least two states!");
 
-  std::shared_ptr<trajopt::CartVelTermInfo> term = std::make_shared<trajopt::CartVelTermInfo>();
+  std::shared_ptr<CartVelTermInfoWC> term = std::make_shared<CartVelTermInfoWC>();
   term->first_step = start_index;
 
   // end_index-1 is done since velocity requires step_i and step_i+1

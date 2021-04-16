@@ -270,7 +270,8 @@ bool WireCutting::run()
   xml_composite_cut.LoadFile(composite_cut_path.c_str());
   XMLElement* compositeElement = xml_composite_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptCompositeProfile");
   auto trajopt_composite_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement);
-  trajopt_composite_profile->constrain_velocity = false;
+  //trajopt_composite_profile->constrain_velocity = false;
+  trajopt_composite_profile->rotational_velocity = false;
 
   // Load composite p2p profile
   tinyxml2::XMLDocument xml_composite_p2p;

@@ -1,6 +1,6 @@
 <Planner type="1">
 	<TrajoptPlanProfile>
-	    <CartesianCoefficientsConstraint>1 1 1 1 0 1</CartesianCoefficientsConstraint>
+	    <CartesianCoefficientsConstraint>1 0 1 1 0 1</CartesianCoefficientsConstraint>
 	    <CartesianCoefficientsCost>0 0 0 0 1 0</CartesianCoefficientsCost>
 	    <JointCoefficients>1</JointCoefficients>
 	    <Term type="2"/>
