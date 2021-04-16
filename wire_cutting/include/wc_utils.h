@@ -8,6 +8,7 @@
 #include <tesseract_motion_planners/trajopt/trajopt_utils.h>
 #include <tesseract_visualization/markers/toolpath_marker.h>
 #include <tesseract_rosutils/plotting.h>
+#include <term_info_wc.h>
 TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
 #include <string>
 TESSERACT_COMMON_IGNORE_WARNINGS_POP
@@ -26,13 +27,21 @@ tesseract_common::VectorIsometry3d loadToolPoses();
 
 PathData loadToolPosesCFR(std::string file);
 
-std::vector<std::vector<Eigen::VectorXd>> loadOptimizationResults();
-void plotIterations(const tesseract_environment::Environment::Ptr& env, const tesseract_rosutils::ROSPlottingPtr& plotter);
+std::vector<std::vector<Eigen::VectorXd>> loadOptimizationResults(std::string path);
+void plotIterations(const tesseract_environment::Environment::Ptr& env, const tesseract_rosutils::ROSPlottingPtr& plotter, const std::vector<std::string>& joint_names, std::string path);
 
 trajopt::TermInfo::Ptr createVelocityTermInfo(double max_displacement,
                                                 int start_index,
                                                 int end_index,
                                                 const std::string& link,
                                                 trajopt::TermType type);
+
+trajopt::TermInfo::Ptr createCartesianWaypointTermInfoWC(const Eigen::Isometry3d& c_wp,
+                                                       int index,
+                                                       std::string working_frame,
+                                                       Eigen::Isometry3d tcp,
+                                                       const Eigen::VectorXd& coeffs,
+                                                       std::string link,
+                                                       trajopt::TermType type);
 
 #endif

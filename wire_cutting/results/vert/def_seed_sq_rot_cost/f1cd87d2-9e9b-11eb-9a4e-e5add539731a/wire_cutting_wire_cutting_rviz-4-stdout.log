@@ -1,0 +1,21 @@
+[0m[ INFO] [1618567819.632672793]: rviz version 1.14.5[0m
+[0m[ INFO] [1618567819.632717843]: compiled against Qt version 5.12.8[0m
+[0m[ INFO] [1618567819.632726750]: compiled against OGRE version 1.9.0 (Ghadamon)[0m
+[0m[ INFO] [1618567819.643872962]: Forcing OpenGl version 0.[0m
+[0m[ INFO] [1618567820.025786119]: Stereo is NOT SUPPORTED[0m
+[0m[ INFO] [1618567820.025840658]: OpenGL device: Mesa Intel(R) UHD Graphics 620 (KBL GT2)[0m
+[0m[ INFO] [1618567820.025865824]: OpenGl version: 4,6 (GLSL 4,6) limited to GLSL 1.4 on Mesa system.[0m
+[0m[ INFO] [1618567820.492008789]: Stopped monitoring environment.[0m
+[0m[ INFO] [1618567820.494611354]: Monitoring external environment on '/tesseract_ros_examples/tesseract_published_environment'[0m
+[0m[ INFO] [1618567820.494931701]: Stopped monitoring environment.[0m
+[0m[ INFO] [1618567820.496893959]: Monitoring external environment on '/tesseract_ros_examples/tesseract_published_environment'[0m
+[0m[ INFO] [1618567821.708009420]: Discrete Contact Monitor Registered: tesseract_collision::tesseract_collision_bullet::BulletDiscreteBVHManager[0m
+[0m[ INFO] [1618567821.708061584]: Discrete Contact Monitor Registered: tesseract_collision::tesseract_collision_bullet::BulletDiscreteSimpleManager[0m
+[0m[ INFO] [1618567821.708072559]: Discrete Contact Monitor Registered: tesseract_collision::tesseract_collision_fcl::FCLDiscreteBVHManager[0m
+[0m[ INFO] [1618567821.708635639]: Continuous Contact Monitor Registered: tesseract_collision::tesseract_collision_bullet::BulletCastBVHManager[0m
+[0m[ INFO] [1618567821.708657424]: Continuous Contact Monitor Registered: tesseract_collision::tesseract_collision_bullet::BulletCastSimpleManager[0m
+[0m[ INFO] [1618567821.798155741]: Discrete Contact Monitor Registered: tesseract_collision::tesseract_collision_bullet::BulletDiscreteBVHManager[0m
+[0m[ INFO] [1618567821.798191097]: Discrete Contact Monitor Registered: tesseract_collision::tesseract_collision_bullet::BulletDiscreteSimpleManager[0m
+[0m[ INFO] [1618567821.798200643]: Discrete Contact Monitor Registered: tesseract_collision::tesseract_collision_fcl::FCLDiscreteBVHManager[0m
+[0m[ INFO] [1618567821.798591225]: Continuous Contact Monitor Registered: tesseract_collision::tesseract_collision_bullet::BulletCastBVHManager[0m
+[0m[ INFO] [1618567821.798608870]: Continuous Contact Monitor Registered: tesseract_collision::tesseract_collision_bullet::BulletCastSimpleManager[0m

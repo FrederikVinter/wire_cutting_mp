@@ -15,16 +15,16 @@ using namespace Eigen;
 
 VectorXd JointTwoLimitsConstraint::operator()(const VectorXd& current_joints_pos) const
 {
-    static Eigen::VectorXd violation(1);
-    violation << 0;
+    Eigen::VectorXd violation(2);
+    violation << 0, 0;
 
     double joint3_pos = current_joints_pos(1) + current_joints_pos(2);
 
     if(current_joints_pos(1) < joint3_pos - 67*DEGREE2RADIAN)
-        violation << (joint3_pos - 67*DEGREE2RADIAN) - current_joints_pos(1);
+        violation(0) = (joint3_pos - 67*DEGREE2RADIAN) - current_joints_pos(1);
 
     if(current_joints_pos(1) > joint3_pos + 65*DEGREE2RADIAN)
-        violation <<  current_joints_pos(1) - (joint3_pos + 65*DEGREE2RADIAN);
+        violation(1) =  current_joints_pos(1) - (joint3_pos + 65*DEGREE2RADIAN);
 
     return violation;
 }
@@ -36,19 +36,17 @@ void JointTwoLimitsConstraint::Plot(const tesseract_visualization::Visualization
 
 VectorXd JointThreeLimitsConstraint::operator()(const VectorXd& current_joints_pos) const
 {
-    static Eigen::VectorXd violation(1);
-    violation << 0;
+    Eigen::VectorXd violation(2);
+    violation << 0, 0;
 
     double joint3_pos = current_joints_pos(1) + current_joints_pos(2);
 
     // Sliding limits
     if(joint3_pos < current_joints_pos(1) - 65*DEGREE2RADIAN)
-        violation << (current_joints_pos(1) - 65*DEGREE2RADIAN) - joint3_pos;
+        violation(0) = (current_joints_pos(1) - 65*DEGREE2RADIAN) - joint3_pos;
 
     if(joint3_pos > current_joints_pos(1) + 67*DEGREE2RADIAN)
-        violation <<  joint3_pos - (current_joints_pos(1) + 67*DEGREE2RADIAN);
-
-
+        violation(1) =  joint3_pos - (current_joints_pos(1) + 67*DEGREE2RADIAN);
 
     return violation;
 }
@@ -60,17 +58,17 @@ void JointThreeLimitsConstraint::Plot(const tesseract_visualization::Visualizati
 
 VectorXd JointThreeAbsoluteLimitsConstraint::operator()(const VectorXd& current_joints_pos) const
 {
-    static Eigen::VectorXd violation(1);
-    violation << 0;
+    Eigen::VectorXd violation(2);
+    violation << 0, 0;
 
     double joint3_pos = current_joints_pos(1) + current_joints_pos(2);
 
     // Absolute limits based on joint3_pos
     if(joint3_pos > 1.91)
-        violation << joint3_pos - 1.91;
+        violation(0) = joint3_pos - 1.91;
 
     if(joint3_pos < -0.489)
-        violation << joint3_pos + 0.489;
+        violation(1) = joint3_pos + 0.489;
 
     return violation;
 }

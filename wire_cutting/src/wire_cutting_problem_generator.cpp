@@ -1,38 +1,14 @@
 #include <wire_cutting_problem_generator.h>
 
 
-WireCuttingProblemGenerator::WireCuttingProblemGenerator()
+
+WireCuttingProblemGenerator::WireCuttingProblemGenerator(tesseract_monitoring::EnvironmentMonitor::Ptr monitor)
 {
-    m_plan_cut = std::make_shared<TrajOptWireCuttingPlanProfile>();
-    JointThreeAbsoluteLimitsConstraint cnt1;
-    JointTwoLimitsConstraint cnt2;
-    JointThreeLimitsConstraint cnt3;
-    std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function1 = cnt1;
-    std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function2 = cnt2;
-    std::function<Eigen::VectorXd(const Eigen::VectorXd&)> temp_function3 = cnt3;
-    sco::VectorOfVector::func temp_1 = temp_function1;
-    sco::VectorOfVector::func temp_2 = temp_function2;
-    sco::VectorOfVector::func temp_3 = temp_function3;
-
-    sco::ConstraintType a = sco::ConstraintType::EQ;
-    Eigen::VectorXd error_coeff(1);
-    error_coeff << 0.5;
-
-    std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple1(temp_1,nullptr,a,error_coeff);
-    std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple2(temp_2,nullptr,a,error_coeff);
-    std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple3(temp_3,nullptr,a,error_coeff);
-    std::vector<std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd>>
-    constraint_error_functions;
-
-    constraint_error_functions.push_back(temp_tuple1);
-    constraint_error_functions.push_back(temp_tuple2);
-    constraint_error_functions.push_back(temp_tuple3);
-
-    m_plan_cut->constraint_error_functions = constraint_error_functions;
+  monitor_ = monitor;
 }
 
 
-ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut(const VectorIsometry3d& tool_poses)
+ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut(const VectorIsometry3d& tool_poses, const Environment::ConstPtr& env)
 {
   CompositeInstruction program("DEFAULT", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
   
@@ -52,6 +28,15 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut(const 
   ProcessPlanningRequest request;
   request.name = tesseract_planning::process_planner_names::TRAJOPT_PLANNER_NAME;
   request.instructions = Instruction(program);
+  request.env_state = env->getCurrentState();
+  request.seed = tesseract_planning::generateSeed(program, env->getCurrentState(), env);
+  
+  /*tesseract_planning::CompositeInstruction naive_seed;
+  {
+    auto lock = monitor_->lockEnvironmentRead();
+    naive_seed = tesseract_planning::generateNaiveSeed(program, *(monitor_->getEnvironment()));
+  }
+  request.seed = Instruction(naive_seed);*/
 
   return request;
 }

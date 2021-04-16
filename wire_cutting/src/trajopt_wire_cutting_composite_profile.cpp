@@ -303,6 +303,7 @@ tinyxml2::XMLElement* TrajOptWireCuttingCompositeProfile::toXML(tinyxml2::XMLDoc
   return xml_planner;
 }
 
+
 void TrajOptWireCuttingCompositeProfile::addVelocityConstraint(trajopt::ProblemConstructionInfo& pci,
                                                                double max_displacement,
                                                                int start_index,

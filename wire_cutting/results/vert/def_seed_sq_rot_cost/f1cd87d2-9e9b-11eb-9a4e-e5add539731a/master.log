@@ -1,0 +1,174 @@
+[rosmaster.main][INFO] 2021-04-16 12:10:19,297: initialization complete, waiting for shutdown
+[rosmaster.main][INFO] 2021-04-16 12:10:19,297: Starting ROS Master Node
+[xmlrpc][INFO] 2021-04-16 12:10:19,298: XML-RPC server binding to 0.0.0.0:11311
+[xmlrpc][INFO] 2021-04-16 12:10:19,298: Started XML-RPC server [http://HP-Spectre:11311/]
+[xmlrpc][INFO] 2021-04-16 12:10:19,298: xml rpc node: starting XML-RPC server
+[rosmaster.master][INFO] 2021-04-16 12:10:19,298: Master initialized: port[11311], uri[http://HP-Spectre:11311/]
+[rosmaster.master][INFO] 2021-04-16 12:10:19,330: +PARAM [/run_id] by /roslaunch
+[rosmaster.master][INFO] 2021-04-16 12:10:19,331: +PARAM [/roslaunch/uris/host_hp_spectre__33403] by /roslaunch
+[rosmaster.master][INFO] 2021-04-16 12:10:19,421: +PARAM [/rosversion] by /roslaunch
+[rosmaster.master][INFO] 2021-04-16 12:10:19,421: +PARAM [/rosdistro] by /roslaunch
+[rosmaster.master][INFO] 2021-04-16 12:10:19,421: +PARAM [/robot_description] by /roslaunch
+[rosmaster.master][INFO] 2021-04-16 12:10:19,421: +PARAM [/robot_description_freespace] by /roslaunch
+[rosmaster.master][INFO] 2021-04-16 12:10:19,421: +PARAM [/robot_description_semantic] by /roslaunch
+[rosmaster.master][INFO] 2021-04-16 12:10:19,421: +PARAM [/robot_description_freespace_semantic] by /roslaunch
+[rosmaster.master][INFO] 2021-04-16 12:10:19,422: +PARAM [/wire_cutting_wire_cutting_node/plotting] by /roslaunch
+[rosmaster.master][INFO] 2021-04-16 12:10:19,422: +PARAM [/wire_cutting_wire_cutting_node/rviz] by /roslaunch
+[rosmaster.master][INFO] 2021-04-16 12:10:19,439: +SERVICE [/rosout/get_loggers] /rosout http://HP-Spectre:36889/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,439: +SERVICE [/rosout/set_logger_level] /rosout http://HP-Spectre:36889/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,440: +PUB [/rosout_agg] /rosout http://HP-Spectre:36889/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,442: +SUB [/rosout] /rosout http://HP-Spectre:36889/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,463: +PUB [/rosout] /virtual_joint_broadcaster_0 http://HP-Spectre:42511/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,463: +SERVICE [/virtual_joint_broadcaster_0/get_loggers] /virtual_joint_broadcaster_0 http://HP-Spectre:42511/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,464: +SERVICE [/virtual_joint_broadcaster_0/set_logger_level] /virtual_joint_broadcaster_0 http://HP-Spectre:42511/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,465: +PUB [/tf] /virtual_joint_broadcaster_0 http://HP-Spectre:42511/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,498: publisherUpdate[/rosout] -> http://HP-Spectre:36889/ ['http://HP-Spectre:42511/']
+[rosmaster.master][INFO] 2021-04-16 12:10:19,501: publisherUpdate[/rosout] -> http://HP-Spectre:36889/ ['http://HP-Spectre:42511/']: sec=0.00, result=[1, '', 0]
+[rosmaster.master][INFO] 2021-04-16 12:10:19,621: +PUB [/rosout] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,621: +SERVICE [/wire_cutting_wire_cutting_node/get_loggers] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,622: +SERVICE [/wire_cutting_wire_cutting_node/set_logger_level] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,642: +PUB [/rosout] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,642: +SERVICE [/wire_cutting_wire_cutting_rviz/get_loggers] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,643: +SERVICE [/wire_cutting_wire_cutting_rviz/set_logger_level] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:19,644: +CACHEDPARAM [/rosout_disable_topics_generation] by /wire_cutting_wire_cutting_rviz
+[rosmaster.master][INFO] 2021-04-16 12:10:19,699: publisherUpdate[/rosout] -> http://HP-Spectre:36889/ ['http://HP-Spectre:42511/', 'http://HP-Spectre:44533/']
+[rosmaster.master][INFO] 2021-04-16 12:10:19,700: publisherUpdate[/rosout] -> http://HP-Spectre:36889/ ['http://HP-Spectre:42511/', 'http://HP-Spectre:44533/']: sec=0.00, result=[1, '', 0]
+[rosmaster.master][INFO] 2021-04-16 12:10:19,700: publisherUpdate[/rosout] -> http://HP-Spectre:36889/ ['http://HP-Spectre:42511/', 'http://HP-Spectre:44533/', 'http://HP-Spectre:38743/']
+[rosmaster.master][INFO] 2021-04-16 12:10:19,701: publisherUpdate[/rosout] -> http://HP-Spectre:36889/ ['http://HP-Spectre:42511/', 'http://HP-Spectre:44533/', 'http://HP-Spectre:38743/']: sec=0.00, result=[1, '', 0]
+[rosmaster.master][INFO] 2021-04-16 12:10:19,880: +CACHEDPARAM [/rosout_disable_topics_generation] by /wire_cutting_wire_cutting_node
+[rosmaster.master][INFO] 2021-04-16 12:10:20,022: +CACHEDPARAM [/rosout/omit_topics] by /rosout
+[rosmaster.master][INFO] 2021-04-16 12:10:20,025: +SERVICE [/tesseract_ros_examples/modify_tesseract] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,026: +SERVICE [/tesseract_ros_examples/get_tesseract_changes] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,026: +SERVICE [/tesseract_ros_examples/get_tesseract_information] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,026: +SERVICE [/tesseract_ros_examples/save_scene_graph] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,027: +PUB [/tesseract_ros_examples/tesseract_published_environment] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,029: +SERVICE [/Freespace/modify_tesseract] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,029: +SERVICE [/Freespace/get_tesseract_changes] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,030: +SERVICE [/Freespace/get_tesseract_information] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,030: +SERVICE [/Freespace/save_scene_graph] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,030: +PUB [/tesseract/display_tesseract_trajectory] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,031: +PUB [/tesseract/display_collisions] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,031: +PUB [/tesseract/display_arrows] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,032: +PUB [/tesseract/display_axes] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,032: +PUB [/tesseract/display_tool_path] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,075: +SUB [/tf] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,078: +SUB [/tf_static] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,248: +PUB [/initialpose] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,249: +PUB [/goal] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,377: +SUB [/joint_states] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,378: -SUB [/joint_states] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,380: +SUB [/joint_states] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,398: +SUB [/tesseract/display_tesseract_trajectory] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,402: +SUB [/visualization_marker_array] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,403: -SUB [/visualization_marker_array] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,405: +SUB [/tesseract/display_collisions] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,407: +SUB [/tesseract/display_tool_path] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,407: -PUB [/goal] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,408: -PUB [/initialpose] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,411: +PUB [/initialpose] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,412: +PUB [/goal] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,413: +PUB [/move_base_simple/goal] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,413: -PUB [/goal] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,413: +PUB [/clicked_point] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,445: +SERVICE [/wire_cutting_wire_cutting_rviz/reload_shaders] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,446: +SERVICE [/wire_cutting_wire_cutting_rviz/load_config] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,447: +SERVICE [/wire_cutting_wire_cutting_rviz/save_config] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:20,494: +SUB [/tesseract_ros_examples/tesseract_published_environment] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:21,709: +SERVICE [/env_widget_0/modify_tesseract] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:21,710: +SERVICE [/env_widget_0/get_tesseract_changes] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:21,710: +SERVICE [/env_widget_0/get_tesseract_information] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:21,711: +SERVICE [/env_widget_0/save_scene_graph] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:21,799: +SERVICE [/env_widget_1/modify_tesseract] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:21,799: +SERVICE [/env_widget_1/get_tesseract_changes] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:21,799: +SERVICE [/env_widget_1/get_tesseract_information] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:21,800: +SERVICE [/env_widget_1/save_scene_graph] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:30,104: -PUB [/tesseract/display_tool_path] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:30,106: -PUB [/tesseract/display_axes] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:30,107: -PUB [/tesseract/display_arrows] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:30,109: -PUB [/tesseract/display_collisions] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:30,110: -PUB [/tesseract/display_tesseract_trajectory] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:30,112: -SERVICE [/Freespace/modify_tesseract] /wire_cutting_wire_cutting_node rosrpc://HP-Spectre:40639
+[rosmaster.master][INFO] 2021-04-16 12:10:30,114: -SERVICE [/Freespace/get_tesseract_changes] /wire_cutting_wire_cutting_node rosrpc://HP-Spectre:40639
+[rosmaster.master][INFO] 2021-04-16 12:10:30,115: -SERVICE [/Freespace/get_tesseract_information] /wire_cutting_wire_cutting_node rosrpc://HP-Spectre:40639
+[rosmaster.master][INFO] 2021-04-16 12:10:30,117: -SERVICE [/Freespace/save_scene_graph] /wire_cutting_wire_cutting_node rosrpc://HP-Spectre:40639
+[rosmaster.master][INFO] 2021-04-16 12:10:30,118: publisherUpdate[/tesseract/display_tool_path] -> http://HP-Spectre:38743/ []
+[rosmaster.master][INFO] 2021-04-16 12:10:30,121: publisherUpdate[/tesseract/display_tool_path] -> http://HP-Spectre:38743/ []: sec=0.00, result=[1, '', 0]
+[rosmaster.master][INFO] 2021-04-16 12:10:30,121: publisherUpdate[/tesseract/display_collisions] -> http://HP-Spectre:38743/ []
+[rosmaster.master][INFO] 2021-04-16 12:10:30,123: publisherUpdate[/tesseract/display_collisions] -> http://HP-Spectre:38743/ []: sec=0.00, result=[1, '', 0]
+[rosmaster.master][INFO] 2021-04-16 12:10:30,123: publisherUpdate[/tesseract/display_tesseract_trajectory] -> http://HP-Spectre:38743/ []
+[rosmaster.master][INFO] 2021-04-16 12:10:30,124: publisherUpdate[/tesseract/display_tesseract_trajectory] -> http://HP-Spectre:38743/ []: sec=0.00, result=[1, '', 0]
+[rosmaster.master][INFO] 2021-04-16 12:10:30,534: -PUB [/tesseract_ros_examples/tesseract_published_environment] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:30,536: -SERVICE [/tesseract_ros_examples/modify_tesseract] /wire_cutting_wire_cutting_node rosrpc://HP-Spectre:40639
+[rosmaster.master][INFO] 2021-04-16 12:10:30,538: -SERVICE [/tesseract_ros_examples/get_tesseract_changes] /wire_cutting_wire_cutting_node rosrpc://HP-Spectre:40639
+[rosmaster.master][INFO] 2021-04-16 12:10:30,539: -SERVICE [/tesseract_ros_examples/get_tesseract_information] /wire_cutting_wire_cutting_node rosrpc://HP-Spectre:40639
+[rosmaster.master][INFO] 2021-04-16 12:10:30,541: -SERVICE [/tesseract_ros_examples/save_scene_graph] /wire_cutting_wire_cutting_node rosrpc://HP-Spectre:40639
+[rosmaster.master][INFO] 2021-04-16 12:10:30,620: publisherUpdate[/tesseract_ros_examples/tesseract_published_environment] -> http://HP-Spectre:38743/ []
+[rosmaster.master][INFO] 2021-04-16 12:10:30,622: publisherUpdate[/tesseract_ros_examples/tesseract_published_environment] -> http://HP-Spectre:38743/ []: sec=0.00, result=[1, '', 0]
+[rosmaster.master][INFO] 2021-04-16 12:10:30,725: -PUB [/rosout] /wire_cutting_wire_cutting_node http://HP-Spectre:44533/
+[rosmaster.master][INFO] 2021-04-16 12:10:30,726: publisherUpdate[/rosout] -> http://HP-Spectre:36889/ ['http://HP-Spectre:42511/', 'http://HP-Spectre:38743/']
+[rosmaster.master][INFO] 2021-04-16 12:10:30,727: -SERVICE [/wire_cutting_wire_cutting_node/get_loggers] /wire_cutting_wire_cutting_node rosrpc://HP-Spectre:40639
+[rosmaster.master][INFO] 2021-04-16 12:10:30,730: -SERVICE [/wire_cutting_wire_cutting_node/set_logger_level] /wire_cutting_wire_cutting_node rosrpc://HP-Spectre:40639
+[rosmaster.master][INFO] 2021-04-16 12:10:30,731: publisherUpdate[/rosout] -> http://HP-Spectre:36889/ ['http://HP-Spectre:42511/', 'http://HP-Spectre:38743/']: sec=0.00, result=[1, '', 0]
+[rosmaster.master][INFO] 2021-04-16 12:10:30,733: -CACHEDPARAM [/rosout_disable_topics_generation] by /wire_cutting_wire_cutting_node
+[rosmaster.master][INFO] 2021-04-16 12:10:44,149: -PUB [/rosout] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,150: publisherUpdate[/rosout] -> http://HP-Spectre:36889/ ['http://HP-Spectre:42511/']
+[rosmaster.master][INFO] 2021-04-16 12:10:44,152: -PUB [/rosout] /virtual_joint_broadcaster_0 http://HP-Spectre:42511/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,154: -PUB [/initialpose] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,155: -PUB [/tf] /virtual_joint_broadcaster_0 http://HP-Spectre:42511/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,158: publisherUpdate[/rosout] -> http://HP-Spectre:36889/ ['http://HP-Spectre:42511/']: sec=0.01, result=[1, '', 0]
+[rosmaster.master][INFO] 2021-04-16 12:10:44,159: publisherUpdate[/rosout] -> http://HP-Spectre:36889/ []
+[rosmaster.master][INFO] 2021-04-16 12:10:44,161: -PUB [/move_base_simple/goal] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,163: publisherUpdate[/rosout] -> http://HP-Spectre:36889/ []: sec=0.00, result=[1, '', 0]
+[rosmaster.master][INFO] 2021-04-16 12:10:44,164: publisherUpdate[/tf] -> http://HP-Spectre:38743/ []
+[rosmaster.master][INFO] 2021-04-16 12:10:44,164: -SERVICE [/virtual_joint_broadcaster_0/get_loggers] /virtual_joint_broadcaster_0 rosrpc://HP-Spectre:51333
+[rosmaster.master][INFO] 2021-04-16 12:10:44,167: publisherUpdate[/tf] -> http://HP-Spectre:38743/ []: sec=0.00, exception=<Fault -1: 'publisherUpdate: unknown method name'>
+[rosmaster.master][INFO] 2021-04-16 12:10:44,168: -PUB [/clicked_point] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,172: -SERVICE [/virtual_joint_broadcaster_0/set_logger_level] /virtual_joint_broadcaster_0 rosrpc://HP-Spectre:51333
+[rosmaster.master][INFO] 2021-04-16 12:10:44,172: -SUB [/tf] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,175: -SUB [/tf_static] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,176: -SUB [/joint_states] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,178: -SUB [/tesseract/display_tesseract_trajectory] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,180: -SUB [/tesseract/display_collisions] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,182: -SUB [/tesseract/display_tool_path] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,183: -SUB [/tesseract_ros_examples/tesseract_published_environment] /wire_cutting_wire_cutting_rviz http://HP-Spectre:38743/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,185: -SERVICE [/wire_cutting_wire_cutting_rviz/get_loggers] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.master][INFO] 2021-04-16 12:10:44,187: -SERVICE [/wire_cutting_wire_cutting_rviz/set_logger_level] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.threadpool][ERROR] 2021-04-16 12:10:44,191: Traceback (most recent call last):
+  File "/opt/ros/noetic/lib/python3/dist-packages/rosmaster/threadpool.py", line 218, in run
+    result = cmd(*args)
+  File "/opt/ros/noetic/lib/python3/dist-packages/rosmaster/master_api.py", line 210, in publisher_update_task
+    ret = xmlrpcapi(api).publisherUpdate('/master', topic, pub_uris)
+  File "/usr/lib/python3.8/xmlrpc/client.py", line 1109, in __call__
+    return self.__send(self.__name, args)
+  File "/usr/lib/python3.8/xmlrpc/client.py", line 1450, in __request
+    response = self.__transport.request(
+  File "/usr/lib/python3.8/xmlrpc/client.py", line 1153, in request
+    return self.single_request(host, handler, request_body, verbose)
+  File "/usr/lib/python3.8/xmlrpc/client.py", line 1169, in single_request
+    return self.parse_response(resp)
+  File "/usr/lib/python3.8/xmlrpc/client.py", line 1341, in parse_response
+    return u.close()
+  File "/usr/lib/python3.8/xmlrpc/client.py", line 655, in close
+    raise Fault(**self._stack[0])
+xmlrpc.client.Fault: <Fault -1: 'publisherUpdate: unknown method name'>
+
+[rosmaster.master][INFO] 2021-04-16 12:10:44,192: -SERVICE [/wire_cutting_wire_cutting_rviz/reload_shaders] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.master][INFO] 2021-04-16 12:10:44,194: -SERVICE [/wire_cutting_wire_cutting_rviz/load_config] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.master][INFO] 2021-04-16 12:10:44,196: -SERVICE [/wire_cutting_wire_cutting_rviz/save_config] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.master][INFO] 2021-04-16 12:10:44,198: -SERVICE [/env_widget_0/modify_tesseract] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.master][INFO] 2021-04-16 12:10:44,199: -SERVICE [/env_widget_0/get_tesseract_changes] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.master][INFO] 2021-04-16 12:10:44,201: -SERVICE [/env_widget_0/get_tesseract_information] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.master][INFO] 2021-04-16 12:10:44,202: -SERVICE [/env_widget_0/save_scene_graph] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.master][INFO] 2021-04-16 12:10:44,204: -SERVICE [/env_widget_1/modify_tesseract] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.master][INFO] 2021-04-16 12:10:44,205: -SERVICE [/env_widget_1/get_tesseract_changes] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.master][INFO] 2021-04-16 12:10:44,207: -SERVICE [/env_widget_1/get_tesseract_information] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.master][INFO] 2021-04-16 12:10:44,208: -SERVICE [/env_widget_1/save_scene_graph] /wire_cutting_wire_cutting_rviz rosrpc://HP-Spectre:35123
+[rosmaster.master][INFO] 2021-04-16 12:10:44,211: -CACHEDPARAM [/rosout_disable_topics_generation] by /wire_cutting_wire_cutting_rviz
+[rosmaster.master][INFO] 2021-04-16 12:10:44,764: -PUB [/rosout_agg] /rosout http://HP-Spectre:36889/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,764: -SUB [/rosout] /rosout http://HP-Spectre:36889/
+[rosmaster.master][INFO] 2021-04-16 12:10:44,765: -SERVICE [/rosout/get_loggers] /rosout rosrpc://HP-Spectre:59761
+[rosmaster.master][INFO] 2021-04-16 12:10:44,765: -SERVICE [/rosout/set_logger_level] /rosout rosrpc://HP-Spectre:59761
+[rosmaster.master][INFO] 2021-04-16 12:10:44,765: -CACHEDPARAM [/rosout/omit_topics] by /rosout
+[rosmaster.main][INFO] 2021-04-16 12:10:44,829: keyboard interrupt, will exit
+[rosmaster.main][INFO] 2021-04-16 12:10:44,829: stopping master...
+[rospy.core][INFO] 2021-04-16 12:10:44,829: signal_shutdown [atexit]

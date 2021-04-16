@@ -107,9 +107,9 @@ void TrajOptWireCuttingPlanProfile::apply(trajopt::ProblemConstructionInfo& pci,
   auto ti1 = createCartesianWaypointTermInfo(
       cartesian_waypoint, index, mi.working_frame, tcp, cart_coeff_cnt, pci.kin->getTipLinkName(), trajopt::TermType::TT_CNT);
   
-  auto ti2 = createCartesianWaypointTermInfo(
+  auto ti2 = createCartesianWaypointTermInfoWC(
       cartesian_waypoint, index, mi.working_frame, tcp, cart_coeff_cost, pci.kin->getTipLinkName(), trajopt::TermType::TT_COST);
-  
+ 
   pci.cnt_infos.push_back(ti1);
   pci.cost_infos.push_back(ti2);
 
@@ -155,6 +155,8 @@ void TrajOptWireCuttingPlanProfile::addConstraintErrorFunctions(trajopt::Problem
   }
 }
 
+
+
 void TrajOptWireCuttingPlanProfile::addFourBarLinkageConstraints()
 {
   JointThreeAbsoluteLimitsConstraint cnt1;
@@ -167,9 +169,9 @@ void TrajOptWireCuttingPlanProfile::addFourBarLinkageConstraints()
   sco::VectorOfVector::func temp_2 = temp_function2;
   sco::VectorOfVector::func temp_3 = temp_function3;
 
-  sco::ConstraintType a = sco::ConstraintType::EQ;
-  Eigen::VectorXd error_coeff(1);
-  error_coeff << 0.5;
+  sco::ConstraintType a = sco::ConstraintType::INEQ;
+  Eigen::VectorXd error_coeff(2);
+  error_coeff << 1, 1;
 
   std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple1(temp_1,nullptr,a,error_coeff);
   std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple2(temp_2,nullptr,a,error_coeff);

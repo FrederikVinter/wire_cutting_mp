@@ -4,10 +4,10 @@
 	    <CollisionCostConfig>
 		<Enabled>true</Enabled>
 		<UseWeightedSum>false</UseWeightedSum>
-		<CollisionEvaluator type="1"/>
-		<BufferMargin>0.025000000000000001</BufferMargin>
-		<SafetyMarginBuffer>0</SafetyMarginBuffer>
-		<Coefficient>1</Coefficient>
+		<CollisionEvaluator type="3"/>
+		<BufferMargin>0.01</BufferMargin>
+		<SafetyMarginBuffer>0.05</SafetyMarginBuffer>
+		<Coefficient>20</Coefficient>
 	    </CollisionCostConfig>
 	    <CollisionConstraintConfig>
 		<Enabled>false</Enabled>

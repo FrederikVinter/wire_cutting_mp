@@ -196,13 +196,13 @@ tesseract_common::VectorIsometry3d loadToolPoses()
   return path;
 }
 
-std::vector<std::vector<Eigen::VectorXd>> loadOptimizationResults()
+std::vector<std::vector<Eigen::VectorXd>> loadOptimizationResults(std::string path)
 {
     std::vector<std::vector<Eigen::VectorXd>> vector_of_paths;  // results
     std::ifstream indata;      // input file
 
     // std::string filename = ros::package::getPath("wire_cutting") + "/config/trajopt_vars.log";
-    std::string filename = "/tmp/trajopt_vars.log";
+    std::string filename = path;
 
     indata.open(filename);
     assert(indata.is_open());
@@ -238,8 +238,8 @@ std::vector<std::vector<Eigen::VectorXd>> loadOptimizationResults()
     return vector_of_paths;
 }
 
-void plotIterations(const tesseract_environment::Environment::Ptr& env, const tesseract_rosutils::ROSPlottingPtr& plotter) {
-    std::vector<std::vector<Eigen::VectorXd>> opt_joint_results = loadOptimizationResults();
+void plotIterations(const tesseract_environment::Environment::Ptr& env, const tesseract_rosutils::ROSPlottingPtr& plotter, const std::vector<std::string>& joint_names , std::string path) {
+    std::vector<std::vector<Eigen::VectorXd>> opt_joint_results = loadOptimizationResults(path);
     for(size_t i = 0; i < opt_joint_results.size(); i++) {
 
       // Calculate poses
@@ -247,7 +247,7 @@ void plotIterations(const tesseract_environment::Environment::Ptr& env, const te
       tesseract_common::VectorIsometry3d opt_poses;
       for (size_t j = 0; j < opt_joint_results[i].size(); ++j) {
 
-        std::cout << "JOINT POSE " << j << "\n" << opt_joint_results[i][j] << "\n";
+        //std::cout << "JOINT POSE " << j << "\n" << opt_joint_results[i][j] << "\n";
 
         Eigen::Isometry3d opt_pose;
         kin->calcFwdKin(opt_pose, opt_joint_results[i][j]);
@@ -267,6 +267,7 @@ void plotIterations(const tesseract_environment::Environment::Ptr& env, const te
         plotter->clear();
       }
     }
+
 }
 
 trajopt::TermInfo::Ptr createVelocityTermInfo(double max_displacement,
@@ -288,4 +289,60 @@ trajopt::TermInfo::Ptr createVelocityTermInfo(double max_displacement,
   term->term_type = type;  
 
   return term;
+}
+
+trajopt::TermInfo::Ptr createRotationalVelocityTermInfo(double max_displacement,
+                                                int start_index,
+                                                int end_index,
+                                                const std::string& link,
+                                                trajopt::TermType type)
+{
+  if ((end_index - start_index) < 2)
+    throw std::runtime_error("TrajOpt CartVelTermInfo requires at least two states!");
+
+  std::shared_ptr<CartRotVelTermInfo> term = std::make_shared<CartRotVelTermInfo>();
+  term->first_step = start_index;
+
+  // end_index-1 is done since velocity requires step_i and step_i+1
+  term->last_step = end_index-1;
+  term->max_displacement = max_displacement;
+  term->link = link;
+  term->term_type = type;  
+
+  return term;
+}
+
+trajopt::TermInfo::Ptr createCartesianWaypointTermInfoWC(const Eigen::Isometry3d& c_wp,
+                                                       int index,
+                                                       std::string working_frame,
+                                                       Eigen::Isometry3d tcp,
+                                                       const Eigen::VectorXd& coeffs,
+                                                       std::string link,
+                                                       trajopt::TermType type)
+{
+  auto pose_info = std::make_shared<CartPoseTermInfoWC>();
+  pose_info->term_type = type;
+  pose_info->name = "cartesian_waypoint_" + std::to_string(index);
+
+  pose_info->link = link;
+  pose_info->tcp = tcp;
+
+  pose_info->timestep = index;
+  pose_info->xyz = c_wp.translation();
+  Eigen::Quaterniond q(c_wp.linear());
+  pose_info->wxyz = Eigen::Vector4d(q.w(), q.x(), q.y(), q.z());
+  pose_info->target = working_frame;
+
+  if (coeffs.size() == 1)
+  {
+    pose_info->pos_coeffs = Eigen::Vector3d::Constant(coeffs(0));
+    pose_info->rot_coeffs = Eigen::Vector3d::Constant(coeffs(0));
+  }
+  else if (coeffs.size() == 6)
+  {
+    pose_info->pos_coeffs = coeffs.head<3>();
+    pose_info->rot_coeffs = coeffs.tail<3>();
+  }
+
+  return pose_info;
 }

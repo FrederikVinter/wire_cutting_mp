@@ -131,6 +131,7 @@ protected:
                             int end_index,
                             const std::vector<int>& fixed_indices) const;
 
+
   void addVelocityConstraint(trajopt::ProblemConstructionInfo& pci,
                               double max_displacement,
                               int start_index,
@@ -138,6 +139,14 @@ protected:
                               const std::string& link,
                               trajopt::TermType type,
                               const std::vector<int>& /*fixed_indices*/) const;
+                      
+  void addRotationalVelocity(trajopt::ProblemConstructionInfo& pci,
+                                                               double max_displacement,
+                                                               int start_index,
+                                                               int end_index,
+                                                               const std::string& link,
+                                                               trajopt::TermType type,
+                                                               const std::vector<int>& /*fixed_indices*/) const;
 
   void addAccelerationSmoothing(trajopt::ProblemConstructionInfo& pci,
                                 int start_index,

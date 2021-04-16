@@ -9,6 +9,7 @@
 #include <tesseract_motion_planners/trajopt/profile/trajopt_profile.h>
 #include <tesseract_process_managers/core/process_planning_server.h>
 #include <ros/ros.h>
+#include <tesseract_monitoring/environment_monitor.h>
 
 #include <tesseract_motion_planners/interface_utils.h>
 #include <tesseract_motion_planners/trajopt/profile/trajopt_default_composite_profile.h>
@@ -31,9 +32,9 @@ using namespace tesseract_planning;
 class WireCuttingProblemGenerator
 {
 public:
-    WireCuttingProblemGenerator();
+    WireCuttingProblemGenerator(tesseract_monitoring::EnvironmentMonitor::Ptr monitor);
     
-    ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& tool_poses);
+    ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& tool_poses, const Environment::ConstPtr& env);
     ProcessPlanningRequest construct_request_cut_descartes(const VectorIsometry3d& tool_poses);
     ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end);
 
@@ -42,6 +43,7 @@ public:
     Environment::Ptr m_env_free;
 private:  
     TrajOptPlanProfile::Ptr m_plan_free;
+    tesseract_monitoring::EnvironmentMonitor::Ptr monitor_; 
 
 };
 

@@ -145,6 +145,8 @@ bool WireCutting::run()
     return false;
   ROS_INFO("Initialized cut env");
 
+  std::cout << "Joints, Active: " << env_->getActiveJointNames().size() << " All: " << env_->getJointNames().size() << std::endl;
+
   auto env_freespace = std::make_shared<tesseract_environment::Environment>();
   if (!env_freespace->init<OFKTStateSolver>(urdf_xml_string_freespace, srdf_xml_string_freespace, locator))
   {
@@ -152,7 +154,6 @@ bool WireCutting::run()
     return false;
   } 
   ROS_INFO("Intialized freespace env");
-
 
   // Create monitor
   monitor_ = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_, EXAMPLE_MONITOR_NAMESPACE);
@@ -162,37 +163,6 @@ bool WireCutting::run()
   auto monitor_freespace = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_freespace, "Freespace");
 
  // Get manipulator
-  /*tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
-  tesseract_kinematics::InverseKinematics::Ptr inv_kin;
-  {  // Need to lock monitor for read
-    auto lock = monitor_->lockEnvironmentRead();
-    fwd_kin = monitor_->getEnvironment()->getManipulatorManager()->getFwdKinematicSolver("manipulator");
-
-    // Get group names
-    std::vector<std::string> group_names = monitor_->getEnvironment()->getManipulatorManager()->getGroupNames();
-    std::cout << "Group names: " << "\n";
-    for (size_t i = 0; i < group_names.size(); i++)
-      std::cout << group_names[i] << "\n";
-
-    // Add OPW as inv kin solver
-    OPWKinematicParameters p;
-    p.a1 = 0.240;
-    p.a2 = -0.225;
-    p.b =  0.000;
-    p.c1 = 0.800;
-    p.c2 = 1.05;
-    p.c3 = 1.725;
-    p.c4 = 0.145;
-
-    p.offsets[2] = -M_PI / 2.0;
-
-    if (monitor_->getEnvironment()->getManipulatorManager()->addOPWKinematicsSolver("manipulator", p)) {
-      ROS_INFO("Added OPW as inv kin solver");
-    }
-
-    inv_kin = monitor_->getEnvironment()->getManipulatorManager()->getInvKinematicSolver("manipulator");
-    std::cout << "Using inv kin solver: " << inv_kin->getSolverName() << "\n";
-  }*/
 
   // Create plotting tool
   ROSPlottingPtr plotter = std::make_shared<ROSPlotting>(monitor_->getSceneGraph()->getRoot());
@@ -226,12 +196,25 @@ bool WireCutting::run()
   SceneGraph::Ptr g1 = g->clone();*/
 
   env_->setState(joint_names, joint_pos);
-  tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
-  std::vector<tesseract_common::VectorIsometry3d> tool_poses; // = loadToolPoses();
+
+  //Between alligners freespace path
   PathData pathData = loadToolPosesCFR("HardProb.txt");
-  //tool_poses = pathData.path;
-  tool_poses.push_back(pathData.path[2]);
-  //tool_poses.push_back(temp_poses);
+  std::vector<tesseract_common::VectorIsometry3d> tool_poses;
+  tool_poses = pathData.path;
+
+
+  /* Freespace a void bbox 
+  tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
+  PathData pathData;
+  std::vector<tesseract_common::VectorIsometry3d> tool_poses; 
+  tool_poses.push_back(temp_poses);
+  tool_poses.push_back(temp_poses);
+  pathData.path = tool_poses;
+  pathData.bbox_pos << 0, 2.2, -0.8;
+  pathData.bbox_size << 0.1, 1.5, 1;
+  pathData.has_bbox = true;*/
+  
+  
   assert(!tool_poses.empty());
 
   /*Eigen::VectorXd pos(3), size(3);
@@ -278,7 +261,7 @@ bool WireCutting::run()
   auto plan_profile_cut = std::make_shared<TrajOptWireCuttingPlanProfile>(*planElement);
   std::cout << "Plan costs: " << std::endl << plan_profile_cut->cart_coeff_cost << std::endl;
   std::cout << "Plan cnt: " << std::endl << plan_profile_cut->cart_coeff_cnt << std::endl;
-  //plan_profile_cut->addFourBarLinkageConstraints();
+  plan_profile_cut->addFourBarLinkageConstraints();
 
 
   // Load composite profile
@@ -289,6 +272,14 @@ bool WireCutting::run()
   auto trajopt_composite_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement);
   trajopt_composite_profile->constrain_velocity = false;
 
+  // Load composite p2p profile
+  tinyxml2::XMLDocument xml_composite_p2p;
+  std::string composite_p2p_path = ros::package::getPath("wire_cutting") + "/planners/composite_p2p_profile.xml";
+  xml_composite_p2p.LoadFile(composite_p2p_path.c_str());
+  XMLElement* compositeElement_p2p = xml_composite_p2p.FirstChildElement("Planner")->FirstChildElement("TrajoptCompositeProfile");
+  auto trajopt_composite_p2p_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement_p2p);
+  trajopt_composite_p2p_profile->constrain_velocity = false;
+
   // Solver profile
   auto trajopt_solver_profile = std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
   trajopt_solver_profile->convex_solver = sco::ModelType::OSQP;
@@ -297,10 +288,15 @@ bool WireCutting::run()
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
 
   //trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
-  trajopt_solver_profile->opt_info.log_results = true;
+  trajopt_solver_profile->opt_info.log_results = iterationDebug;
   
 
+
   // Add profiles to Dictionary
+  planning_server_freespace.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("FREESPACE",
+                                                                                      trajopt_solver_profile);
+  planning_server_freespace.getProfiles()->addProfile<tesseract_planning::TrajOptCompositeProfile>("FREESPACE",
+                                                                                         trajopt_composite_p2p_profile);                                                                                    
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptCompositeProfile>("DEFAULT",
                                                                                          trajopt_composite_profile);
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("DEFAULT",
@@ -309,12 +305,14 @@ bool WireCutting::run()
   
   plotter->waitForInput();
 
-  WireCuttingProblemGenerator problem_generator;
+  WireCuttingProblemGenerator problem_generator(monitor_);
   // Generate cut requests from tool poses
   std::size_t segments = tool_poses.size();
   std::vector<ProcessPlanningRequest> cut_requests(segments);
   for(std::size_t i = 0; i < segments; i++)
-    cut_requests[i] = problem_generator.construct_request_cut(tool_poses[i]);
+  {
+    cut_requests[i] = problem_generator.construct_request_cut(tool_poses[i], env_);
+  }
 
 
   // Solve process plans for cuts
@@ -322,16 +320,20 @@ bool WireCutting::run()
   for(std::size_t i = 0; i < segments; i++)
   {
     cut_responses[i] = planning_server.run(cut_requests[i]);
-    planning_server.waitForAll();
-    std::cout << "path number: " << i << " finished!" << std::endl;
-    plotter->waitForInput();
+    if(iterationDebug) {  
+      planning_server.waitForAll(); 
+      plotter->waitForInput();   
+      ROS_INFO("Plotting path iterations");  
+      plotIterations(env_, plotter, joint_names, "/tmp/trajopt_vars.log");
+    }
   }
+  planning_server.waitForAll();
 
   // // Plot optimization iterations
-  if(iterationDebug) {    
+  /*if(iterationDebug) {    
      ROS_INFO("Plotting path iterations");  
      plotIterations(env_, plotter);
-  }
+  }*/
 
   // Cast responses to composite instructions
   std::vector<const CompositeInstruction*> cis(segments);
@@ -362,15 +364,20 @@ bool WireCutting::run()
   std::size_t p2p_moves = p2p_requests.size();
   std::vector<ProcessPlanningFuture> p2p_responses(p2p_moves);
   for(std::size_t i = 0; i < p2p_moves; i++)
+  {
     p2p_responses[i] = planning_server_freespace.run(p2p_requests[i]);  
-
+    //planning_server_freespace.waitForAll(); 
+    //plotter->waitForInput();  
+    if(iterationDebug) { 
+      planning_server_freespace.waitForAll();  
+      plotter->waitForInput(); 
+      ROS_INFO("Plotting path iterations");  
+      plotIterations(env_, plotter, joint_names, "/tmp/trajopt_vars.log");
+    }
+  }
   planning_server_freespace.waitForAll();
 
-  // // Plot optimization iterations
-  // if(iterationDebug) {    
-  //   ROS_INFO("Plotting path iterations");  
-  //   plotIterations(env_, plotter);
-  // }
+
 
   plotter->waitForInput();
   ROS_INFO("Combine toolpath and trajectory for cut and p2p");
@@ -404,17 +411,17 @@ bool WireCutting::run()
   }
 
 
-  /*tinyxml2::XMLDocument xmlDoc;
+  tinyxml2::XMLDocument xmlDoc;
 
   XMLNode * pRoot = xmlDoc.NewElement("Instructions");    // Creat root element
   xmlDoc.InsertFirstChild(pRoot);                 // Insert element
 
-  XMLElement* pResults = trajopt_composite_profile->toXML(xmlDoc);
-  //XMLElement * pResults = response.results->toXML(xmlDoc);
+  //XMLElement* pResults = trajopt_composite_profile->toXML(xmlDoc);
+  XMLElement * pResults = cut_responses[0].results->toXML(xmlDoc);
   pRoot->InsertEndChild(pResults);                // insert element as child
 
   const char* fileName = "/home/frederik/ws_tesseract_wirecut/trajopt_results.xml";
-  tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);*/
+  tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);
 
 
 

@@ -33,7 +33,8 @@ add_library(${PROJECT_NAME}_wire_cutting src/wire_cutting.cpp
                                          src/four_bar_linkage_constraint.cpp
                                          src/wc_utils.cpp
                                          src/trajopt_wire_cutting_composite_profile.cpp
-                                         src/wire_cutting_problem_generator.cpp)
+                                         src/wire_cutting_problem_generator.cpp
+                                         src/term_info_wc.cpp)
                                          
 
 target_link_libraries(${PROJECT_NAME}_wire_cutting tesseract::tesseract_environment_core tesseract::tesseract_environment_ofkt tesseract::tesseract_process_managers ${catkin_LIBRARIES})
@@ -58,6 +59,34 @@ target_include_directories(${PROJECT_NAME}_wire_cutting_node PRIVATE
 target_include_directories(${PROJECT_NAME}_wire_cutting_node SYSTEM PRIVATE
     ${catkin_INCLUDE_DIRS})
 
+  
+# ITERATIONPLOTTER:
+add_library(${PROJECT_NAME}_iterations_plotter src/iterations_plotter/iterations_plotter.cpp
+                                               src/wc_utils.cpp
+                                               src/term_info_wc.cpp)
+                                         
+
+target_link_libraries(${PROJECT_NAME}_iterations_plotter tesseract::tesseract_environment_core tesseract::tesseract_environment_ofkt tesseract::tesseract_process_managers ${catkin_LIBRARIES})
+target_compile_options(${PROJECT_NAME}_iterations_plotter PUBLIC ${TESSERACT_COMPILE_OPTIONS})
+target_clang_tidy(${PROJECT_NAME}_iterations_plotter ARGUMENTS ${TESSERACT_CLANG_TIDY_ARGS} ENABLE ${TESSERACT_ENABLE_CLANG_TIDY})
+target_cxx_version(${PROJECT_NAME}_iterations_plotter PUBLIC VERSION 17)
+target_include_directories(${PROJECT_NAME}_iterations_plotter PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include>")
+target_include_directories(${PROJECT_NAME}_iterations_plotter SYSTEM PUBLIC
+    ${catkin_INCLUDE_DIRS})
+
+add_executable(${PROJECT_NAME}_iterations_plotter_node src/iterations_plotter/iterations_plotter_node.cpp)
+target_link_libraries(${PROJECT_NAME}_iterations_plotter_node ${PROJECT_NAME}_iterations_plotter ${catkin_LIBRARIES})
+target_compile_options(${PROJECT_NAME}_iterations_plotter_node PRIVATE ${TESSERACT_COMPILE_OPTIONS})
+target_clang_tidy(${PROJECT_NAME}_iterations_plotter_node ARGUMENTS ${TESSERACT_CLANG_TIDY_ARGS} ENABLE ${TESSERACT_ENABLE_CLANG_TIDY})
+target_cxx_version(${PROJECT_NAME}_iterations_plotter_node PUBLIC VERSION 17)
+target_include_directories(${PROJECT_NAME}_iterations_plotter_node PRIVATE
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include>")
+target_include_directories(${PROJECT_NAME}_iterations_plotter_node SYSTEM PRIVATE
+    ${catkin_INCLUDE_DIRS})
+
 
 # Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}
@@ -71,6 +100,8 @@ install(
   TARGETS
     ${PROJECT_NAME}_wire_cutting
     ${PROJECT_NAME}_wire_cutting_node
+    ${PROJECT_NAME}_iterations_plotter
+    ${PROJECT_NAME}_iterations_plotter_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
