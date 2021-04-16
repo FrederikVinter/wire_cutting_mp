@@ -17,6 +17,7 @@ TRAJOPT_IGNORE_WARNINGS_POP
 #include <trajopt_utils/eigen_slicing.hpp>
 #include <trajopt_utils/logging.hpp>
 #include <trajopt_utils/vector_ops.hpp>
+#include <tesseract_kinematics/core/utils.h>
 
 #include <tesseract_kinematics/kdl/kdl_fwd_kin_chain.h>
 
@@ -246,16 +247,19 @@ void CartRotVelTermInfo::hatch(TrajOptProb& prob)
     {
       auto f =
           std::make_shared<CartRotVelErrCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
-      // CartRotVelJacCalculator not implemented use numerical approx of jacobian
-      //auto dfdx =
-      //    std::make_shared<CartRotVelJacCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
+
+      auto dfdx =
+          std::make_shared<CartRotVelJacCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
+      
+      Eigen::VectorXd coeff(6);
+      coeff << 0, 1, 0, 0, 1, 0;
       prob.addCost(std::make_shared<TrajOptCostFromErrFunc>(
           f,
-          //dfdx,
+          dfdx,
           concat(prob.GetVarRow(iStep, 0, n_dof), prob.GetVarRow(iStep + 1, 0, n_dof)),
-          Eigen::VectorXd::Ones(0),
-          sco::ABS,
-          name));
+          coeff,
+          sco::HINGE,
+          "CartRotVel"));
     }
   }
   else if ((term_type & TT_CNT) && ~(term_type | ~TT_USE_TIME))
@@ -264,12 +268,12 @@ void CartRotVelTermInfo::hatch(TrajOptProb& prob)
     {
       auto f =
           std::make_shared<CartRotVelErrCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
-      // CartRotVelJacCalculator not implemented use numerical approx of jacobian
-      //auto dfdx =
-      //    std::make_shared<CartRotVelJacCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
+     
+      auto dfdx =
+          std::make_shared<CartRotVelJacCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
       prob.addConstraint(std::make_shared<TrajOptConstraintFromErrFunc>(
           f,
-          //dfdx,
+          dfdx,
           concat(prob.GetVarRow(iStep, 0, n_dof), prob.GetVarRow(iStep + 1, 0, n_dof)),
           Eigen::VectorXd::Ones(0),
           sco::INEQ,
@@ -294,8 +298,67 @@ VectorXd CartRotVelErrCalculator::operator()(const VectorXd& dof_vals) const
     pose0 = world_to_base_ * pose0 * kin_link_->transform * tcp_;
     pose1 = world_to_base_ * pose1 * kin_link_->transform * tcp_;
 
+    
+    /*auto pose0_RPY = pose0.rotation().eulerAngles(0, 1, 2);
+    auto pose1_RPY = pose1.rotation().eulerAngles(0, 1, 2);
+
+    VectorXd out(2);
+    out[0] = pose0_RPY[1] - pose1_RPY[1];
+    out[1] = pose1_RPY[1] - pose0_RPY[1];
+
+    std::cout << out[0] << std::endl << std::endl;
+    std::cout << out[1] << std::endl << std::endl;*/
+
     VectorXd out(6);
     out.topRows(3) = (pose1.rotation().eulerAngles(0, 1, 2) - pose0.rotation().eulerAngles(0, 1, 2) - Vector3d(limit_, limit_, limit_));
     out.bottomRows(3) = (pose0.rotation().eulerAngles(0, 1, 2) - pose1.rotation().eulerAngles(0, 1, 2) - Vector3d(limit_, limit_, limit_));
     return out;
+}
+
+MatrixXd CartRotVelJacCalculator::operator()(const VectorXd& dof_vals) const
+{
+  auto n_dof = static_cast<int>(manip_->numJoints());
+  MatrixXd out(6, 2 * n_dof);
+
+  MatrixXd jac0, jac1;
+  Eigen::Isometry3d tf0, tf1;
+
+  jac0.resize(6, manip_->numJoints());
+  jac1.resize(6, manip_->numJoints());
+
+  if (tcp_.translation().isZero())
+  {
+    manip_->calcFwdKin(tf0, dof_vals.topRows(n_dof), kin_link_->link_name);
+    manip_->calcJacobian(jac0, dof_vals.topRows(n_dof), kin_link_->link_name);
+    tesseract_kinematics::jacobianChangeBase(jac0, world_to_base_);
+    tesseract_kinematics::jacobianChangeRefPoint(jac0,
+                                                 (world_to_base_ * tf0).linear() * kin_link_->transform.translation());
+
+    manip_->calcFwdKin(tf1, dof_vals.bottomRows(n_dof), kin_link_->link_name);
+    manip_->calcJacobian(jac1, dof_vals.bottomRows(n_dof), kin_link_->link_name);
+    tesseract_kinematics::jacobianChangeBase(jac1, world_to_base_);
+    tesseract_kinematics::jacobianChangeRefPoint(jac1,
+                                                 (world_to_base_ * tf1).linear() * kin_link_->transform.translation());
+  }
+  else
+  {
+    manip_->calcFwdKin(tf0, dof_vals.topRows(n_dof), kin_link_->link_name);
+    manip_->calcJacobian(jac0, dof_vals.topRows(n_dof), kin_link_->link_name);
+    tesseract_kinematics::jacobianChangeBase(jac0, world_to_base_);
+    tesseract_kinematics::jacobianChangeRefPoint(
+        jac0, (world_to_base_ * tf0).linear() * (kin_link_->transform * tcp_).translation());
+
+    manip_->calcFwdKin(tf1, dof_vals.bottomRows(n_dof), kin_link_->link_name);
+    manip_->calcJacobian(jac1, dof_vals.bottomRows(n_dof), kin_link_->link_name);
+    tesseract_kinematics::jacobianChangeBase(jac1, world_to_base_);
+    tesseract_kinematics::jacobianChangeRefPoint(
+        jac1, (world_to_base_ * tf1).linear() * (kin_link_->transform * tcp_).translation());
+  }
+
+  out.block(0, 0, 3, n_dof) = -jac0.bottomRows(3);
+  out.block(0, n_dof, 3, n_dof) = jac1.bottomRows(3);
+  out.block(3, 0, 3, n_dof) = jac0.bottomRows(3);
+  out.block(3, n_dof, 3, n_dof) = -jac1.bottomRows(3);
+  
+  return out;
 }

@@ -57,6 +57,7 @@ struct CartRotVelTermInfo : public TermInfo
   int first_step, last_step;
   /** @brief Link to which the term is applied */
   std::string link;
+  Eigen::Vector3d rot_coeffs;
   double max_displacement;
   /** @brief Used to add term to pci from json */
   void fromJson(ProblemConstructionInfo& pci, const Json::Value& v) override;
@@ -95,6 +96,35 @@ struct CartRotVelErrCalculator : sco::VectorOfVector
   }
 
   Eigen::VectorXd operator()(const Eigen::VectorXd& dof_vals) const override;
+};
+
+struct CartRotVelJacCalculator : sco::MatrixOfVector
+{
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  tesseract_kinematics::ForwardKinematics::ConstPtr manip_;
+  tesseract_environment::AdjacencyMap::ConstPtr adjacency_map_;
+  Eigen::Isometry3d world_to_base_;
+  std::string link_;
+  tesseract_environment::AdjacencyMapPair::ConstPtr kin_link_;
+  double limit_;
+  Eigen::Isometry3d tcp_;
+  CartRotVelJacCalculator(tesseract_kinematics::ForwardKinematics::ConstPtr manip,
+                       tesseract_environment::AdjacencyMap::ConstPtr adjacency_map,
+                       const Eigen::Isometry3d& world_to_base,
+                       std::string link,
+                       double limit,
+                       const Eigen::Isometry3d& tcp = Eigen::Isometry3d::Identity())
+    : manip_(std::move(manip))
+    , adjacency_map_(std::move(adjacency_map))
+    , world_to_base_(world_to_base)
+    , link_(std::move(link))
+    , limit_(limit)
+    , tcp_(tcp)
+  {
+    kin_link_ = adjacency_map_->getLinkMapping(link_);
+  }
+
+  Eigen::MatrixXd operator()(const Eigen::VectorXd& dof_vals) const override;
 };
 
 

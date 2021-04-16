@@ -292,6 +292,7 @@ trajopt::TermInfo::Ptr createVelocityTermInfo(double max_displacement,
 }
 
 trajopt::TermInfo::Ptr createRotationalVelocityTermInfo(double max_displacement,
+                                                //Eigen::Vector3d rot_coeffs,
                                                 int start_index,
                                                 int end_index,
                                                 const std::string& link,
@@ -306,6 +307,7 @@ trajopt::TermInfo::Ptr createRotationalVelocityTermInfo(double max_displacement,
   // end_index-1 is done since velocity requires step_i and step_i+1
   term->last_step = end_index-1;
   term->max_displacement = max_displacement;
+  //term->rot_coeffs = rot_coeffs;
   term->link = link;
   term->term_type = type;  
 

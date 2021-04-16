@@ -214,6 +214,9 @@ void TrajOptWireCuttingCompositeProfile::apply(trajopt::ProblemConstructionInfo&
   if (constrain_velocity)
     addVelocityConstraint(pci, 0, start_index, end_index, pci.kin->getTipLinkName(), trajopt::TermType::TT_COST, fixed_indices);
 
+  if (rotational_velocity)
+    addRotationalVelocity(pci, 0, start_index, end_index, pci.kin->getTipLinkName(), trajopt::TermType::TT_COST, fixed_indices);
+  
   //  if (!constraint_error_functions.empty())
   //    addConstraintErrorFunctions(pci, start_index, end_index, fixed_indices);
 
@@ -303,6 +306,25 @@ tinyxml2::XMLElement* TrajOptWireCuttingCompositeProfile::toXML(tinyxml2::XMLDoc
   return xml_planner;
 }
 
+void TrajOptWireCuttingCompositeProfile::addRotationalVelocity(trajopt::ProblemConstructionInfo& pci,
+                                                               double max_displacement,
+                                                               int start_index,
+                                                               int end_index,
+                                                               const std::string& link,
+                                                               trajopt::TermType type,
+                                                               const std::vector<int>& /*fixed_indices*/) const
+{
+    // 6 coeffs both ways from p_i -> p_i+1 and p_i+1 -> p_i
+    //Eigen::Vector3d rot_coeff(0);
+    //rot_coeff << 0, 1, 0, 0, 1, 0;
+
+    if(type == trajopt::TermType::TT_CNT) {
+      pci.cnt_infos.push_back(createRotationalVelocityTermInfo(max_displacement, start_index, end_index, link, type));
+    }
+    else {
+      pci.cost_infos.push_back(createRotationalVelocityTermInfo(max_displacement,  start_index, end_index, link, type));
+    }
+}
 
 void TrajOptWireCuttingCompositeProfile::addVelocityConstraint(trajopt::ProblemConstructionInfo& pci,
                                                                double max_displacement,

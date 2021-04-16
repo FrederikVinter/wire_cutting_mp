@@ -66,6 +66,8 @@ public:
   CollisionConstraintConfig collision_constraint_config;
   /** @brief If true, velocity constraint is enabled (added 05/03/2021)*/
   bool constrain_velocity = true;
+   /** @brief If true, rotational velocity cost is enabled (added 05/03/2021)*/
+  bool rotational_velocity = true;
   /** @brief If true, a joint velocity cost with a target of 0 will be applied for all timesteps Default: true*/
   bool smooth_velocities = false;
   /** @brief This default to all ones, but allows you to weight different joints */
