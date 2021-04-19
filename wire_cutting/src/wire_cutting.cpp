@@ -216,14 +216,14 @@ bool WireCutting::run()
   if (rviz_)
     plotter->waitForConnection();
 
-  // Eigen::VectorXd pos(3), size(3);
-  // pos << 0, 2.2, -0.2;
-  // size << 0.3, 0.8, 0.6;
-  // Command::Ptr cmd = addBoundingBox(pos, size);
-  // if (!monitor_->applyCommand(*cmd))
-  //   return false;
-  // if (!monitor_freespace->applyCommand(*cmd))
-  //   return false;
+  Eigen::VectorXd pos(3), size(3);
+  pos << 0, 2.2, -0.2;
+  size << 0.3, 0.8, 0.6;
+  Command::Ptr cmd = addBoundingBox(pos, size);
+  if (!monitor_->applyCommand(*cmd))
+    return false;
+  if (!monitor_freespace->applyCommand(*cmd))
+    return false;
   
   // Set the robot initial state
   std::vector<std::string> joint_names;
@@ -257,9 +257,9 @@ bool WireCutting::run()
   assert(!tool_poses.empty());
   //tool_poses.push_back(temp_poses);
 
-  /*Eigen::VectorXd pos(3), size(3);
-  pos << 0, 1.8, -0.5;
-  size << 0.2, 0.3, 0.4;*/
+  // Eigen::VectorXd pos(3), size(3);
+  // pos << 0, 1.8, -0.5;
+  // size << 0.2, 0.3, 0.4;
   // if(pathData.has_bbox)
   // {
   //   std::cout << "Adding bbox with pos: " << std::endl << pathData.bbox_pos << std::endl << "size: " << std::endl << pathData.bbox_size << std::endl;
@@ -278,6 +278,15 @@ bool WireCutting::run()
 
   ProcessPlanningServer planning_server_freespace(env_freespace,1,5);
   planning_server_freespace.loadDefaultProcessPlanners();
+
+  // Create OMPL Profile
+  double range = 0.01;
+  double planning_time = 10.0;
+  auto ompl_profile = std::make_shared<tesseract_planning::OMPLDefaultPlanProfile>();
+  auto ompl_planner_config = std::make_shared<tesseract_planning::RRTConnectConfigurator>();
+  ompl_planner_config->range = range;
+  ompl_profile->planning_time = planning_time;
+  ompl_profile->planners = { ompl_planner_config, ompl_planner_config };
 
   // Create Descartes profile
   auto descartes_plan_profile = std::make_shared<DescartesDefaultPlanProfileD>();
@@ -330,8 +339,9 @@ bool WireCutting::run()
                                                                                       trajopt_solver_profile);
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", plan_profile_cut);
 
-  planning_server_freespace.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("FREESPACE",
+  planning_server_freespace.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("FREESPACE_TRAJOPT",
                                                                                       trajopt_solver_profile);
+  planning_server_freespace.getProfiles()->addProfile<tesseract_planning::OMPLPlanProfile>("FREESPACE_OMPL", ompl_profile);                                                                                
   
   plotter->waitForInput();
 
@@ -374,7 +384,6 @@ bool WireCutting::run()
   {
     cut_responses[i] = planning_server.run(cut_requests[i]);
     planning_server.waitForAll();
-    std::cout << "Seed for path number: " << i << " finished!" << std::endl;
     plotter->waitForInput();
   }
 
@@ -404,7 +413,7 @@ bool WireCutting::run()
     JointState last = trajectories[i-1].back();
     JointState first = trajectories[i].front();
 
-    p2p_requests.push_back(problem_generator.construct_request_p2p(last, first));
+    p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_OMPL"));
   }
 
   plotter->waitForInput();

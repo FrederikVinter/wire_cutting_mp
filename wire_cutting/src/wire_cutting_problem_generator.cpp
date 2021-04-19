@@ -89,25 +89,25 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut_descar
   return request;
 }
 
-ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const JointState& start, const JointState& end)
+ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const JointState& start, const JointState& end, const std::string& planner_name)
 {
   std::cout << start.position << std::endl;
   std::cout << end.position << std::endl << std::endl;
-  CompositeInstruction program("FREESPACE", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
+  CompositeInstruction program(planner_name, CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
 
 
   Waypoint wp_start = StateWaypoint(start.joint_names, start.position);
   Waypoint wp_end = StateWaypoint(start.joint_names, end.position);
 
-  PlanInstruction start_instruction(wp_start, PlanInstructionType::START, "FREESPACE");
+  PlanInstruction start_instruction(wp_start, PlanInstructionType::START, planner_name);
   program.setStartInstruction(start_instruction);
 
-  PlanInstruction plan_end(wp_end, PlanInstructionType::FREESPACE, "FREESPACE");
+  PlanInstruction plan_end(wp_end, PlanInstructionType::FREESPACE, planner_name);
 
   program.push_back(plan_end);
 
   ProcessPlanningRequest request;
-  request.name = tesseract_planning::process_planner_names::TRAJOPT_PLANNER_NAME;
+  request.name = planner_name + " request";
   request.instructions = Instruction(program);
 
   return request;

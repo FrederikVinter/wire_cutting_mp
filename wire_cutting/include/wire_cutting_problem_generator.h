@@ -35,7 +35,7 @@ public:
     
     ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& tool_poses);
     ProcessPlanningRequest construct_request_cut_descartes(const VectorIsometry3d& tool_poses);
-    ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end);
+    ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end, const std::string& planner_name);
 
     TrajOptWireCuttingPlanProfile::Ptr m_plan_cut;
     Environment::Ptr m_env_cut;
