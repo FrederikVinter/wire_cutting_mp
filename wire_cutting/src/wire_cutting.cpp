@@ -47,6 +47,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <tesseract_command_language/command_language.h>
 #include <tesseract_command_language/utils/utils.h>
 #include <tesseract_process_managers/taskflow_generators/trajopt_taskflow.h>
+#include <tesseract_process_managers/taskflow_generators/ompl_taskflow.h>
 #include <tesseract_motion_planners/trajopt/profile/trajopt_default_plan_profile.h>
 #include <tesseract_motion_planners/trajopt/profile/trajopt_default_composite_profile.h>
 #include <tesseract_motion_planners/trajopt/profile/trajopt_default_solver_profile.h>
@@ -161,6 +162,14 @@ bool WireCutting::run()
     
   auto monitor_freespace = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_freespace, "Freespace");
 
+  // Create manipulator information for program
+  ManipulatorInfo mi("manipulator");
+  mi.tcp = ToolCenterPoint("carbon_hotwire", false); 
+
+  ManipulatorInfo mi_freespace("manipulator");
+  mi_freespace.tcp = ToolCenterPoint("carbon_hotwire", false); 
+  
+
  //Get manipulator
   tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
   tesseract_kinematics::InverseKinematics::Ptr inv_kin;
@@ -174,41 +183,10 @@ bool WireCutting::run()
     for (size_t i = 0; i < group_names.size(); i++)
       std::cout << group_names[i] << "\n";
 
-    // Add OPW as inv kin solver
-    OPWKinematicParameters p;
-    p.a1 = 0.240;
-    p.a2 = -0.225;
-    p.b =  0.000;
-    p.c1 = 0.800;
-    p.c2 = 1.05;
-    p.c3 = 1.725;
-    p.c4 = 0.145 + 1.861;
-
-    p.offsets[2] = -M_PI / 2.0;
-
-    // if (monitor_->getEnvironment()->getManipulatorManager()->addOPWKinematicsSolver("manipulator", p)) {
-    //   ROS_INFO("Added OPW as inv kin solver");
-    // }
-
     std::cout << "Has group TCP: " << monitor_->getEnvironment()->getManipulatorManager()->hasGroupTCP("manipulator", "carbon_hotwire") << "\n";
     inv_kin = monitor_->getEnvironment()->getManipulatorManager()->getInvKinematicSolver("manipulator");
 
     std::cout << "Using inv kin solver: " << inv_kin->getSolverName() << "\n";
-
-    ManipulatorInfo manip_info("manipulator");
-    std::cout << "TCP empty: " <<  manip_info.empty() << "\n";
-
-    // Save manip info
-    tinyxml2::XMLDocument xmlDoc;
-    XMLNode * pRoot = xmlDoc.NewElement("ManipInfo");    // Creat root element
-    xmlDoc.InsertFirstChild(pRoot);                 // Insert element
-
-    XMLElement* pResults = manip_info.toXML(xmlDoc);
-    // XMLElement * pResults = response.results->toXML(xmlDoc);
-    pRoot->InsertEndChild(pResults);                // insert element as child
-
-    const char* fileName = "/home/jonathan/projects/wirecutting_ws/manipulator_info.xml";
-    tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);
   }
 
   // Create plotting tool
@@ -218,7 +196,7 @@ bool WireCutting::run()
 
   Eigen::VectorXd pos(3), size(3);
   pos << 0, 2.2, -0.2;
-  size << 0.3, 0.8, 0.6;
+  size << 0.1, 0.8, 0.6;
   Command::Ptr cmd = addBoundingBox(pos, size);
   if (!monitor_->applyCommand(*cmd))
     return false;
@@ -281,11 +259,12 @@ bool WireCutting::run()
 
   // Create OMPL Profile
   double range = 0.01;
-  double planning_time = 10.0;
+  double planning_time = 15.0;
   auto ompl_profile = std::make_shared<tesseract_planning::OMPLDefaultPlanProfile>();
   auto ompl_planner_config = std::make_shared<tesseract_planning::RRTConnectConfigurator>();
   ompl_planner_config->range = range;
   ompl_profile->planning_time = planning_time;
+  ompl_profile->collision_continuous = true;
   ompl_profile->planners = { ompl_planner_config, ompl_planner_config };
 
   // Create Descartes profile
@@ -308,10 +287,18 @@ bool WireCutting::run()
   XMLElement* planElement = xml_plan_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptPlanProfile");
   
   auto plan_profile_cut = std::make_shared<TrajOptWireCuttingPlanProfile>(*planElement);
-  std::cout << "Plan costs: " << std::endl << plan_profile_cut->cart_coeff_cost << std::endl;
-  std::cout << "Plan cnt: " << std::endl << plan_profile_cut->cart_coeff_cnt << std::endl;
+  // std::cout << "Plan costs: " << std::endl << plan_profile_cut->cart_coeff_cost << std::endl;
+  // std::cout << "Plan cnt: " << std::endl << plan_profile_cut->cart_coeff_cnt << std::endl;
   //plan_profile_cut->addFourBarLinkageConstraints();
 
+  // Load plan profile (FREESPACE)
+  tinyxml2::XMLDocument xml_plan_freespace;
+  std::string plan_freespace_path = ros::package::getPath("wire_cutting") + "/planners/plan_freespace_profile.xml";
+  xml_plan_freespace.LoadFile(plan_freespace_path.c_str());
+  planElement = xml_plan_freespace.FirstChildElement("Planner")->FirstChildElement("TrajoptPlanProfile");
+  
+  auto plan_profile_freespace = std::make_shared<TrajOptWireCuttingPlanProfile>(*planElement);
+  // std::cout << "Joint costs: " << std::endl << plan_profile_freespace->joint_coeff << std::endl;
 
   // Load composite profile
   tinyxml2::XMLDocument xml_composite_cut;
@@ -340,9 +327,10 @@ bool WireCutting::run()
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("wire_cutting", plan_profile_cut);
 
   planning_server_freespace.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("FREESPACE_TRAJOPT",
-                                                                                      trajopt_solver_profile);
-  planning_server_freespace.getProfiles()->addProfile<tesseract_planning::OMPLPlanProfile>("FREESPACE_OMPL", ompl_profile);                                                                                
-  
+                                                                                      trajopt_solver_profile);  
+  planning_server_freespace.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("FREESPACE_TRAJOPT", plan_profile_freespace);                                                                               
+  planning_server_freespace.getProfiles()->addProfile<tesseract_planning::OMPLPlanProfile>("FREESPACE_OMPL", ompl_profile);
+                                                                       
   plotter->waitForInput();
 
   WireCuttingProblemGenerator problem_generator;
@@ -359,7 +347,7 @@ bool WireCutting::run()
   // Generate seed with descartes
   std::vector<ProcessPlanningRequest> cut_requests_seed(segments);
   for(std::size_t i = 0; i < segments; i++)
-    cut_requests_seed[i] = problem_generator.construct_request_cut_descartes(tool_poses[i]);
+    cut_requests_seed[i] = problem_generator.construct_request_cut_descartes(tool_poses[i], mi);
 
   std::vector<ProcessPlanningFuture> cut_responses_seed(segments);
   for(std::size_t i = 0; i < segments; i++)
@@ -373,7 +361,7 @@ bool WireCutting::run()
     // Solve process plans for cuts
   std::vector<ProcessPlanningRequest> cut_requests(segments);
   for(std::size_t i = 0; i < segments; i++) {
-    cut_requests[i] = problem_generator.construct_request_cut(tool_poses[i]);
+    cut_requests[i] = problem_generator.construct_request_cut(tool_poses[i], mi);
     std::cout << "Constructed initial request " << std::endl;
     cut_requests[i].seed = *cut_responses_seed[i].results.get();
     std::cout << "Constructed seed " << std::endl;
@@ -397,40 +385,71 @@ bool WireCutting::run()
   std::vector<const CompositeInstruction*> cis(segments);
   for(std::size_t i = 0; i < segments; i++)
     cis[i] = cut_responses[i].results->cast_const<tesseract_planning::CompositeInstruction>();
-
-
+ 
   // Convert CIs to joint trajectories
   std::vector<JointTrajectory> trajectories(segments);
   for(std::size_t i = 0; i < segments; i++)
     trajectories[i] = tesseract_planning::toJointTrajectory(*cis[i]);
 
   plotter->waitForInput();
-  ROS_INFO("Generate point to point requests");
+
+  // Create a OMPL taskflow without post collision checking
+  // disable continous contact check during RRT since it often fails
+  const std::string new_planner_name = "OMPL_NO_POST_CHECK";
+  tesseract_planning::OMPLTaskflowParams params;
+  params.enable_post_contact_discrete_check = false;
+  params.enable_post_contact_continuous_check = false;
+  planning_server_freespace.registerProcessPlanner(new_planner_name,
+                                                  std::make_unique<tesseract_planning::OMPLTaskflow>(params));
+
   // Generate point to point requests
+  ROS_INFO("Generate point to point requests");
   std::vector<ProcessPlanningRequest> p2p_requests;
+  std::vector<ProcessPlanningFuture> p2p_responses;
+
   for(std::size_t i = 1; i < segments; i++)
-  {
-    JointState last = trajectories[i-1].back();
-    JointState first = trajectories[i].front();
+    {
+      JointState last = trajectories[i-1].back();
+      JointState first = trajectories[i].front();
+      p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_TRAJOPT", mi_freespace));
+    }
 
-    p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_OMPL"));
+  if (problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
+    ROS_INFO("Succeeded with TrajOpt only");
+  } else {
+    ROS_INFO("Did not succeed using only TrajOpt. Using RRT as seed");
+    for(std::size_t i = 1; i < segments; i++) {
+        JointState last = trajectories[i-1].back();
+        JointState first = trajectories[i].front();
+        p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_OMPL", mi_freespace));
+    } 
+    std::vector<ProcessPlanningFuture> p2p_responses_seed;
+    if (problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
+        p2p_requests.clear();
+        for(std::size_t i = 1; i < segments; i++) {
+          JointState last = trajectories[i-1].back();
+          JointState first = trajectories[i].front();
+          ProcessPlanningRequest request = problem_generator.construct_request_p2p(last, first, "FREESPACE_TRAJOPT", mi_freespace);
+          request.seed = *p2p_responses[i-1].results.get();
+          p2p_requests.push_back(request);
+        }
+        p2p_responses.clear();
+        if(problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
+          ROS_INFO("Succeeded with RRT as seed");
+        } else {
+          ROS_INFO("RRT succeeded but was unable to be optimized");
+          // p2p_responses = p2p_responses_seed;
+        }
+    } else {
+      ROS_INFO("RRT did not succeed");
+    }
   }
-
-  plotter->waitForInput();
-  ROS_INFO("Solve process plans for point to point");
-  // Solve process plans for point to point
-  std::size_t p2p_moves = p2p_requests.size();
-  std::vector<ProcessPlanningFuture> p2p_responses(p2p_moves);
-  for(std::size_t i = 0; i < p2p_moves; i++)
-    p2p_responses[i] = planning_server_freespace.run(p2p_requests[i]);  
-
-  planning_server_freespace.waitForAll();
 
   // Plot optimization iterations
-  if(iterationDebug) {    
+  // if(iterationDebug) {    
     ROS_INFO("Plotting path iterations");  
     plotIterations(env_, plotter);
-  }
+  // }
 
   plotter->waitForInput();
   ROS_INFO("Combine toolpath and trajectory for cut and p2p");
@@ -462,21 +481,6 @@ bool WireCutting::run()
     plotter->plotMarker(ToolpathMarker(combined_toolpath));
     plotter->plotTrajectory(combined_trajectory, env_->getStateSolver());
   }
-
-
-  /*tinyxml2::XMLDocument xmlDoc;
-
-  XMLNode * pRoot = xmlDoc.NewElement("Instructions");    // Creat root element
-  xmlDoc.InsertFirstChild(pRoot);                 // Insert element
-
-  XMLElement* pResults = trajopt_composite_profile->toXML(xmlDoc);
-  //XMLElement * pResults = response.results->toXML(xmlDoc);
-  pRoot->InsertEndChild(pResults);                // insert element as child
-
-  const char* fileName = "/home/frederik/ws_tesseract_wirecut/trajopt_results.xml";
-  tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);*/
-
-
 
   ROS_INFO("Final trajectory is collision free");
   return true;

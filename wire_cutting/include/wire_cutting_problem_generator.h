@@ -15,6 +15,9 @@
 #include <tesseract_motion_planners/trajopt/profile/trajopt_default_solver_profile.h>
 #include <trajopt_wire_cutting_composite_profile.h>
 
+#include <tesseract_visualization/markers/toolpath_marker.h>
+#include <tesseract_rosutils/plotting.h>
+
 #include <four_bar_linkage_constraint.h>
 #include <trajopt_wire_cutting_plan_profile.h>
 TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
@@ -33,9 +36,15 @@ class WireCuttingProblemGenerator
 public:
     WireCuttingProblemGenerator();
     
-    ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& tool_poses);
-    ProcessPlanningRequest construct_request_cut_descartes(const VectorIsometry3d& tool_poses);
-    ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end, const std::string& planner_name);
+    ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& tool_poses, ManipulatorInfo& mi);
+    ProcessPlanningRequest construct_request_cut_descartes(const VectorIsometry3d& tool_poses, ManipulatorInfo& mi);
+    ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end, const std::string& planner_name, ManipulatorInfo& mi);
+
+
+    bool run_request_p2p(std::vector<ProcessPlanningRequest>& p2p_requests, 
+                        const tesseract_rosutils::ROSPlottingPtr& plotter,
+                        ProcessPlanningServer& planning_server_freespace,
+                        std::vector<ProcessPlanningFuture>& p2p_responses);
 
     TrajOptWireCuttingPlanProfile::Ptr m_plan_cut;
     Environment::Ptr m_env_cut;

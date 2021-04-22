@@ -32,9 +32,9 @@ WireCuttingProblemGenerator::WireCuttingProblemGenerator()
 }
 
 
-ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut(const VectorIsometry3d& tool_poses)
+ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut(const VectorIsometry3d& tool_poses, ManipulatorInfo& mi)
 {
-  CompositeInstruction program("DEFAULT", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
+  CompositeInstruction program("DEFAULT", CompositeInstructionOrder::ORDERED, mi);
   
   assert(!tool_poses.empty());
   Waypoint wp = CartesianWaypoint(tool_poses[0]);
@@ -56,9 +56,9 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut(const 
   return request;
 }
 
-ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut_descartes(const VectorIsometry3d& tool_poses)
+ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut_descartes(const VectorIsometry3d& tool_poses, ManipulatorInfo& mi)
 {
-  CompositeInstruction program("DESCARTES", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
+  CompositeInstruction program("DESCARTES", CompositeInstructionOrder::ORDERED, mi);
   
   assert(!tool_poses.empty());
   Waypoint wp = CartesianWaypoint(tool_poses[0]);
@@ -89,12 +89,11 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut_descar
   return request;
 }
 
-ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const JointState& start, const JointState& end, const std::string& planner_name)
+ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const JointState& start, const JointState& end, const std::string& planner_name, ManipulatorInfo& mi)
 {
-  std::cout << start.position << std::endl;
+  std::cout << start.position << std::endl << std::endl;;
   std::cout << end.position << std::endl << std::endl;
-  CompositeInstruction program(planner_name, CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
-
+  CompositeInstruction program(planner_name, CompositeInstructionOrder::ORDERED, mi);
 
   Waypoint wp_start = StateWaypoint(start.joint_names, start.position);
   Waypoint wp_end = StateWaypoint(start.joint_names, end.position);
@@ -107,8 +106,43 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const 
   program.push_back(plan_end);
 
   ProcessPlanningRequest request;
-  request.name = planner_name + " request";
+  if (planner_name == "FREESPACE_TRAJOPT") {
+    request.name = tesseract_planning::process_planner_names::TRAJOPT_PLANNER_NAME;
+  }
+  else if(planner_name == "FREESPACE_OMPL") {
+    request.name = "OMPL_NO_POST_CHECK";
+  }
   request.instructions = Instruction(program);
 
   return request;
+}
+
+bool WireCuttingProblemGenerator::run_request_p2p(std::vector<ProcessPlanningRequest>& p2p_requests, 
+                                                  const tesseract_rosutils::ROSPlottingPtr& plotter,
+                                                  ProcessPlanningServer& planning_server_freespace,
+                                                  std::vector<ProcessPlanningFuture>& p2p_responses) {
+  
+  plotter->waitForInput();
+
+  std::size_t p2p_moves = p2p_requests.size();
+  p2p_responses.resize(p2p_moves);
+
+  ROS_INFO("Solve process plans for point to point");
+  // Solve process plans for point to point
+  assert(p2p_requests.size() == p2p_moves);
+  for(std::size_t i = 0; i < p2p_requests.size(); i++) {
+    p2p_responses[i] = planning_server_freespace.run(p2p_requests[i]);
+  }
+  planning_server_freespace.waitForAll();
+
+  // check if planning was succesful
+  for(std::size_t i = 0; i < p2p_moves; i++) {
+    if(p2p_responses[i].interface->isAborted()) {
+      ROS_INFO("run_request_p2p: 1 or more requests did not succeed");
+      p2p_requests.clear();
+      p2p_responses.clear();
+      return false;
+    }
+  }
+  return true;
 }
