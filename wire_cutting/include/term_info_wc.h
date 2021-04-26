@@ -75,6 +75,7 @@ struct CartVelTermInfoWC : public TermInfo
   int first_step, last_step;
   /** @brief Link to which the term is applied */
   std::string link;
+  Eigen::VectorXd coeffs;
   double max_displacement;
   /** @brief Used to add term to pci from json */
   void fromJson(ProblemConstructionInfo& pci, const Json::Value& v) override;

@@ -360,7 +360,7 @@ bool WireCutting::run()
   XMLElement* compositeElement = xml_composite_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptCompositeProfile");
   auto trajopt_composite_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement);
   trajopt_composite_profile->constrain_velocity = false;
-  trajopt_composite_profile->rotational_velocity = false;
+  trajopt_composite_profile->rotational_velocity = true;
 
   // Load composite p2p profile
   tinyxml2::XMLDocument xml_composite_p2p;
@@ -375,6 +375,7 @@ bool WireCutting::run()
   auto trajopt_solver_profile = std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
   trajopt_solver_profile->convex_solver = sco::ModelType::OSQP;
   trajopt_solver_profile->opt_info.max_iter = 500;
+  trajopt_solver_profile->opt_info.max_merit_coeff_increases = 50;
   trajopt_solver_profile->opt_info.min_approx_improve = 1e-3;
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
 
