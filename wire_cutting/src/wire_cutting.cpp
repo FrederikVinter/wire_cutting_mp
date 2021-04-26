@@ -163,6 +163,39 @@ bool WireCutting::run()
   auto monitor_freespace = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_freespace, "Freespace");
 
  // Get manipulator
+  tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
+  tesseract_kinematics::InverseKinematics::Ptr inv_kin;
+  {  // Need to lock monitor for read
+    auto lock = monitor_->lockEnvironmentRead();
+    fwd_kin = monitor_->getEnvironment()->getManipulatorManager()->getFwdKinematicSolver("manipulator");
+
+    // Get group names
+    std::vector<std::string> group_names = monitor_->getEnvironment()->getManipulatorManager()->getGroupNames();
+    std::cout << "Group names: " << "\n";
+    for (size_t i = 0; i < group_names.size(); i++)
+      std::cout << group_names[i] << "\n";
+
+
+    std::cout << "Has group TCP: " << monitor_->getEnvironment()->getManipulatorManager()->hasGroupTCP("manipulator", "carbon_hotwire") << "\n";
+    inv_kin = monitor_->getEnvironment()->getManipulatorManager()->getInvKinematicSolver("manipulator");
+
+    std::cout << "Using inv kin solver: " << inv_kin->getSolverName() << "\n";
+
+    ManipulatorInfo manip_info("manipulator");
+    std::cout << "TCP empty: " <<  manip_info.empty() << "\n";
+
+    // Save manip info
+    /*tinyxml2::XMLDocument xmlDoc;
+    XMLNode * pRoot = xmlDoc.NewElement("ManipInfo");    // Creat root element
+    xmlDoc.InsertFirstChild(pRoot);                 // Insert element
+
+    XMLElement* pResults = manip_info.toXML(xmlDoc);
+    // XMLElement * pResults = response.results->toXML(xmlDoc);
+    pRoot->InsertEndChild(pResults);                // insert element as child
+
+    const char* fileName = "/home/jonathan/projects/wirecutting_ws/manipulator_info.xml";
+    tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);*/
+  }
 
   // Create plotting tool
   ROSPlottingPtr plotter = std::make_shared<ROSPlotting>(monitor_->getSceneGraph()->getRoot());
@@ -246,11 +279,61 @@ bool WireCutting::run()
   descartes_plan_profile->enable_edge_collision = true;
   descartes_plan_profile->debug = true;
   descartes_plan_profile->target_pose_sampler = [](const Eigen::Isometry3d& tool_pose) {
-    // return tesseract_planning::sampleToolAxis(tool_pose, 60 * M_PI * 180.0, Eigen::Vector3d(0, 1, 0)); // sample around Y-axis
-    return tesseract_planning::sampleToolYAxis(tool_pose, M_PI);
-  };*/
+    //return tesseract_planning::sampleToolAxis(tool_pose, 60 * M_PI * 180.0, Eigen::Vector3d(0, 1, 0)); // sample around Y-axis
+    //std::cout << "SAMPLE" << std::endl;
+     return tesseract_planning::sampleToolYAxis(tool_pose, 0.100);
+  };
+  planning_server.getProfiles()->addProfile<tesseract_planning::DescartesPlanProfile<double>>("DESCARTES", descartes_plan_profile);
 
-  //planning_server.getProfiles()->addProfile<tesseract_planning::DescartesDefaultPlanProfileD>("DESCARTES", descartes_plan_profile);
+
+  CompositeInstruction program("DESCARTES", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
+  
+  assert(!tool_poses.empty());
+  Waypoint wps = CartesianWaypoint(tool_poses[0][0]);
+  PlanInstruction plan_instruction(wps, PlanInstructionType::START, "DESCARTES");
+  plan_instruction.setDescription("from_start_plan");
+  program.setStartInstruction(plan_instruction);
+
+  std::cout << "Start point: "  << std::endl;
+  wps.print();
+
+
+  Waypoint wpe = CartesianWaypoint(tool_poses[0][1]);
+  PlanInstruction plan_instructione(wpe, PlanInstructionType::LINEAR, "DESCARTES");
+  plan_instruction.setDescription("waypoint_" + std::to_string(1)); 
+  program.push_back(plan_instructione);
+
+  std::cout << "End point: "  << std::endl;
+  wpe.print();
+  
+  
+
+  CompositeInstruction seed = generateSeed(program, env_->getCurrentState(), env_);
+
+  // Create Planning Request
+  PlannerRequest request;
+  request.seed = seed;
+  request.instructions = program;
+  request.env = env_;
+  request.env_state = env_->getCurrentState();
+
+  // Solve Descartes Plan
+  PlannerResponse descartes_response;
+  DescartesMotionPlannerD descartes_planner;
+  descartes_planner.plan_profiles["DESCARTES"] = descartes_plan_profile;
+  descartes_planner.problem_generator = tesseract_planning::DefaultDescartesProblemGenerator<double>;
+  plotter->waitForInput();
+  auto descartes_status = descartes_planner.solve(request, descartes_response);
+  assert(descartes_status);
+
+  plotter->waitForInput();
+  // Plot Descartes Trajectory
+  if (plotter)
+  {
+    plotter->waitForInput();
+    plotter->plotTrajectory(toJointTrajectory(descartes_response.results), env_->getStateSolver());
+  }
+  plotter->waitForInput();*/
 
   // Load plan profile
   tinyxml2::XMLDocument xml_plan_cut;
@@ -270,7 +353,7 @@ bool WireCutting::run()
   xml_composite_cut.LoadFile(composite_cut_path.c_str());
   XMLElement* compositeElement = xml_composite_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptCompositeProfile");
   auto trajopt_composite_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement);
-  //trajopt_composite_profile->constrain_velocity = false;
+  trajopt_composite_profile->constrain_velocity = false;
   trajopt_composite_profile->rotational_velocity = false;
 
   // Load composite p2p profile
@@ -280,6 +363,7 @@ bool WireCutting::run()
   XMLElement* compositeElement_p2p = xml_composite_p2p.FirstChildElement("Planner")->FirstChildElement("TrajoptCompositeProfile");
   auto trajopt_composite_p2p_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement_p2p);
   trajopt_composite_p2p_profile->constrain_velocity = false;
+  trajopt_composite_p2p_profile->rotational_velocity = false;
 
   // Solver profile
   auto trajopt_solver_profile = std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
@@ -294,6 +378,8 @@ bool WireCutting::run()
 
 
   // Add profiles to Dictionary
+  planning_server_freespace.getProfiles()->addProfile<tesseract_planning::TrajOptPlanProfile>("FREESPACE", 
+                                                                                      plan_profile_cut);
   planning_server_freespace.getProfiles()->addProfile<tesseract_planning::TrajOptSolverProfile>("FREESPACE",
                                                                                       trajopt_solver_profile);
   planning_server_freespace.getProfiles()->addProfile<tesseract_planning::TrajOptCompositeProfile>("FREESPACE",

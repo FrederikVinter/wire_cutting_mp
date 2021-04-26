@@ -171,7 +171,7 @@ void TrajOptWireCuttingPlanProfile::addFourBarLinkageConstraints()
 
   sco::ConstraintType a = sco::ConstraintType::INEQ;
   Eigen::VectorXd error_coeff(2);
-  error_coeff << 1, 1;
+  error_coeff << 10, 10;
 
   std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple1(temp_1,nullptr,a,error_coeff);
   std::tuple<sco::VectorOfVector::func, sco::MatrixOfVector::func, sco::ConstraintType, Eigen::VectorXd> temp_tuple2(temp_2,nullptr,a,error_coeff);
