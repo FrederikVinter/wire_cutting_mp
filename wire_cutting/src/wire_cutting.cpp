@@ -162,6 +162,14 @@ bool WireCutting::run()
     
   auto monitor_freespace = std::make_shared<tesseract_monitoring::EnvironmentMonitor>(env_freespace, "Freespace");
 
+
+  /*ManipulatorInfo mi("manipulator");
+  mi.tcp = ToolCenterPoint("carbon_hotwire", false); 
+
+  ManipulatorInfo mi_freespace("manipulator");
+  mi_freespace.tcp = ToolCenterPoint("carbon_hotwire", false); */
+  
+
  // Get manipulator
   tesseract_kinematics::ForwardKinematics::Ptr fwd_kin;
   tesseract_kinematics::InverseKinematics::Ptr inv_kin;
@@ -181,8 +189,6 @@ bool WireCutting::run()
 
     std::cout << "Using inv kin solver: " << inv_kin->getSolverName() << "\n";
 
-    ManipulatorInfo manip_info("manipulator");
-    std::cout << "TCP empty: " <<  manip_info.empty() << "\n";
 
     // Save manip info
     /*tinyxml2::XMLDocument xmlDoc;
@@ -398,7 +404,8 @@ bool WireCutting::run()
   std::vector<ProcessPlanningRequest> cut_requests(segments);
   for(std::size_t i = 0; i < segments; i++)
   {
-    cut_requests[i] = problem_generator.construct_request_cut(tool_poses[i], env_);
+    auto manipinfo = ManipulatorInfo("manipulator");
+    cut_requests[i] = problem_generator.construct_request_cut(tool_poses[i], env_, manipinfo);
   }
 
 

@@ -1,4 +1,3 @@
-<?xml version="1.0"?>
 <robot name="irb6400r" version="1.0.0">
     <!-- <group name="robot_only">
         <chain base_link="base_link" tip_link="tool0"/>
@@ -7,12 +6,12 @@
         <chain base_link="base_link" tip_link="carbon_hotwire"/>
     </group> -->
     <group name="manipulator">
-        <chain base_link="base_link" tip_link="carbon_hotwire"/>
+        <chain base_link="base_link" tip_link="tool0"/>
     </group>
 
-    <!--<group_tcps group="manipulator">
+    <group_tcps group="manipulator">
         <tcp name="carbon_hotwire" xyz="0 0 1.861" wxyz="1 0 0 0"/>
-    </group_tcps>-->
+    </group_tcps>
 
     <group_state name="home" group="manipulator">
         <joint name="joint_6" value="0"/>
@@ -23,9 +22,7 @@
         <joint name="joint_2" value="0"/>
     </group_state>
 
-    <group_opw group="manipulator" a1="0.23999999999999999" a2="-0.22500000000000001" b="0" c1="0.80000000000000004" c2="1.05" c3="1.7250000000000001" c4="2.0059" offsets="0.000000 0.000000 -1.570000 0.000000 0.000000 0.000000" sign_corrections="1 1 1 1 1 1"/>
-    
-    <!--  c4="0.14499999999999999 -->
+    <group_opw group="manipulator" a1="0.23999999999999999" a2="-0.22500000000000001" b="0" c1="0.80000000000000004" c2="1.05" c3="1.7250000000000001" c4="0.14499999999999999" offsets="0.000000 0.000000 -1.570000 0.000000 0.000000 0.000000" sign_corrections="1 1 1 1 1 1"/>
     
     <disable_collisions link1="CH_left" link2="CH_right" reason="Never"/>
     <disable_collisions link1="base_link" link2="link_2" reason="Never"/>

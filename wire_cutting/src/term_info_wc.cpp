@@ -339,7 +339,7 @@ void CartVelTermInfoWC::hatch(TrajOptProb& prob)
     for (int iStep = first_step; iStep <= last_step; ++iStep)
     {
       Eigen::VectorXd coeff(6);
-      coeff << 0, 1, 0, 0, 1, 0;
+      coeff << 0, 5, 0, 0, 5, 0;
       auto f =
           std::make_shared<CartVelErrCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
       auto dfdx =

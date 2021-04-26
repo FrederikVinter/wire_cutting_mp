@@ -8,7 +8,7 @@ WireCuttingProblemGenerator::WireCuttingProblemGenerator(tesseract_monitoring::E
 }
 
 
-ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut(const VectorIsometry3d& tool_poses, const Environment::ConstPtr& env)
+ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_cut(const VectorIsometry3d& tool_poses, const Environment::ConstPtr& env, ManipulatorInfo& manip)
 {
   CompositeInstruction program("DEFAULT", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
   

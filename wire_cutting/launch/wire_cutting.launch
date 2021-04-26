@@ -13,7 +13,7 @@
   <param name="$(arg robot_description)_freespace" command="$(find xacro)/xacro --inorder '$(find wire_cutting)/urdf/wire_cutting_freespace_workcell.xacro'" />
 
   <!-- The semantic description that corresponds to the URDF -->
-  <param name="$(arg robot_description)_semantic" textfile="$(find wire_cutting)/config/irb6400r_ignition.srdf" />
+  <param name="$(arg robot_description)_semantic" textfile="$(find wire_cutting)/config/irb6400r.srdf" />
   <param name="$(arg robot_description)_freespace_semantic" textfile="$(find wire_cutting)/config/irb6400r_freespace.srdf" />
 
   <group unless="$(arg testing)">    

@@ -250,7 +250,9 @@ void plotIterations(const tesseract_environment::Environment::Ptr& env, const te
         //std::cout << "JOINT POSE " << j << "\n" << opt_joint_results[i][j] << "\n";
 
         Eigen::Isometry3d opt_pose;
+        Eigen::Vector3d tcp_pose(0,0,1.861);
         kin->calcFwdKin(opt_pose, opt_joint_results[i][j]);
+        opt_pose.translate(tcp_pose);
         opt_poses.push_back(opt_pose);
       }
 

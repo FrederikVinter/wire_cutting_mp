@@ -34,7 +34,7 @@ class WireCuttingProblemGenerator
 public:
     WireCuttingProblemGenerator(tesseract_monitoring::EnvironmentMonitor::Ptr monitor);
     
-    ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& tool_poses, const Environment::ConstPtr& env);
+    ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& tool_poses, const Environment::ConstPtr& env, ManipulatorInfo& manip);
     ProcessPlanningRequest construct_request_cut_descartes(const VectorIsometry3d& tool_poses);
     ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end);
 
