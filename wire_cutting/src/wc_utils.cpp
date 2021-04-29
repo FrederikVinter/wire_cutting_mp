@@ -252,7 +252,7 @@ void plotIterations(const tesseract_environment::Environment::Ptr& env, const te
         Eigen::Isometry3d opt_pose;
         Eigen::Vector3d tcp_pose(0,0,1.861);
         kin->calcFwdKin(opt_pose, opt_joint_results[i][j]);
-        opt_pose.translate(tcp_pose);
+        //opt_pose.translate(tcp_pose);
         opt_poses.push_back(opt_pose);
       }
 
@@ -276,7 +276,9 @@ trajopt::TermInfo::Ptr createVelocityTermInfo(double max_displacement,
                                                 int start_index,
                                                 int end_index,
                                                 const std::string& link,
-                                                trajopt::TermType type)
+                                                trajopt::TermType type,
+                                                const Eigen::VectorXd& coeff,
+                                                sco::PenaltyType penalty_type)
 {
   if ((end_index - start_index) < 2)
     throw std::runtime_error("TrajOpt CartVelTermInfo requires at least two states!");
@@ -289,6 +291,8 @@ trajopt::TermInfo::Ptr createVelocityTermInfo(double max_displacement,
   term->max_displacement = max_displacement;
   term->link = link;
   term->term_type = type;  
+  term->coeffs = coeff;
+  term->penalty_type = penalty_type;
 
   return term;
 }
@@ -298,7 +302,9 @@ trajopt::TermInfo::Ptr createRotationalVelocityTermInfo(double max_displacement,
                                                 int start_index,
                                                 int end_index,
                                                 const std::string& link,
-                                                trajopt::TermType type)
+                                                trajopt::TermType type,
+                                                const Eigen::VectorXd& coeff,
+                                                sco::PenaltyType penalty_type)
 {
   if ((end_index - start_index) < 2)
     throw std::runtime_error("TrajOpt CartVelTermInfo requires at least two states!");
@@ -311,7 +317,9 @@ trajopt::TermInfo::Ptr createRotationalVelocityTermInfo(double max_displacement,
   term->max_displacement = max_displacement;
   //term->rot_coeffs = rot_coeffs;
   term->link = link;
-  term->term_type = type;  
+  term->term_type = type;
+  term->rot_coeffs = coeff;
+  term->penalty_type = penalty_type;  
 
   return term;
 }
@@ -322,7 +330,8 @@ trajopt::TermInfo::Ptr createCartesianWaypointTermInfoWC(const Eigen::Isometry3d
                                                        Eigen::Isometry3d tcp,
                                                        const Eigen::VectorXd& coeffs,
                                                        std::string link,
-                                                       trajopt::TermType type)
+                                                       trajopt::TermType type,
+                                                       sco::PenaltyType penalty_type)
 {
   auto pose_info = std::make_shared<CartPoseTermInfoWC>();
   pose_info->term_type = type;
@@ -330,6 +339,7 @@ trajopt::TermInfo::Ptr createCartesianWaypointTermInfoWC(const Eigen::Isometry3d
 
   pose_info->link = link;
   pose_info->tcp = tcp;
+  pose_info->penalty_type = penalty_type;
 
   pose_info->timestep = index;
   pose_info->xyz = c_wp.translation();

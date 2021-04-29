@@ -31,6 +31,8 @@ public:
 
   Eigen::VectorXd cart_coeff_cnt{ Eigen::VectorXd::Constant(6, 1, 5) };
   Eigen::VectorXd cart_coeff_cost{ Eigen::VectorXd::Constant(6, 1, 0) };
+  sco::PenaltyType cart_penalty_type = sco::ABS;
+
   Eigen::VectorXd joint_coeff{ Eigen::VectorXd::Constant(1, 1, 5) };
   trajopt::TermType term_type{ trajopt::TermType::TT_CNT };
 

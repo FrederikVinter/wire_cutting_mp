@@ -14,7 +14,7 @@ TrajOptWireCuttingPlanProfile::TrajOptWireCuttingPlanProfile(const tinyxml2::XML
   const tinyxml2::XMLElement* joint_coeff_element = xml_element.FirstChildElement("JointCoefficients");
   const tinyxml2::XMLElement* term_type_element = xml_element.FirstChildElement("Term");
   const tinyxml2::XMLElement* cnt_error_fn_element = xml_element.FirstChildElement("ConstraintErrorFunctions");
-
+  const tinyxml2::XMLElement* penalty_type = xml_element.FirstChildElement("PenaltyType");
   tinyxml2::XMLError status;
 
   if (cartesian_coeff_cnt_element)
@@ -51,6 +51,18 @@ TrajOptWireCuttingPlanProfile::TrajOptWireCuttingPlanProfile(const tinyxml2::XML
     cart_coeff_cost.resize(static_cast<long>(cart_coeff_cost_tokens.size()));
     for (std::size_t i = 0; i < cart_coeff_cost_tokens.size(); ++i)
       tesseract_common::toNumeric<double>(cart_coeff_cost_tokens[i], cart_coeff_cost[static_cast<long>(i)]);
+
+
+  }
+
+  if(penalty_type)
+  {
+    int coll_type;
+    status = penalty_type->QueryIntAttribute("type", &coll_type);
+    if (status != tinyxml2::XML_SUCCESS)
+      throw std::runtime_error("CollisionCostConfig: Error parsing Penalty type attribute.");
+
+    cart_penalty_type = static_cast<sco::PenaltyType>(coll_type);
   }
 
   if (joint_coeff_element)
@@ -108,7 +120,7 @@ void TrajOptWireCuttingPlanProfile::apply(trajopt::ProblemConstructionInfo& pci,
       cartesian_waypoint, index, mi.working_frame, tcp, cart_coeff_cnt, pci.kin->getTipLinkName(), trajopt::TermType::TT_CNT);
   
   auto ti2 = createCartesianWaypointTermInfoWC(
-      cartesian_waypoint, index, mi.working_frame, tcp, cart_coeff_cost, pci.kin->getTipLinkName(), trajopt::TermType::TT_COST);
+      cartesian_waypoint, index, mi.working_frame, tcp, cart_coeff_cost, pci.kin->getTipLinkName(), trajopt::TermType::TT_COST, cart_penalty_type);
  
   pci.cnt_infos.push_back(ti1);
   pci.cost_infos.push_back(ti2);

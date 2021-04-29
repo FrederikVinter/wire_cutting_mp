@@ -170,11 +170,12 @@ void CartPoseTermInfoWC::hatch(TrajOptProb& prob)
     auto f = std::make_shared<CartPoseErrCalculator>(
         world_to_target * input_pose, prob.GetKin(), adjacency_map, world_to_base, link, tcp, indices);
 
-    // This is currently not being used. There is an intermittent bug that needs to be tracked down it is not used.
+    // This is currently not being use2.5d. There is an intermittent bug that needs to be tracked down it is not used.
     auto dfdx = std::make_shared<CartPoseJacCalculator>(
         input_pose, prob.GetKin(), adjacency_map, world_to_base, link, tcp, indices);
+    
     prob.addCost(
-        std::make_shared<TrajOptCostFromErrFunc>(f, prob.GetVarRow(timestep, 0, n_dof), coeff, sco::SQUARED, name));
+        std::make_shared<TrajOptCostFromErrFunc>(f, prob.GetVarRow(timestep, 0, n_dof), coeff, penalty_type, name));
   }
   else if ((term_type & TT_CNT) && ~(term_type | ~TT_USE_TIME))
   {
@@ -243,6 +244,7 @@ void CartRotVelTermInfo::hatch(TrajOptProb& prob)
   }
   else if ((term_type & TT_COST) && ~(term_type | ~TT_USE_TIME))
   {
+    std::cout << "RotVel Coeffs: " << rot_coeffs << std::endl << std::endl;
     for (int iStep = first_step; iStep <= last_step; ++iStep)
     {
       auto f =
@@ -251,15 +253,13 @@ void CartRotVelTermInfo::hatch(TrajOptProb& prob)
       auto dfdx =
           std::make_shared<CartRotVelJacCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
       
-      Eigen::VectorXd coeff(6);
-      coeff << 0, 1, 0, 0, 1, 0;
       prob.addCost(std::make_shared<TrajOptCostFromErrFunc>(
           f,
           dfdx,
           concat(prob.GetVarRow(iStep, 0, n_dof), prob.GetVarRow(iStep + 1, 0, n_dof)),
-          coeff,
-          sco::HINGE,
-          "CartRotVel"));
+          rot_coeffs,
+          penalty_type,
+          "RotVel: " + std::to_string(iStep) + " to " + std::to_string(iStep+1)));
     }
   }
   else if ((term_type & TT_CNT) && ~(term_type | ~TT_USE_TIME))
@@ -336,21 +336,21 @@ void CartVelTermInfoWC::hatch(TrajOptProb& prob)
   }
   else if ((term_type & TT_COST) && ~(term_type | ~TT_USE_TIME))
   {
+    std::cout << "LinVel Coeffs: " << coeffs << std::endl << std::endl;
     for (int iStep = first_step; iStep <= last_step; ++iStep)
     {
-      Eigen::VectorXd coeff(6);
-      coeff << 0, 5, 0, 0, 5, 0;
       auto f =
           std::make_shared<CartVelErrCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
       auto dfdx =
           std::make_shared<CartVelJacCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
+      
       prob.addCost(std::make_shared<TrajOptCostFromErrFunc>(
           f,
           dfdx,
           concat(prob.GetVarRow(iStep, 0, n_dof), prob.GetVarRow(iStep + 1, 0, n_dof)),
-          coeff,
-          sco::ABS,
-          name));
+          coeffs,
+          penalty_type,
+          "LinVel: " + std::to_string(iStep) + " to " + std::to_string(iStep+1)));
     }
   }
   else if ((term_type & TT_CNT) && ~(term_type | ~TT_USE_TIME))
@@ -402,6 +402,10 @@ VectorXd CartRotVelErrCalculator::operator()(const VectorXd& dof_vals) const
     VectorXd out(6);
     out.topRows(3) = (pose1.rotation().eulerAngles(0, 1, 2) - pose0.rotation().eulerAngles(0, 1, 2) - Vector3d(limit_, limit_, limit_));
     out.bottomRows(3) = (pose0.rotation().eulerAngles(0, 1, 2) - pose1.rotation().eulerAngles(0, 1, 2) - Vector3d(limit_, limit_, limit_));
+
+    /*for(std::size_t i = 0; i < 6; i++)
+      out[i] = std::pow(out[i],2);*/
+
     return out;
 }
 

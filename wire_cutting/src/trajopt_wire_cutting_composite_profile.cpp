@@ -55,7 +55,9 @@ TrajOptWireCuttingCompositeProfile::TrajOptWireCuttingCompositeProfile(const tin
                                                                                                  "action");
   const tinyxml2::XMLElement* longest_valid_seg_length_element = xml_element.FirstChildElement("LongestValidSegmentLeng"
                                                                                                "th");
-
+  const tinyxml2::XMLElement* linear_cart_vel = xml_element.FirstChildElement("LinearCartesianVelocity");
+  const tinyxml2::XMLElement* rotational_cart_vel = xml_element.FirstChildElement("RotationalCartesianVelocity");
+                                                                                                                                                                                                                                                                                         
   tinyxml2::XMLError status;
 
   if (contact_test_type_element)
@@ -147,6 +149,97 @@ TrajOptWireCuttingCompositeProfile::TrajOptWireCuttingCompositeProfile(const tin
 
     tesseract_common::toNumeric<double>(long_valid_seg_len_string, longest_valid_segment_length);
   }
+
+
+  if (linear_cart_vel)
+  {
+    const tinyxml2::XMLElement* enabled_element = linear_cart_vel->FirstChildElement("Enabled");
+    const tinyxml2::XMLElement* coeff_element = linear_cart_vel->FirstChildElement("Coefficients");
+    const tinyxml2::XMLElement* cost_type = linear_cart_vel->FirstChildElement("PenaltyType");
+
+    if (!enabled_element)
+      throw std::runtime_error("TrajoptCompositeProfile: Linear cart vel Must have enabled element");
+
+    tinyxml2::XMLError status = enabled_element->QueryBoolText(&constrain_velocity);
+    if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+      throw std::runtime_error("TrajoptCompositeProfile: Error parsing Enabled string");
+
+    if (coeff_element)
+    {
+      std::vector<std::string> coeff_tokens;
+      std::string coeff_string;
+      status = tesseract_common::QueryStringText(coeff_element, coeff_string);
+      if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+        throw std::runtime_error("TrajoptCompositeProfile: Error parsing cart vel Coefficients string");
+
+      boost::split(coeff_tokens, coeff_string, boost::is_any_of(" "), boost::token_compress_on);
+
+      std::size_t length = coeff_tokens.size();
+
+      if (!tesseract_common::isNumeric(coeff_tokens))
+        throw std::runtime_error("TrajoptCompositeProfile: Cart vel Coefficients are not all numeric values.");
+
+      cart_vel_coeff.resize(static_cast<long>(length));
+      for (std::size_t i = 0; i < coeff_tokens.size(); ++i)
+        tesseract_common::toNumeric<double>(coeff_tokens[i], cart_vel_coeff[static_cast<long>(i)]);
+    }
+
+    if(cost_type)
+    {
+      int coll_type;
+      status = cost_type->QueryIntAttribute("type", &coll_type);
+      if (status != tinyxml2::XML_SUCCESS)
+        throw std::runtime_error("CollisionCostConfig: Error parsing Penalty type attribute.");
+
+      cart_vel_penalty_type = static_cast<sco::PenaltyType>(coll_type);
+    }
+  }
+
+  if (rotational_cart_vel)
+  {
+    const tinyxml2::XMLElement* enabled_element = rotational_cart_vel->FirstChildElement("Enabled");
+    const tinyxml2::XMLElement* coeff_element = rotational_cart_vel->FirstChildElement("Coefficients");
+    const tinyxml2::XMLElement* cost_type = rotational_cart_vel->FirstChildElement("PenaltyType");
+
+    if (!enabled_element)
+      throw std::runtime_error("TrajoptCompositeProfile: Rotational Cart vel Must have enabled element");
+
+    tinyxml2::XMLError status = enabled_element->QueryBoolText(&rotational_velocity);
+    if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+      throw std::runtime_error("TrajoptCompositeProfile: Error parsing Enabled string");
+
+    if (coeff_element)
+    {
+      std::vector<std::string> coeff_tokens;
+      std::string coeff_string;
+      status = tesseract_common::QueryStringText(coeff_element, coeff_string);
+      if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+        throw std::runtime_error("TrajoptCompositeProfile: Error parsing cart rot vel Coefficients string");
+
+      boost::split(coeff_tokens, coeff_string, boost::is_any_of(" "), boost::token_compress_on);
+
+      std::size_t length = coeff_tokens.size();
+
+      if (!tesseract_common::isNumeric(coeff_tokens))
+        throw std::runtime_error("TrajoptCompositeProfile: Cart rot vel Coefficients are not all numeric values.");
+
+      cart_rot_vel_coeff.resize(static_cast<long>(length));
+      for (std::size_t i = 0; i < coeff_tokens.size(); ++i)
+        tesseract_common::toNumeric<double>(coeff_tokens[i], cart_rot_vel_coeff[static_cast<long>(i)]);
+    
+    }
+
+    if(cost_type)
+    {
+      int coll_type;
+      status = cost_type->QueryIntAttribute("type", &coll_type);
+      if (status != tinyxml2::XML_SUCCESS)
+        throw std::runtime_error("CollisionCostConfig: Error parsing Penalty type attribute.");
+
+      cart_rot_vel_penalty_type = static_cast<sco::PenaltyType>(coll_type);
+    }
+  }
+
 }
 
 void TrajOptWireCuttingCompositeProfile::smoothMotionTerms(const tinyxml2::XMLElement& xml_element,
@@ -319,10 +412,10 @@ void TrajOptWireCuttingCompositeProfile::addRotationalVelocity(trajopt::ProblemC
     //rot_coeff << 0, 1, 0, 0, 1, 0;
 
     if(type == trajopt::TermType::TT_CNT) {
-      pci.cnt_infos.push_back(createRotationalVelocityTermInfo(max_displacement, start_index, end_index, link, type));
+      pci.cnt_infos.push_back(createRotationalVelocityTermInfo(max_displacement, start_index, end_index, link, type, cart_rot_vel_coeff, cart_rot_vel_penalty_type));
     }
     else {
-      pci.cost_infos.push_back(createRotationalVelocityTermInfo(max_displacement,  start_index, end_index, link, type));
+      pci.cost_infos.push_back(createRotationalVelocityTermInfo(max_displacement,  start_index, end_index, link, type, cart_rot_vel_coeff, cart_rot_vel_penalty_type));
     }
 }
 
@@ -335,10 +428,10 @@ void TrajOptWireCuttingCompositeProfile::addVelocityConstraint(trajopt::ProblemC
                                                                const std::vector<int>& /*fixed_indices*/) const
 {
   if(type == trajopt::TermType::TT_CNT) {
-    pci.cnt_infos.push_back(createVelocityTermInfo(max_displacement, start_index, end_index, link, type));
+    pci.cnt_infos.push_back(createVelocityTermInfo(max_displacement, start_index, end_index, link, type, cart_vel_coeff, cart_vel_penalty_type));
   }
   else {
-    pci.cost_infos.push_back(createVelocityTermInfo(max_displacement, start_index, end_index, link, type));
+    pci.cost_infos.push_back(createVelocityTermInfo(max_displacement, start_index, end_index, link, type, cart_vel_coeff, cart_vel_penalty_type));
   }
 }
 

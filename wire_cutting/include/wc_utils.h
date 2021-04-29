@@ -34,14 +34,18 @@ trajopt::TermInfo::Ptr createVelocityTermInfo(double max_displacement,
                                                 int start_index,
                                                 int end_index,
                                                 const std::string& link,
-                                                trajopt::TermType type);
+                                                trajopt::TermType type,
+                                                const Eigen::VectorXd& coeff,
+                                                sco::PenaltyType penalty_type);
 
 trajopt::TermInfo::Ptr createRotationalVelocityTermInfo(double max_displacement,
                                                 //Eigen::Vector3d rot_coeffs,
                                                 int start_index,
                                                 int end_index,
                                                 const std::string& link,
-                                                trajopt::TermType type);
+                                                trajopt::TermType type,
+                                                const Eigen::VectorXd& coeff,
+                                                sco::PenaltyType penalty_type);
 
 trajopt::TermInfo::Ptr createCartesianWaypointTermInfoWC(const Eigen::Isometry3d& c_wp,
                                                        int index,
@@ -49,6 +53,7 @@ trajopt::TermInfo::Ptr createCartesianWaypointTermInfoWC(const Eigen::Isometry3d
                                                        Eigen::Isometry3d tcp,
                                                        const Eigen::VectorXd& coeffs,
                                                        std::string link,
-                                                       trajopt::TermType type);
+                                                       trajopt::TermType type,
+                                                       sco::PenaltyType penalty_type);
 
 #endif

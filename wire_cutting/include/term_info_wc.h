@@ -41,6 +41,8 @@ struct CartPoseTermInfoWC : public TermInfo
    * "world", frame */
   std::string target;
 
+  sco::PenaltyType penalty_type;
+
   CartPoseTermInfoWC();
 
   /** @brief Used to add term to pci from json */
@@ -57,7 +59,8 @@ struct CartRotVelTermInfo : public TermInfo
   int first_step, last_step;
   /** @brief Link to which the term is applied */
   std::string link;
-  Eigen::Vector3d rot_coeffs;
+  Eigen::VectorXd rot_coeffs;
+  sco::PenaltyType penalty_type;
   double max_displacement;
   /** @brief Used to add term to pci from json */
   void fromJson(ProblemConstructionInfo& pci, const Json::Value& v) override;
@@ -76,6 +79,7 @@ struct CartVelTermInfoWC : public TermInfo
   /** @brief Link to which the term is applied */
   std::string link;
   Eigen::VectorXd coeffs;
+  sco::PenaltyType penalty_type;
   double max_displacement;
   /** @brief Used to add term to pci from json */
   void fromJson(ProblemConstructionInfo& pci, const Json::Value& v) override;

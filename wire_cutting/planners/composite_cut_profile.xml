@@ -17,6 +17,16 @@
 		<SafetyMarginBuffer>0.050000000000000003</SafetyMarginBuffer>
 		<Coefficient>20</Coefficient>
 	    </CollisionConstraintConfig>
+	    <LinearCartesianVelocity>
+		<Enabled>false</Enabled>
+		<Coefficients>0 1 0 0 1 0</Coefficients>
+		<PenaltyType type="1"/>
+	    </LinearCartesianVelocity>
+    	    <RotationalCartesianVelocity>
+		<Enabled>false</Enabled>
+		<Coefficients>0 1 0 0 1 0</Coefficients>
+		<PenaltyType type="2"/>
+	    </RotationalCartesianVelocity>	    
 	    <SmoothVelocities>
 		<Enabled>true</Enabled>
 		<Coefficients>1</Coefficients>

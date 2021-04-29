@@ -64,10 +64,18 @@ public:
   CollisionCostConfig collision_cost_config;
   /** @brief Configuration info for collisions that are modeled as constraints */
   CollisionConstraintConfig collision_constraint_config;
+  
   /** @brief If true, velocity constraint is enabled (added 05/03/2021)*/
   bool constrain_velocity = true;
-   /** @brief If true, rotational velocity cost is enabled (added 05/03/2021)*/
+  Eigen::VectorXd cart_vel_coeff{ Eigen::VectorXd::Constant(6, 1, 0) };
+  sco::PenaltyType cart_vel_penalty_type = sco::ABS;
+   
+  /** @brief If true, rotational velocity cost is enabled (added 05/03/2021)*/
   bool rotational_velocity = true;
+  Eigen::VectorXd cart_rot_vel_coeff{ Eigen::VectorXd::Constant(6, 1, 0) };
+  sco::PenaltyType cart_rot_vel_penalty_type = sco::HINGE;
+   
+  
   /** @brief If true, a joint velocity cost with a target of 0 will be applied for all timesteps Default: true*/
   bool smooth_velocities = false;
   /** @brief This default to all ones, but allows you to weight different joints */
@@ -84,6 +92,8 @@ public:
   bool avoid_singularity = false;
   /** @brief Optimization weight associated with kinematic singularity avoidance */
   double avoid_singularity_coeff = 5.0;
+
+  
 
 
   /** @brief Set the resolution at which state validity needs to be verified in order for a motion between two states

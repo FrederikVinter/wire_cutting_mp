@@ -227,12 +227,6 @@ bool WireCutting::run()
   joint_pos(4) = 1.57;
   joint_pos(5) = 0;
 
-  /*SceneGraph::ConstPtr g = env_freespace.get()->getSceneGraph(); 
-  g->saveDOT("/home/frederik/ws_tesseract_wirecut/scenegraph.dot");
-  auto mimic = g->getJoint("joint_p")->mimic;
-  std::string s = mimic->joint_name;
-  ROS_INFO(s.c_str());
-  SceneGraph::Ptr g1 = g->clone();*/
 
   env_->setState(joint_names, joint_pos);
 
@@ -278,69 +272,6 @@ bool WireCutting::run()
   ProcessPlanningServer planning_server_freespace(env_freespace,1,5);
   planning_server_freespace.loadDefaultProcessPlanners();
 
-  // Create Descartes profile
-  /*auto descartes_plan_profile = std::make_shared<DescartesDefaultPlanProfileD>();
-  descartes_plan_profile->enable_collision = false;
-  descartes_plan_profile->allow_collision = false;
-  descartes_plan_profile->enable_edge_collision = true;
-  descartes_plan_profile->debug = true;
-  descartes_plan_profile->target_pose_sampler = [](const Eigen::Isometry3d& tool_pose) {
-    //return tesseract_planning::sampleToolAxis(tool_pose, 60 * M_PI * 180.0, Eigen::Vector3d(0, 1, 0)); // sample around Y-axis
-    //std::cout << "SAMPLE" << std::endl;
-     return tesseract_planning::sampleToolYAxis(tool_pose, 0.100);
-  };
-  planning_server.getProfiles()->addProfile<tesseract_planning::DescartesPlanProfile<double>>("DESCARTES", descartes_plan_profile);
-
-
-  CompositeInstruction program("DESCARTES", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator"));
-  
-  assert(!tool_poses.empty());
-  Waypoint wps = CartesianWaypoint(tool_poses[0][0]);
-  PlanInstruction plan_instruction(wps, PlanInstructionType::START, "DESCARTES");
-  plan_instruction.setDescription("from_start_plan");
-  program.setStartInstruction(plan_instruction);
-
-  std::cout << "Start point: "  << std::endl;
-  wps.print();
-
-
-  Waypoint wpe = CartesianWaypoint(tool_poses[0][1]);
-  PlanInstruction plan_instructione(wpe, PlanInstructionType::LINEAR, "DESCARTES");
-  plan_instruction.setDescription("waypoint_" + std::to_string(1)); 
-  program.push_back(plan_instructione);
-
-  std::cout << "End point: "  << std::endl;
-  wpe.print();
-  
-  
-
-  CompositeInstruction seed = generateSeed(program, env_->getCurrentState(), env_);
-
-  // Create Planning Request
-  PlannerRequest request;
-  request.seed = seed;
-  request.instructions = program;
-  request.env = env_;
-  request.env_state = env_->getCurrentState();
-
-  // Solve Descartes Plan
-  PlannerResponse descartes_response;
-  DescartesMotionPlannerD descartes_planner;
-  descartes_planner.plan_profiles["DESCARTES"] = descartes_plan_profile;
-  descartes_planner.problem_generator = tesseract_planning::DefaultDescartesProblemGenerator<double>;
-  plotter->waitForInput();
-  auto descartes_status = descartes_planner.solve(request, descartes_response);
-  assert(descartes_status);
-
-  plotter->waitForInput();
-  // Plot Descartes Trajectory
-  if (plotter)
-  {
-    plotter->waitForInput();
-    plotter->plotTrajectory(toJointTrajectory(descartes_response.results), env_->getStateSolver());
-  }
-  plotter->waitForInput();*/
-
   // Load plan profile
   tinyxml2::XMLDocument xml_plan_cut;
   std::string plan_cut_path = ros::package::getPath("wire_cutting") + "/planners/plan_cut_profile.xml";
@@ -359,17 +290,14 @@ bool WireCutting::run()
   xml_composite_cut.LoadFile(composite_cut_path.c_str());
   XMLElement* compositeElement = xml_composite_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptCompositeProfile");
   auto trajopt_composite_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement);
-  trajopt_composite_profile->constrain_velocity = false;
-  trajopt_composite_profile->rotational_velocity = true;
-
+  
   // Load composite p2p profile
   tinyxml2::XMLDocument xml_composite_p2p;
   std::string composite_p2p_path = ros::package::getPath("wire_cutting") + "/planners/composite_p2p_profile.xml";
   xml_composite_p2p.LoadFile(composite_p2p_path.c_str());
   XMLElement* compositeElement_p2p = xml_composite_p2p.FirstChildElement("Planner")->FirstChildElement("TrajoptCompositeProfile");
   auto trajopt_composite_p2p_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement_p2p);
-  trajopt_composite_p2p_profile->constrain_velocity = false;
-  trajopt_composite_p2p_profile->rotational_velocity = false;
+
 
   // Solver profile
   auto trajopt_solver_profile = std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
