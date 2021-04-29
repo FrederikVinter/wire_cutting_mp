@@ -2,9 +2,9 @@
 
 
 
-WireCuttingProblemGenerator::WireCuttingProblemGenerator(tesseract_monitoring::EnvironmentMonitor::Ptr monitor)
+WireCuttingProblemGenerator::WireCuttingProblemGenerator()
 {
-  monitor_ = monitor;
+
 }
 
 

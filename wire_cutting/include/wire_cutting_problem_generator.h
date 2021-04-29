@@ -46,7 +46,7 @@ using namespace tesseract_planning;
 class WireCuttingProblemGenerator
 {
 public:
-    WireCuttingProblemGenerator(tesseract_monitoring::EnvironmentMonitor::Ptr monitor);
+    WireCuttingProblemGenerator();
     
     ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& tool_poses, ManipulatorInfo& mi);
 
@@ -82,8 +82,6 @@ public:
     Environment::Ptr m_env_free;
 private:  
     TrajOptPlanProfile::Ptr m_plan_free;
-    tesseract_monitoring::EnvironmentMonitor::Ptr monitor_; 
-
 };
 
 #endif
