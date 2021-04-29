@@ -246,9 +246,6 @@ void plotIterations(const tesseract_environment::Environment::Ptr& env, const te
       auto kin = env->getManipulatorManager()->getFwdKinematicSolver("manipulator");
       tesseract_common::VectorIsometry3d opt_poses;
       for (size_t j = 0; j < opt_joint_results[i].size(); ++j) {
-
-        //std::cout << "JOINT POSE " << j << "\n" << opt_joint_results[i][j] << "\n";
-
         Eigen::Isometry3d opt_pose;
         Eigen::Vector3d tcp_pose(0,0,1.861);
         kin->calcFwdKin(opt_pose, opt_joint_results[i][j]);
@@ -270,6 +267,22 @@ void plotIterations(const tesseract_environment::Environment::Ptr& env, const te
       }
     }
 
+}
+
+tesseract_common::VectorIsometry3d sampleToolAxis_WC(const Eigen::Isometry3d& tool_pose,
+                                                    double resolution,
+                                                    const Eigen::Vector3d& axis)
+{
+  tesseract_common::VectorIsometry3d samples;
+  int cnt = static_cast<int>(std::ceil(2.0 * M_PI / resolution)) + 1;
+  Eigen::VectorXd angles = Eigen::VectorXd::LinSpaced(cnt, -M_PI/4, M_PI/4);
+  samples.reserve(static_cast<size_t>(angles.size()) - 1ul);
+  for (long i = 0; i < static_cast<long>(angles.size() - 1); ++i)
+  {
+    Eigen::Isometry3d p = tool_pose * Eigen::AngleAxisd(angles(i), axis);
+    samples.push_back(p);
+  }
+  return samples;
 }
 
 trajopt::TermInfo::Ptr createVelocityTermInfo(double max_displacement,

@@ -12,7 +12,7 @@
 	    <CollisionConstraintConfig>
 		<Enabled>false</Enabled>
 		<UseWeightedSum>false</UseWeightedSum>
-		<CollisionEvaluator type="2"/>
+		<CollisionEvaluator type="1"/>
 		<SafetyMargin>0.01</SafetyMargin>
 		<SafetyMarginBuffer>0.050000000000000003</SafetyMarginBuffer>
 		<Coefficient>20</Coefficient>
