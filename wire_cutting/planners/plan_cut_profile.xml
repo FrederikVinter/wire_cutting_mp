@@ -2,7 +2,7 @@
 	<TrajoptPlanProfile>
 	    <CartesianCoefficientsConstraint>1 1 1 1 0 1</CartesianCoefficientsConstraint>
 	    <CartesianCoefficientsCost>0 0 0 0 1 0</CartesianCoefficientsCost>
-	    <JointCoefficients>5</JointCoefficients>
+	    <JointCoefficients>0 0 0 0 0 0</JointCoefficients>
 	    <Term type="2"/>
 	</TrajoptPlanProfile>
 </Planner>

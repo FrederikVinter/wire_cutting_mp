@@ -194,14 +194,14 @@ bool WireCutting::run()
   if (rviz_)
     plotter->waitForConnection();
 
-  Eigen::VectorXd pos(3), size(3);
-  pos << 0, 2.2, -0.2;
-  size << 0.1, 0.8, 0.6;
-  Command::Ptr cmd = addBoundingBox(pos, size);
-  if (!monitor_->applyCommand(*cmd))
-    return false;
-  if (!monitor_freespace->applyCommand(*cmd))
-    return false;
+  // Eigen::VectorXd pos(3), size(3);
+  // pos << 0, 2.2, -0.2;
+  // size << 0.15, 0.8, 0.6;
+  // Command::Ptr cmd = addBoundingBox(pos, size);
+  // if (!monitor_->applyCommand(*cmd))
+  //   return false;
+  // if (!monitor_freespace->applyCommand(*cmd))
+  //   return false;
   
   // Set the robot initial state
   std::vector<std::string> joint_names;
@@ -213,11 +213,11 @@ bool WireCutting::run()
   joint_names.push_back("joint_6");
 
   Eigen::VectorXd joint_pos(6);
-  joint_pos(0) = 1.57;
+  joint_pos(0) = M_PI/2.0;
   joint_pos(1) = 0;
   joint_pos(2) = 0;
   joint_pos(3) = 0;
-  joint_pos(4) = 1.57;
+  joint_pos(4) = M_PI/2.0;
   joint_pos(5) = 0;
 
   /*SceneGraph::ConstPtr g = env_freespace.get()->getSceneGraph(); 
@@ -228,12 +228,15 @@ bool WireCutting::run()
   SceneGraph::Ptr g1 = g->clone();*/
 
   env_->setState(joint_names, joint_pos);
-  tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
-  std::vector<tesseract_common::VectorIsometry3d> tool_poses;// = loadToolPosesFromPrg("test");
-  tool_poses.push_back(temp_poses);
-  tool_poses.push_back(temp_poses);
-  assert(!tool_poses.empty());
+  // tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
+  // std::vector<tesseract_common::VectorIsometry3d> tool_poses;// = loadToolPosesFromPrg("test");
+  // tool_poses.push_back(temp_poses);
+  // tool_poses.push_back(temp_poses);
+  // assert(!tool_poses.empty());
   //tool_poses.push_back(temp_poses);
+
+  PathData path_data = loadToolPosesCFR("HardProb_v2.txt");
+  std::vector<tesseract_common::VectorIsometry3d> tool_poses = path_data.path;
 
   // Eigen::VectorXd pos(3), size(3);
   // pos << 0, 1.8, -0.5;
@@ -268,17 +271,16 @@ bool WireCutting::run()
   ompl_profile->planners = { ompl_planner_config, ompl_planner_config };
 
   // Create Descartes profile
-  auto descartes_plan_profile = std::make_shared<DescartesDefaultPlanProfileD>();
+  auto descartes_plan_profile = std::make_shared<DescartesDefaultPlanProfile<double>>();
   descartes_plan_profile->enable_collision = false;
-  descartes_plan_profile->allow_collision = false;
+  descartes_plan_profile->allow_collision = true;
   descartes_plan_profile->enable_edge_collision = true;
-  descartes_plan_profile->debug = true;
+  descartes_plan_profile->num_threads = 2;
   descartes_plan_profile->target_pose_sampler = [](const Eigen::Isometry3d& tool_pose) {
-    return tesseract_planning::sampleToolAxis(tool_pose, 60 * M_PI * 180.0, Eigen::Vector3d(0, 1, 0)); // sample around Y-axis
-    // return tesseract_planning::sampleToolYAxis(tool_pose, M_PI);
+    return sampleToolAxis_WC(tool_pose, M_PI/4.0, Eigen::Vector3d(0, 1, 0)); // sample around Y-axis
   };
 
-  planning_server.getProfiles()->addProfile<tesseract_planning::DescartesDefaultPlanProfileD>("DESCARTES", descartes_plan_profile);
+  planning_server.getProfiles()->addProfile<tesseract_planning::DescartesPlanProfile<double>>("DESCARTES_CUT", descartes_plan_profile);
 
   // Load plan profile
   tinyxml2::XMLDocument xml_plan_cut;
@@ -287,9 +289,7 @@ bool WireCutting::run()
   XMLElement* planElement = xml_plan_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptPlanProfile");
   
   auto plan_profile_cut = std::make_shared<TrajOptWireCuttingPlanProfile>(*planElement);
-  // std::cout << "Plan costs: " << std::endl << plan_profile_cut->cart_coeff_cost << std::endl;
-  // std::cout << "Plan cnt: " << std::endl << plan_profile_cut->cart_coeff_cnt << std::endl;
-  //plan_profile_cut->addFourBarLinkageConstraints();
+  plan_profile_cut->addFourBarLinkageConstraints();
 
   // Load plan profile (FREESPACE)
   tinyxml2::XMLDocument xml_plan_freespace;
@@ -315,7 +315,7 @@ bool WireCutting::run()
   trajopt_solver_profile->opt_info.min_approx_improve = 1e-3;
   trajopt_solver_profile->opt_info.min_trust_box_size = 1e-3;
 
-  //trajopt_solver_profile->opt_info.cnt_tolerance = 1e-4;
+  trajopt_solver_profile->opt_info.cnt_tolerance = 1e-2;
   trajopt_solver_profile->opt_info.log_results = true;
   
 
@@ -335,36 +335,24 @@ bool WireCutting::run()
 
   WireCuttingProblemGenerator problem_generator;
 
-  // // Generate cut requests from tool poses
-  // std::size_t segments = tool_poses.size();
-  // std::vector<ProcessPlanningRequest> cut_requests(segments);
-  // for(std::size_t i = 0; i < segments; i++)
-  //   cut_requests[i] = problem_generator.construct_request_cut_descartes(tool_poses[i]);
-
   // Generate cut requests from tool poses
   std::size_t segments = tool_poses.size();
   
   // Generate seed with descartes
-  std::vector<ProcessPlanningRequest> cut_requests_seed(segments);
+  std::vector<CompositeInstruction> cut_seed(segments);
   for(std::size_t i = 0; i < segments; i++)
-    cut_requests_seed[i] = problem_generator.construct_request_cut_descartes(tool_poses[i], mi);
+   // cut_seed[i] = problem_generator.generate_descartes_seed(tool_poses[i], mi, env_, descartes_plan_profile);
+   // cut_seed[i] = problem_generator.generate_conf_interpolated_seed(tool_poses[i], mi, env_);
+      cut_seed[i] = problem_generator.generate_naive_seed(tool_poses[i], mi, env_);
 
-  std::vector<ProcessPlanningFuture> cut_responses_seed(segments);
-  for(std::size_t i = 0; i < segments; i++)
-  {
-    cut_responses_seed[i] = planning_server.run(cut_requests_seed[i]);
-    planning_server.waitForAll();
-    std::cout << "Seed for path number: " << i << " finished!" << std::endl;
-    plotter->waitForInput();
-  }
-
-    // Solve process plans for cuts
+  // Solve process plans for cuts
   std::vector<ProcessPlanningRequest> cut_requests(segments);
+
   for(std::size_t i = 0; i < segments; i++) {
     cut_requests[i] = problem_generator.construct_request_cut(tool_poses[i], mi);
     std::cout << "Constructed initial request " << std::endl;
-    cut_requests[i].seed = *cut_responses_seed[i].results.get();
-    std::cout << "Constructed seed " << std::endl;
+    cut_requests[i].seed = cut_seed[i];
+    std::cout << "Using generated seed as input" << std::endl;
   }
 
   std::vector<ProcessPlanningFuture> cut_responses(segments);
@@ -395,11 +383,11 @@ bool WireCutting::run()
 
   // Create a OMPL taskflow without post collision checking
   // disable continous contact check during RRT since it often fails
-  const std::string new_planner_name = "OMPL_NO_POST_CHECK";
+  const std::string ompl_planner_name = "OMPL_NO_POST_CHECK";
   tesseract_planning::OMPLTaskflowParams params;
   params.enable_post_contact_discrete_check = false;
   params.enable_post_contact_continuous_check = false;
-  planning_server_freespace.registerProcessPlanner(new_planner_name,
+  planning_server_freespace.registerProcessPlanner(ompl_planner_name,
                                                   std::make_unique<tesseract_planning::OMPLTaskflow>(params));
 
   // Generate point to point requests
@@ -424,13 +412,13 @@ bool WireCutting::run()
         p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_OMPL", mi_freespace));
     } 
     std::vector<ProcessPlanningFuture> p2p_responses_seed;
-    if (problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
+    if (problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses_seed)) {
         p2p_requests.clear();
         for(std::size_t i = 1; i < segments; i++) {
           JointState last = trajectories[i-1].back();
           JointState first = trajectories[i].front();
           ProcessPlanningRequest request = problem_generator.construct_request_p2p(last, first, "FREESPACE_TRAJOPT", mi_freespace);
-          request.seed = *p2p_responses[i-1].results.get();
+          request.seed = *p2p_responses_seed[i-1].results.get();
           p2p_requests.push_back(request);
         }
         p2p_responses.clear();
@@ -438,7 +426,10 @@ bool WireCutting::run()
           ROS_INFO("Succeeded with RRT as seed");
         } else {
           ROS_INFO("RRT succeeded but was unable to be optimized");
-          // p2p_responses = p2p_responses_seed;
+          // for(size_t i = 0; i < p2p_responses_seed.size(); i ++)
+          //   p2p_responses[i] = p2p_responses_seed[i];
+          p2p_responses.resize(cut_responses.size()-1);
+          // p2p_responses = p2p_responses;
         }
     } else {
       ROS_INFO("RRT did not succeed");
@@ -446,10 +437,10 @@ bool WireCutting::run()
   }
 
   // Plot optimization iterations
-  // if(iterationDebug) {    
+  if(iterationDebug) {    
     ROS_INFO("Plotting path iterations");  
     plotIterations(env_, plotter);
-  // }
+  }
 
   plotter->waitForInput();
   ROS_INFO("Combine toolpath and trajectory for cut and p2p");

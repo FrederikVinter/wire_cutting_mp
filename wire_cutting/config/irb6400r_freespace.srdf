@@ -8,8 +8,8 @@
         <tcp name="carbon_hotwire" xyz="0 0 1.861" wxyz="1 0 0 0"/>
     </group_tcps>
 
-    <group_opw group="manipulator" a1="0.23999999999999999" a2="-0.22500000000000001" b="0" c1="0.80000000000000004" c2="1.05" c3="1.7250000000000001" c4="0.14499999999999999" offsets="0.000000 0.000000 -1.570000 0.000000 0.000000 0.000000" sign_corrections="1 1 1 1 1 1"/>
-
+    <group_opw group="manipulator" a1="0.240" a2="-0.225" b="0.0" c1="0.800" c2="1.05" c3="1.725" c4="0.1482" offsets="0.000000 0.000000 -1.570000 0.000000 0.000000 0.000000" sign_corrections="1 1 1 1 1 1"/>
+    
     <disable_collisions link1="base_link" link2="link_1" reason="Never"/>
     <disable_collisions link1="base_link" link2="link_2" reason="Never"/>
     <disable_collisions link1="base_link" link2="link_3" reason="Adjacent"/>

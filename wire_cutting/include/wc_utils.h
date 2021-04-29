@@ -29,6 +29,10 @@ PathData loadToolPosesCFR(std::string file);
 std::vector<std::vector<Eigen::VectorXd>> loadOptimizationResults();
 void plotIterations(const tesseract_environment::Environment::Ptr& env, const tesseract_rosutils::ROSPlottingPtr& plotter);
 
+tesseract_common::VectorIsometry3d sampleToolAxis_WC(const Eigen::Isometry3d& tool_pose,
+                                                    double resolution,
+                                                    const Eigen::Vector3d& axis);
+
 trajopt::TermInfo::Ptr createVelocityTermInfo(double max_displacement,
                                                 int start_index,
                                                 int end_index,

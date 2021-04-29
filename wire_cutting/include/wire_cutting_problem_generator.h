@@ -24,6 +24,17 @@ TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
 #include <tesseract_environment/core/utils.h>
 #include <string>
 #include <vector>
+
+#include <tesseract_motion_planners/descartes/descartes_collision.h>
+#include <tesseract_motion_planners/descartes/descartes_motion_planner.h>
+#include <tesseract_motion_planners/descartes/descartes_utils.h>
+#include <tesseract_motion_planners/descartes/problem_generators/default_problem_generator.h>
+#include <tesseract_motion_planners/descartes/profile/descartes_default_plan_profile.h>
+
+#include <tesseract_motion_planners/ompl/profile/ompl_default_plan_profile.h>
+#include <tesseract_motion_planners/ompl/ompl_motion_planner.h>
+#include <tesseract_motion_planners/ompl/problem_generators/default_problem_generator.h>
+
 TESSERACT_COMMON_IGNORE_WARNINGS_POP
 
 using namespace tesseract_common;
@@ -37,7 +48,26 @@ public:
     WireCuttingProblemGenerator();
     
     ProcessPlanningRequest construct_request_cut(const VectorIsometry3d& tool_poses, ManipulatorInfo& mi);
-    ProcessPlanningRequest construct_request_cut_descartes(const VectorIsometry3d& tool_poses, ManipulatorInfo& mi);
+
+    CompositeInstruction generate_descartes_seed(const VectorIsometry3d& tool_poses,
+                                                 ManipulatorInfo& mi, 
+                                                 const tesseract_environment::Environment::Ptr& env,
+                                                 std::shared_ptr<DescartesDefaultPlanProfile<double>> descartes_plan_profile);
+
+    CompositeInstruction generate_conf_interpolated_seed(const VectorIsometry3d& tool_poses,
+                                                         ManipulatorInfo& mi, 
+                                                         const tesseract_environment::Environment::Ptr& env);
+
+    CompositeInstruction generate_naive_seed(const VectorIsometry3d& tool_poses,
+                                             ManipulatorInfo& mi, 
+                                             const tesseract_environment::Environment::Ptr& env);
+
+    CompositeInstruction generate_ompl_seed(const VectorIsometry3d& tool_poses,
+                                            ManipulatorInfo& mi, 
+                                            const tesseract_environment::Environment::Ptr& env,
+                                            std::shared_ptr<tesseract_planning::OMPLDefaultPlanProfile> ompl_plan_profile);
+
+
     ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end, const std::string& planner_name, ManipulatorInfo& mi);
 
 
