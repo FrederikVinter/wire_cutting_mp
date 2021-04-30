@@ -215,8 +215,8 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const 
                                                                           const std::string& planner_name, 
                                                                           ManipulatorInfo& mi)
 {
-  std::cout << start.position << std::endl << std::endl;;
-  std::cout << end.position << std::endl << std::endl;
+  std::cout << "p2p start: " << std::endl << start.position << std::endl << std::endl;;
+  std::cout << "p2p end: " << std::endl << end.position << std::endl << std::endl;
   CompositeInstruction program(planner_name, CompositeInstructionOrder::ORDERED, mi);
 
   Waypoint wp_start = StateWaypoint(start.joint_names, start.position);

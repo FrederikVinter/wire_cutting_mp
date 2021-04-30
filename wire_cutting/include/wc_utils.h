@@ -14,6 +14,25 @@ TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
 TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <tinyxml2.h>
 
+enum TestType{
+  cut,
+  p2p,
+  full
+};
+
+enum InitMethodCut{
+  naive,
+  lvsPlanner,
+  decartes
+};
+
+enum Methodp2p{
+  trajopt_only,
+  rrt_only,
+  rrt_trajopt,
+  naive_trajopt
+};
+
 struct PathData
 {
   PathData() {bbox_pos.resize((3)); bbox_size.resize(3); };
@@ -59,5 +78,13 @@ trajopt::TermInfo::Ptr createCartesianWaypointTermInfoWC(const Eigen::Isometry3d
                                                        std::string link,
                                                        trajopt::TermType type,
                                                        sco::PenaltyType penalty_type);
+
+void loadTestData(TestType &test_type,
+                bool &show_iterations,
+                const std::string &test_name, 
+                InitMethodCut &init_method_cut, 
+                Methodp2p &method_p2p, 
+                tesseract_common::JointState &p2p_start, 
+                tesseract_common::JointState &p2p_end);
 
 #endif

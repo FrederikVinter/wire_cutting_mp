@@ -373,3 +373,136 @@ trajopt::TermInfo::Ptr createCartesianWaypointTermInfoWC(const Eigen::Isometry3d
 
   return pose_info;
 }
+
+void loadTestData(TestType &test_type,
+                bool &show_iterations,
+                const std::string &test_name, 
+                InitMethodCut &init_method_cut, 
+                Methodp2p &method_p2p, 
+                tesseract_common::JointState &p2p_start, 
+                tesseract_common::JointState &p2p_end)
+{
+  tinyxml2::XMLDocument test_def;
+  std::string test_def_s = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/test_def.xml";
+  std::cout << "Test def path: " << test_def_s << std::endl;
+  test_def.LoadFile(test_def_s.c_str());
+  tinyxml2::XMLElement* test_element = test_def.FirstChildElement("Test");
+
+  if(!test_element)
+  {
+    throw std::runtime_error("Wrong test def path or incomplete file");
+  }
+
+  const tinyxml2::XMLElement* init_method = test_element->FirstChildElement("InitMethodCut");
+  const tinyxml2::XMLElement* iterationsDebug = test_element->FirstChildElement("ShowIterations");
+  const tinyxml2::XMLElement* p2p = test_element->FirstChildElement("p2p");
+
+  tinyxml2::XMLError status;
+
+  if(!test_element)
+  {
+    throw std::runtime_error("Test must be defined");
+  } else {
+      int temp;
+      status = test_element->QueryIntAttribute("type", &temp);
+      if (status != tinyxml2::XML_SUCCESS)
+        throw std::runtime_error("test type was not read correctly");
+
+      test_type = static_cast<TestType>(temp);
+      std::cout << "Test type: " << test_type << std::endl;
+  }
+
+  if(init_method)
+  {
+    int temp;
+    status = init_method->QueryIntAttribute("type", &temp);
+    if (status != tinyxml2::XML_SUCCESS)
+      throw std::runtime_error("init method cut was not read correctly");
+
+    init_method_cut = static_cast<InitMethodCut>(temp);
+    std::cout << "Init method cut: " << init_method_cut << std::endl;
+  }
+
+  if(iterationsDebug)
+  {
+    tinyxml2::XMLError status = iterationsDebug->QueryBoolText(&show_iterations);
+    if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+      throw std::runtime_error("Test def Error parsing show iterations");
+
+    std::cout << "Show iterations: " << show_iterations << std::endl;
+  }
+
+  if(p2p)
+  {
+    const tinyxml2::XMLElement* method = p2p->FirstChildElement("Method");
+    const tinyxml2::XMLElement* p2p_start_ele = p2p->FirstChildElement("Start");
+    const tinyxml2::XMLElement* p2p_end_ele = p2p->FirstChildElement("End");
+
+    if(!method)
+      throw std::runtime_error("p2p must contain method!");
+    else {
+      int temp;
+      status = method->QueryIntAttribute("type", &temp);
+      if (status != tinyxml2::XML_SUCCESS)
+        throw std::runtime_error("method p2p was not read correctly");
+      method_p2p = static_cast<Methodp2p>(temp);
+
+      std::cout << "Method p2p: " << method_p2p << std::endl;
+    }
+
+    if(!p2p_start_ele)
+      throw std::runtime_error("p2p must contain start!");
+    else {
+      std::vector<std::string> start_tokens;
+      std::string start_string;
+      status = tesseract_common::QueryStringText(p2p_start_ele, start_string);
+      if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+        throw std::runtime_error("Error parsing p2p start");
+
+      boost::split(start_tokens, start_string, boost::is_any_of(" "), boost::token_compress_on);
+
+      std::size_t length = start_tokens.size();
+      if(length != 6)
+        throw std::runtime_error("Start must contain 6 joint values");
+
+      if (!tesseract_common::isNumeric(start_tokens))
+        throw std::runtime_error("p2p start are not all numeric values.");
+
+      p2p_start.position.resize(static_cast<long>(length));
+      for (std::size_t i = 0; i < start_tokens.size(); ++i)
+        tesseract_common::toNumeric<double>(start_tokens[i], p2p_start.position[static_cast<long>(i)]);
+      std::cout << "p2p start pos: " << std::endl << p2p_start.position << std::endl;
+    }
+
+    if(!p2p_end_ele)
+      throw std::runtime_error("p2p must contain end!");
+    else {
+      std::vector<std::string> end_tokens;
+      std::string end_string;
+      status = tesseract_common::QueryStringText(p2p_end_ele, end_string);
+      if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+        throw std::runtime_error("Error parsing p2p end");
+
+      boost::split(end_tokens, end_string, boost::is_any_of(" "), boost::token_compress_on);
+
+      std::size_t length = end_tokens.size();
+      if(length != 6)
+        throw std::runtime_error("End must contain 6 joint values");
+
+      if (!tesseract_common::isNumeric(end_tokens))
+        throw std::runtime_error("p2p end are not all numeric values.");
+
+      p2p_end.position.resize(static_cast<long>(length));
+      for (std::size_t i = 0; i < end_tokens.size(); ++i)
+        tesseract_common::toNumeric<double>(end_tokens[i], p2p_end.position[static_cast<long>(i)]);
+      std::cout << "p2p end pos: " << std::endl << p2p_end.position << std::endl;
+    }
+
+  }
+
+  
+
+
+
+}
+
