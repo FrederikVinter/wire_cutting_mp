@@ -1,0 +1,9 @@
+<Planner type="1">
+	<TrajoptPlanProfile>
+	    <CartesianCoefficientsConstraint>0 0 0 0 0 0</CartesianCoefficientsConstraint>
+	    <CartesianCoefficientsCost>0 0 0 0 0 0</CartesianCoefficientsCost>
+	    <JointCoefficients>0 0 0 0 0 0</JointCoefficients>
+	    <Term type="1"/>
+	</TrajoptPlanProfile>
+</Planner>
+
