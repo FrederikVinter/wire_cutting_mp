@@ -582,9 +582,95 @@ void loadTestData(TestType &test_type,
 
   }
 
-  
+}
+
+void saveInstructionsAsXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis, std::string test_name) 
+{
+    for(size_t i = 0; i < cis.size(); i++) {
+      tinyxml2::XMLDocument xmlDoc;
+      tinyxml2::XMLNode * pRoot = xmlDoc.NewElement("Instructions");    // Creat root element
+      xmlDoc.InsertFirstChild(pRoot);                         // Insert element
+
+      tinyxml2::XMLElement* pResults = cis[i]->toXML(xmlDoc);
+      pRoot->InsertEndChild(pResults);                        // insert element as child
+
+      // save results
+      std::string fileName_string = ros::package::getPath("wire_cutting") + "/test/" + test_name +  "/paths/path_" + std::to_string(i) + ".xml";
+      const char* fileName = fileName_string.c_str();
+      std::cout << "Saved at path: " << fileName << "\n";
+
+      //const char* fileName = "/home/jonathan/projects/wirecutting_ws/src/wire_cutting_mp/wire_cutting/test/test_1.xml";
+      tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);
+  }
+}
+
+std::vector<std::vector<std::vector<Isometry3d>>> loadInstructionsFromXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis, const tesseract_environment::Environment::Ptr& env, std::string test_name)
+{
+  using namespace tinyxml2;
+
+  // SEGMENTS
+  //  -> WAYPOINTS
+  //  --> COORDINATES    
+
+    std::vector<std::vector<std::vector<Isometry3d>>> segment_coordinates;
+
+    for(size_t i = 0; i < cis.size(); i++) {
+      std::vector<std::vector<Isometry3d>> wp_to_wp;
+      tinyxml2::XMLError status;
+
+      tinyxml2::XMLDocument results;
+      std::string fileName = ros::package::getPath("wire_cutting") + "/test/" + test_name +  "/paths/path_" + std::to_string(i) + ".xml";
+      results.LoadFile(fileName.c_str());
+
+      // navigate to root of all instructions
+      XMLElement* instructions_root = results.FirstChildElement("Instructions")->FirstChildElement("Instruction")->FirstChildElement("CompositeInstruction");
+
+      // Position of 1st instruction of waypoint_1
+      XMLElement* ci = instructions_root->FirstChildElement("Instruction");
+
+      while(ci) {
+        std::vector<Isometry3d> coordinates; // coordinates for each waypoint_N
+
+        // Navigate to position of 1st instruction
+        XMLElement* instruction =  ci->FirstChildElement("CompositeInstruction")->FirstChildElement("Instruction");
+
+        // Get all sibilings
+        while(instruction) {
+          XMLElement* instruction_pos = instruction->FirstChildElement("MoveInstruction")->FirstChildElement("Waypoint")->FirstChildElement("StateWaypoint")->FirstChildElement("Position");
+
+          // Print position
+          std::string pos;
+          status = tesseract_common::QueryStringText(instruction_pos, pos);
+          if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+            throw std::runtime_error("loadInstructionsAsXML failed: entry 'Position' not found");
 
 
+          // Put joint angles in vector
+          auto iss = std::istringstream{pos};
+          auto str = std::string{};
+          VectorXd joint_angles(6);
+          int j = 0;
+          while (iss >> str) {
+            joint_angles(j) = std::stod(str);
+            j++;
+          }
 
+          // use fwd kin to calculate cartesian coordinates
+          Eigen::Isometry3d cartesian_coordinates;
+          auto kin = env->getManipulatorManager()->getFwdKinematicSolver("manipulator");
+          kin->calcFwdKin(cartesian_coordinates, joint_angles);
+          Eigen::Vector3d tcp_pose(0,0,1.861);
+          cartesian_coordinates.translate(tcp_pose);
+          coordinates.push_back(cartesian_coordinates);
+
+          instruction = instruction->NextSiblingElement(); // get next instruction
+        }
+        wp_to_wp.push_back(coordinates);
+
+        ci = ci->NextSiblingElement(); //advance from waypoint_N -> waypoint_N+1
+      }
+      segment_coordinates.push_back(wp_to_wp);
+    }
+    return segment_coordinates;
 }
 

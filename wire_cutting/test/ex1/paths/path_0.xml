@@ -1,0 +1,478 @@
+<Instructions>
+    <Instruction type="30">
+        <CompositeInstruction order="0">
+            <Description>Tesseract Composite Instruction</Description>
+            <Profile>DEFAULT</Profile>
+            <ManipulatorInfo>
+                <Manipulator>manipulator</Manipulator>
+                <ManipulatorIKSolver></ManipulatorIKSolver>
+                <WorkingFrame></WorkingFrame>
+                <TCP name="carbon_hotwire" external="false"/>
+            </ManipulatorInfo>
+            <StartInstruction>
+                <Instruction type="20">
+                    <MoveInstruction type="3">
+                        <Description></Description>
+                        <Profile>DEFAULT</Profile>
+                        <Waypoint type="3">
+                            <StateWaypoint>
+                                <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                <Position>1.3734 0.686599 -0.223634 2.99035e-06 1.10783 1.3734</Position>
+                                <Velocity>0 0 0 0 0 0</Velocity>
+                                <Acceleration>-8.79907e-13 3.7988e-13 -6.34492e-14 2.1684e-18 2.46358e-13 -1.27565e-12</Acceleration>
+                                <TimeFromStart>0.000000</TimeFromStart>
+                            </StateWaypoint>
+                        </Waypoint>
+                    </MoveInstruction>
+                </Instruction>
+            </StartInstruction>
+            <Instruction type="30">
+                <CompositeInstruction order="0">
+                    <Description>Tesseract Composite Instruction</Description>
+                    <Profile>DEFAULT</Profile>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.38216 0.686232 -0.216197 4.07978e-06 1.10076 1.38215</Position>
+                                    <Velocity>0.113291 -0.00290331 0.093576 2.03063e-05 -0.0907111 0.113269</Velocity>
+                                    <Acceleration>0.768108 0.0146432 0.585331 0.000252961 -0.60052 0.767976</Acceleration>
+                                    <TimeFromStart>0.166601</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.39094 0.686139 -0.209129 5.24832e-06 1.09378 1.39093</Position>
+                                    <Velocity>0.161143 0.000978815 0.125828 6.13944e-06 -0.12681 0.161142</Velocity>
+                                    <Acceleration>0.728951 0.106811 0.423689 -0.000696179 -0.528851 0.729739</Acceleration>
+                                    <TimeFromStart>0.230528</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.39976 0.686322 -0.202431 4.31527e-06 1.0869 1.39975</Position>
+                                    <Velocity>0.166059 0.00582009 0.122833 -4.78415e-05 -0.12859 0.166116</Velocity>
+                                    <Acceleration>-0.540313 0.0789609 -0.538602 -0.0013752 0.460562 -0.538851</Acceleration>
+                                    <TimeFromStart>0.282649</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.4086 0.686777 -0.196097 1.026e-06 1.08012 1.4086</Position>
+                                    <Velocity>0.163204 0.0109089 0.113341 -4.50658e-05 -0.124205 0.163256</Velocity>
+                                    <Acceleration>0.436922 0.105365 0.194788 0.00147574 -0.301739 0.435237</Acceleration>
+                                    <TimeFromStart>0.337864</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.41746 0.687495 -0.190117 7.06918e-08 1.07342 1.41746</Position>
+                                    <Velocity>0.193565 0.0184909 0.126527 -4.0386e-06 -0.145015 0.19357</Velocity>
+                                    <Acceleration>0.775036 0.197293 0.331576 0.000161999 -0.528963 0.774843</Acceleration>
+                                    <TimeFromStart>0.387967</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.42635 0.688475 -0.184491 8.14286e-10 1.06681 1.42635</Position>
+                                    <Velocity>0.219975 0.0275465 0.134516 -2.88679e-07 -0.162062 0.219975</Velocity>
+                                    <Acceleration>0.460026 0.226199 0.0420154 1.33677e-05 -0.268254 0.460015</Acceleration>
+                                    <TimeFromStart>0.430733</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.43527 0.689717 -0.179218 5.44022e-12 1.0603 1.43527</Position>
+                                    <Velocity>0.215603 0.0329804 0.123355 2.48176e-07 -0.156335 0.215603</Velocity>
+                                    <Acceleration>-0.677389 0.043982 -0.596965 1.3325e-05 0.552999 -0.677396</Acceleration>
+                                    <TimeFromStart>0.470958</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.4442 0.691218 -0.174297 4.8901e-12 1.05388 1.4442</Position>
+                                    <Velocity>0.204728 0.0375163 0.108337 -7.83843e-07 -0.145853 0.204729</Velocity>
+                                    <Acceleration>0.173284 0.166279 -0.099192 -6.1165e-05 -0.0671154 0.17332</Acceleration>
+                                    <TimeFromStart>0.514102</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.45316 0.692978 -0.169726 4.675e-12 1.04754 1.45316</Position>
+                                    <Velocity>0.191216 0.0400494 0.0940813 2.9269e-06 -0.134129 0.191215</Velocity>
+                                    <Acceleration>-0.781329 -0.0522859 -0.54231 0.000228148 0.594693 -0.781461</Acceleration>
+                                    <TimeFromStart>0.558547</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.46213 0.694994 -0.165503 1.72923e-07 1.04131 1.46213</Position>
+                                    <Velocity>0.191305 0.0457703 0.0860301 -7.011e-07 -0.1318 0.191306</Velocity>
+                                    <Acceleration>0.785 0.28804 0.210524 -0.000377657 -0.498686 0.785213</Acceleration>
+                                    <TimeFromStart>0.607079</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.47113 0.697263 -0.161627 3.93466e-09 1.03516 1.47113</Position>
+                                    <Velocity>0.225198 0.0598973 0.092724 -2.18417e-06 -0.152626 0.2252</Velocity>
+                                    <Acceleration>0.784759 0.366269 0.0995097 0.000308967 -0.465901 0.78462</Acceleration>
+                                    <TimeFromStart>0.650261</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.48014 0.699784 -0.158095 9.10205e-09 1.02911 1.48014</Position>
+                                    <Velocity>0.254658 0.0747777 0.0948427 -1.01929e-06 -0.169616 0.254658</Velocity>
+                                    <Acceleration>0.784481 0.426345 0.0133422 -0.000246919 -0.43907 0.784508</Acceleration>
+                                    <TimeFromStart>0.687808</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.48916 0.702557 -0.154909 -6.6223e-08 1.02315 1.48916</Position>
+                                    <Velocity>0.281025 0.0901164 0.0938546 -5.09953e-07 -0.183969 0.281025</Velocity>
+                                    <Acceleration>0.780853 0.484266 -0.0720005 0.000277157 -0.413028 0.780833</Acceleration>
+                                    <TimeFromStart>0.721497</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.4982 0.705576 -0.152064 -1.33334e-08 1.01728 1.4982</Position>
+                                    <Velocity>0.303299 0.105474 0.0895901 1.87326e-06 -0.195068 0.303299</Velocity>
+                                    <Acceleration>0.660876 0.509789 -0.204032 -0.000122895 -0.305423 0.660885</Acceleration>
+                                    <TimeFromStart>0.752395</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.50725 0.708842 -0.149562 2.67843e-11 1.01152 1.50725</Position>
+                                    <Velocity>0.305038 0.114126 0.078618 -5.75716e-07 -0.192744 0.305038</Velocity>
+                                    <Acceleration>-0.542816 0.0775534 -0.540778 -4.33458e-05 0.463201 -0.542788</Acceleration>
+                                    <TimeFromStart>0.781858</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.5163 0.712354 -0.147401 -1.88247e-08 1.00584 1.5163</Position>
+                                    <Velocity>0.286246 0.114725 0.0628673 -3.3155e-08 -0.177592 0.286246</Velocity>
+                                    <Acceleration>-0.685206 -0.0384292 -0.48851 7.88016e-05 0.526949 -0.68525</Acceleration>
+                                    <TimeFromStart>0.812463</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.52537 0.716107 -0.14558 -1.74484e-11 1.00027 1.52537</Position>
+                                    <Velocity>0.266303 0.113755 0.048424 4.8733e-07 -0.162179 0.266302</Velocity>
+                                    <Acceleration>-0.528127 -0.0205475 -0.390191 -4.71363e-05 0.410736 -0.528102</Acceleration>
+                                    <TimeFromStart>0.845338</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.53445 0.720103 -0.1441 -1.01892e-10 0.994794 1.53445</Position>
+                                    <Velocity>0.243374 0.110311 0.0351347 -1.44735e-07 -0.145446 0.243374</Velocity>
+                                    <Acceleration>-0.763037 -0.173422 -0.358154 1.15436e-05 0.531576 -0.763043</Acceleration>
+                                    <TimeFromStart>0.880854</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.54353 0.724337 -0.142959 -8.12597e-11 0.989418 1.54353</Position>
+                                    <Velocity>0.215668 0.10328 0.0231782 6.22304e-08 -0.126458 0.215668</Velocity>
+                                    <Acceleration>-0.634816 -0.181306 -0.245084 -1.10164e-06 0.426391 -0.634816</Acceleration>
+                                    <TimeFromStart>0.920495</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.55262 0.728809 -0.142157 -1.41672e-10 0.984144 1.55262</Position>
+                                    <Velocity>0.183799 0.093235 0.0122172 -1.03461e-07 -0.105452 0.183799</Velocity>
+                                    <Acceleration>-0.769843 -0.261444 -0.238041 -6.20151e-06 0.499481 -0.769839</Acceleration>
+                                    <TimeFromStart>0.965871</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.56171 0.733518 -0.141694 4.40082e-11 0.978973 1.56171</Position>
+                                    <Velocity>0.148333 0.077001 0.00732228 3.87935e-07 -0.084323 0.148333</Velocity>
+                                    <Acceleration>-0.517083 -0.327625 0.060422 2.40324e-05 0.267216 -0.517098</Acceleration>
+                                    <TimeFromStart>1.020988</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_1</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.5708 0.73846 -0.14157 5.29402e-08 0.973906 1.5708</Position>
+                                    <Velocity>0.110813 0.0691755 -0.0114462 6.48154e-07 -0.0577288 0.110813</Velocity>
+                                    <Acceleration>-0.554274 0.104172 -0.59635 -1.66019e-05 0.492172 -0.554264</Acceleration>
+                                    <TimeFromStart>1.091029</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                </CompositeInstruction>
+            </Instruction>
+            <Instruction type="30">
+                <CompositeInstruction order="0">
+                    <Description>Tesseract Composite Instruction</Description>
+                    <Profile>DEFAULT</Profile>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_2</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.59904 0.780738 -0.180532 -1.27704e-07 0.97059 1.59904</Position>
+                                    <Velocity>0.113598 0.195525 -0.194805 1.8294e-07 -0.000719757 0.113598</Velocity>
+                                    <Acceleration>0.569756 0.598349 -0.423154 1.40152e-05 -0.175192 0.569748</Acceleration>
+                                    <TimeFromStart>1.450731</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_2</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.6266 0.825392 -0.223907 -4.76644e-11 0.969311 1.6266</Position>
+                                    <Velocity>0.1759 0.291405 -0.287662 4.66612e-07 -0.00374355 0.1759</Velocity>
+                                    <Acceleration>0.115622 0.456421 -0.598349 -1.08946e-05 0.141928 0.115628</Acceleration>
+                                    <TimeFromStart>1.632535</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_2</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.65348 0.872545 -0.271992 3.63373e-10 0.970243 1.65348</Position>
+                                    <Velocity>0.187668 0.345016 -0.361071 -1.23336e-07 0.0160559 0.187668</Velocity>
+                                    <Acceleration>0.0443403 0.272284 -0.399483 2.87565e-06 0.127199 0.0443387</Acceleration>
+                                    <TimeFromStart>1.779673</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_2</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.67965 0.922396 -0.325195 2.5072e-10 0.973595 1.67965</Position>
+                                    <Velocity>0.16284 0.32137 -0.349368 3.5806e-08 0.0279975 0.16284</Velocity>
+                                    <Acceleration>-0.38671 -0.59835 0.560878 -6.81124e-07 0.0374729 -0.38671</Acceleration>
+                                    <TimeFromStart>1.924708</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_2</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.70512 0.975245 -0.384074 1.53163e-10 0.979626 1.70512</Position>
+                                    <Velocity>0.130311 0.285104 -0.32539 -1.14138e-08 0.0402862 0.130311</Velocity>
+                                    <Acceleration>0.0282529 0.198719 -0.296661 1.60786e-07 0.0979425 0.0282528</Acceleration>
+                                    <TimeFromStart>2.106205</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_2</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.72987 1.03154 -0.449416 -1.03757e-10 0.988674 1.72987</Position>
+                                    <Velocity>0.106111 0.25039 -0.295084 2.83906e-09 0.0446933 0.106111</Velocity>
+                                    <Acceleration>-0.269153 -0.544275 0.598347 -1.89075e-08 -0.0540725 -0.269153</Acceleration>
+                                    <TimeFromStart>2.307121</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="0">
+                            <Description>waypoint_2</Description>
+                            <Profile>DEFAULT</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>1.75391 1.09195 -0.522364 7.82256e-11 1.00121 1.75391</Position>
+                                    <Velocity>0 0 0 0 0 0</Velocity>
+                                    <Acceleration>1.24246e-13 6.13423e-14 6.09953e-14 -3.21844e-09 9.59514e-14 -5.08468e-14</Acceleration>
+                                    <TimeFromStart>2.827264</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                </CompositeInstruction>
+            </Instruction>
+        </CompositeInstruction>
+    </Instruction>
+</Instructions>

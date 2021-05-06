@@ -7,6 +7,7 @@
 #include <tesseract_common/types.h>
 #include <tesseract_motion_planners/trajopt/trajopt_utils.h>
 #include <tesseract_visualization/markers/toolpath_marker.h>
+#include <tesseract_command_language/command_language.h>
 #include <tesseract_rosutils/plotting.h>
 #include <term_info_wc.h>
 TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
@@ -45,6 +46,10 @@ std::vector<tesseract_common::VectorIsometry3d> loadToolPosesFromPrg(const std::
 tesseract_common::VectorIsometry3d loadToolPoses();
 
 PathData loadToolPosesCFR(std::string file);
+
+void saveInstructionsAsXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis, std::string test_name);
+std::vector<std::vector<std::vector<Isometry3d>>> loadInstructionsFromXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis, const tesseract_environment::Environment::Ptr& env, std::string test_name);
+
 
 std::vector<std::vector<Eigen::VectorXd>> loadOptimizationResults(std::string path);
 void plotIterations(const tesseract_environment::Environment::Ptr& env, const tesseract_rosutils::ROSPlottingPtr& plotter, const std::vector<std::string>& joint_names, std::string path);

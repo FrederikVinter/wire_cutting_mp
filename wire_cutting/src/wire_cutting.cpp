@@ -353,14 +353,6 @@ bool WireCutting::run()
   plotter->waitForInput(); 
   PathData path_data = loadToolPosesCFR(poses_path);
   std::vector<tesseract_common::VectorIsometry3d> tool_poses = path_data.path;
-  tesseract_common::VectorIsometry3d test_poses;
-  std::vector<tesseract_common::VectorIsometry3d> result_poses;
-  test_poses.push_back(tool_poses[0].front());
-  test_poses.push_back(tool_poses[0].back());
-  result_poses.push_back(tool_poses[0]);
-
-  evaluate_path(test_poses, result_poses);
-  return 0;
 
   assert(!tool_poses.empty());
 
@@ -446,7 +438,27 @@ bool WireCutting::run()
   std::vector<const CompositeInstruction*> cis(segments);
   for(std::size_t i = 0; i < segments; i++)
     cis[i] = cut_responses[i].results->cast_const<tesseract_planning::CompositeInstruction>();
+
+  saveInstructionsAsXML(cis, test_name);
  
+  std::vector<std::vector<std::vector<Isometry3d>>> segment_coordinates = loadInstructionsFromXML(cis, env_, test_name);
+
+  for (size_t i = 0; i < segment_coordinates.size(); i++) {
+    std::cout << "SEGMENT " << i+1 << "\n";
+      for (size_t j = 0; j < segment_coordinates[i].size(); j++) {
+        std::cout << setw(10) << "WAYPOINT " << j+1 << "\n";
+        for (size_t k = 0; k < segment_coordinates[i][j].size(); k++) {
+          std::cout << setw(20) << "XYZ COORDINATES" << k << "\n";
+          std::cout << setw(20) << segment_coordinates[i][j][k].translation() << "\n";
+        }
+      }
+  }
+  for(std::size_t i = 0; i < segment_coordinates.size(); i++)
+  {
+    evaluate_path(tool_poses[i], segment_coordinates[i]);
+  }
+
+
   // Convert CIs to joint trajectories
   std::vector<JointTrajectory> trajectories(segments);
   for(std::size_t i = 0; i < segments; i++)
