@@ -34,7 +34,8 @@ add_library(${PROJECT_NAME}_wire_cutting src/wire_cutting.cpp
                                          src/wc_utils.cpp
                                          src/trajopt_wire_cutting_composite_profile.cpp
                                          src/wire_cutting_problem_generator.cpp
-                                         src/term_info_wc.cpp)
+                                         src/term_info_wc.cpp
+                                         src/test_wc.cpp)
                                          
 
 target_link_libraries(${PROJECT_NAME}_wire_cutting tesseract::tesseract_environment_core tesseract::tesseract_environment_ofkt tesseract::tesseract_process_managers ${catkin_LIBRARIES})

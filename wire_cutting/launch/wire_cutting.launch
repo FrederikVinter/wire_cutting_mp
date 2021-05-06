@@ -7,7 +7,11 @@
   <arg name="plotting" default="true"/>
   <arg name="rviz" default="true"/>
   <arg name="testing" default="false"/>
+  <arg name="testn" default="ex"/>
+  <arg name="testp" default="HardProb_v2.txt"/>
 
+  <param name="test_name" value="$(arg testn)"/>
+  <param name="test_poses" value="$(arg testp)"/>
   <!-- Load universal robot description format (URDF) -->
   <param name="$(arg robot_description)" command="$(find xacro)/xacro --inorder '$(find wire_cutting)/urdf/wire_cutting_workcell.xacro'" />
   <param name="$(arg robot_description)_freespace" command="$(find xacro)/xacro --inorder '$(find wire_cutting)/urdf/wire_cutting_freespace_workcell.xacro'" />

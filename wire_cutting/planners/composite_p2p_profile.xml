@@ -5,8 +5,8 @@
 		<Enabled>true</Enabled>
 		<UseWeightedSum>false</UseWeightedSum>
 		<CollisionEvaluator type="1"/>
-		<BufferMargin>0.05</BufferMargin>
-		<SafetyMarginBuffer>0.10</SafetyMarginBuffer>
+		<BufferMargin>0.10</BufferMargin>
+		<SafetyMarginBuffer>0.30</SafetyMarginBuffer>
 		<Coefficient>1</Coefficient>
 	    </CollisionCostConfig>
 	    <CollisionConstraintConfig>

@@ -40,8 +40,11 @@ private:
   std::string test_name;
   InitMethodCut init_method_cut = InitMethodCut::lvsPlanner;
   Methodp2p method_p2p = Methodp2p::trajopt_only;
-  tesseract_common::JointState p2p_start;
-  tesseract_common::JointState p2p_end;
+  Isometry3d p2p_start;
+  Isometry3d p2p_end;
+  bool p2p_bbox = false;
+  VectorXd bbox_size;
+  VectorXd bbox_pos;
 };
 
 }  // namespace tesseract_ros_examples

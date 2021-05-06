@@ -71,6 +71,10 @@ public:
 
     ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end, const std::string& planner_name, ManipulatorInfo& mi);
 
+    ProcessPlanningRequest construct_request_p2p_cart(const Isometry3d& start,
+                                                                          const Isometry3d& end, 
+                                                                          const std::string& planner_name, 
+                                                                          ManipulatorInfo& mi);
 
     bool run_request_p2p(std::vector<ProcessPlanningRequest>& p2p_requests, 
                         const tesseract_rosutils::ROSPlottingPtr& plotter,

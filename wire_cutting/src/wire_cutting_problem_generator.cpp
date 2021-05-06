@@ -241,6 +241,38 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const 
   return request;
 }
 
+ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p_cart(const Isometry3d& start,
+                                                                          const Isometry3d& end, 
+                                                                          const std::string& planner_name, 
+                                                                          ManipulatorInfo& mi)
+{
+
+  CompositeInstruction program(planner_name, CompositeInstructionOrder::ORDERED, mi);
+
+  Waypoint wp_start = CartesianWaypoint(start);
+  Waypoint wp_end = CartesianWaypoint(end);
+  wp_start.print("Start");
+  wp_end.print("End");
+
+  PlanInstruction start_instruction(wp_start, PlanInstructionType::START, planner_name);
+  program.setStartInstruction(start_instruction);
+
+  PlanInstruction plan_end(wp_end, PlanInstructionType::FREESPACE, planner_name);
+
+  program.push_back(plan_end);
+
+  ProcessPlanningRequest request;
+  if (planner_name == "FREESPACE_TRAJOPT") {
+    request.name = tesseract_planning::process_planner_names::TRAJOPT_PLANNER_NAME;
+  }
+  else if(planner_name == "FREESPACE_OMPL") {
+    request.name = "OMPL_NO_POST_CHECK";
+  }
+  request.instructions = Instruction(program);
+
+  return request;
+}
+
 bool WireCuttingProblemGenerator::run_request_p2p(std::vector<ProcessPlanningRequest>& p2p_requests, 
                                                   const tesseract_rosutils::ROSPlottingPtr& plotter,
                                                   ProcessPlanningServer& planning_server_freespace,

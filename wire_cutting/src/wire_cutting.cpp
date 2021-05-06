@@ -40,6 +40,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <wc_utils.h>
 #include <trajopt_wire_cutting_composite_profile.h>
 #include <wire_cutting_problem_generator.h>
+#include <test_wc.h>
 
 #include <tesseract_environment/core/utils.h>
 #include <tesseract_rosutils/plotting.h>
@@ -83,6 +84,12 @@ const std::string ROBOT_SEMANTIC_FREESPACE_PARAM = "robot_description_freespace_
 
 /** @brief RViz Example Namespace */
 const std::string EXAMPLE_MONITOR_NAMESPACE = "tesseract_ros_examples";
+
+/** @brief test_name */
+const std::string TEST_NAME = "test_name";
+
+/** @brief test_name */
+const std::string TEST_POSES = "test_poses";
 
 namespace tesseract_ros_examples
 {
@@ -225,6 +232,8 @@ bool WireCutting::run()
 
   env_->setState(joint_names, joint_pos);
 
+  plotter->waitForInput(); 
+
 
   /* Freespace a void bbox 
   tesseract_common::VectorIsometry3d temp_poses = loadToolPoses();
@@ -334,16 +343,25 @@ bool WireCutting::run()
                                                                                       plan_profile_cut);
   planning_server_freespace.getProfiles()->addProfile<tesseract_planning::OMPLPlanProfile>("FREESPACE_OMPL", ompl_profile);
                                                                        
-  plotter->waitForInput();
-
-
   
 
   // Load test data
-  test_name = "ex";
+  nh_.getParam(TEST_NAME, test_name);
+  std::string poses_path;
+  nh_.getParam(TEST_POSES, poses_path);
 
-  PathData path_data = loadToolPosesCFR("HardProb_v2.txt");
+  plotter->waitForInput(); 
+  PathData path_data = loadToolPosesCFR(poses_path);
   std::vector<tesseract_common::VectorIsometry3d> tool_poses = path_data.path;
+  tesseract_common::VectorIsometry3d test_poses;
+  std::vector<tesseract_common::VectorIsometry3d> result_poses;
+  test_poses.push_back(tool_poses[0].front());
+  test_poses.push_back(tool_poses[0].back());
+  result_poses.push_back(tool_poses[0]);
+
+  evaluate_path(test_poses, result_poses);
+  return 0;
+
   assert(!tool_poses.empty());
 
   // Eigen::VectorXd pos(3), size(3);
@@ -360,13 +378,10 @@ bool WireCutting::run()
   // }
 
   std::cout << "Path loaded" << std::endl;
-  plotter->waitForInput();
   
-
-  loadTestData(test_type, iterationDebug, test_name, init_method_cut, method_p2p, p2p_start, p2p_end);
+  loadTestData(test_type, iterationDebug, test_name, init_method_cut, method_p2p, p2p_start, p2p_end, p2p_bbox, bbox_pos, bbox_size);
 
   std::cout << "Test data loaded" << std::endl;
-  plotter->waitForInput();
 
   WireCuttingProblemGenerator problem_generator;
   // Generate cut requests from tool poses
@@ -397,6 +412,12 @@ bool WireCutting::run()
     }
   }
 
+  //const CompositeInstruction* ci_seed = cut_seed[0].cast_const<tesseract_planning::CompositeInstruction>();
+  tesseract_common::Toolpath toolpath_seed = tesseract_planning::toToolpath(cut_seed[0], env_);
+  std::cout << toolpath_seed.size() << std::endl;
+  plotter->plotMarker(ToolpathMarker(toolpath_seed));
+
+  plotter->waitForInput(); 
 
 
   std::vector<ProcessPlanningRequest> cut_requests(segments);
@@ -431,8 +452,6 @@ bool WireCutting::run()
   for(std::size_t i = 0; i < segments; i++)
     trajectories[i] = tesseract_planning::toJointTrajectory(*cis[i]);
 
-  plotter->waitForInput();
-
   // Generate point to point requests
   ROS_INFO("Generate point to point requests");
   std::vector<ProcessPlanningRequest> p2p_requests;
@@ -442,6 +461,9 @@ bool WireCutting::run()
   {
     JointState last = trajectories[i-1].back();
     JointState first = trajectories[i].front();
+
+    std::cout << "Start p2p: " << std::endl << last.position << std::endl;
+    std::cout << "End p2p: " << std::endl << first.position << std::endl;
     p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_TRAJOPT", mi_freespace));
   }
 
@@ -449,7 +471,6 @@ bool WireCutting::run()
     ROS_INFO("Succeeded with TrajOpt only");
   }  
 
-  plotter->waitForInput();
   ROS_INFO("Combine toolpath and trajectory for cut and p2p");
 
   assert(cut_responses.size() == p2p_responses.size()+1);
@@ -467,37 +488,73 @@ bool WireCutting::run()
     combined_toolpath.insert(combined_toolpath.end(), toolpath.begin(), toolpath.end());
     combined_trajectory.insert(combined_trajectory.end(), trajectory.begin(), trajectory.end());
   }
+
+
+
   } else if (test_type == TestType::p2p)
   {
     std::vector<ProcessPlanningRequest> p2p_requests;
 
-    p2p_start.joint_names = env_->getActiveJointNames();
-    p2p_end.joint_names = env_->getActiveJointNames();
-    plotter->waitForInput();
+    if(p2p_bbox)
+    {
+      std::cout << "Adding bbox with pos: " << std::endl << bbox_pos << std::endl << "size: " << std::endl << bbox_size << std::endl;
+      Command::Ptr cmd = addBoundingBox(bbox_pos, bbox_size);
+      if (!monitor_->applyCommand(*cmd))
+        return false;
+      if (!monitor_freespace->applyCommand(*cmd))
+        return false;
+    }
+    
+    VectorXd seed_inv(6);
+    seed_inv << 0, 0, 0, 0, 0, 0;
+
+
+    auto invkin = monitor_->getEnvironment()->getManipulatorManager()->getInvKinematicSolver("manipulator");
+    
+    Eigen::Isometry3d tcp = env_->findTCP(mi);
+
+    Isometry3d p2p_start_local = p2p_start * tcp.inverse();
+    Isometry3d p2p_end_local = p2p_end * tcp.inverse();
+
+    std::cout << "Start Rotation: " << std::endl << p2p_start.rotation() << std::endl;
+    
+    std::array<Eigen::VectorXd, 2> sol = getClosestJointSolution(p2p_start_local, p2p_end_local, invkin, invkin, seed_inv);
+
+    JointState s, e;
+    s.joint_names = joint_names;
+    e.joint_names = joint_names;
+
+    for(std::size_t i = 0; i < s.joint_names.size(); i++)
+    {
+      std::cout << s.joint_names[i] << std::endl;
+    }
+    s.position = sol[0];
+    e.position = sol[1];
+
+
     switch(method_p2p)
     {
       case Methodp2p::trajopt_only :
-        p2p_requests.push_back(problem_generator.construct_request_p2p(p2p_start, p2p_end, "FREESPACE_TRAJOPT", mi_freespace));
+        p2p_requests.push_back(problem_generator.construct_request_p2p(s, e, "FREESPACE_TRAJOPT", mi_freespace));
         break;
 
       case Methodp2p::rrt_only :
-        p2p_requests.push_back(problem_generator.construct_request_p2p(p2p_start, p2p_end, "FREESPACE_OMPL", mi_freespace));
+        p2p_requests.push_back(problem_generator.construct_request_p2p(s, e, "FREESPACE_OMPL", mi_freespace));
         break;
 
       case Methodp2p::rrt_trajopt :
-        p2p_requests.push_back(problem_generator.construct_request_p2p(p2p_start, p2p_end, "FREESPACE_OMPL", mi_freespace));
+        p2p_requests.push_back(problem_generator.construct_request_p2p(s, e, "FREESPACE_OMPL", mi_freespace));
         break;
     
     }   
 
     std::vector<ProcessPlanningFuture> p2p_responses;
 
-    plotter->waitForInput();
     if (problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
         // Trajopt after seed
         if(method_p2p == Methodp2p::rrt_trajopt || method_p2p == Methodp2p::naive_trajopt ) {
           p2p_requests.clear();
-          ProcessPlanningRequest request = problem_generator.construct_request_p2p(p2p_start, p2p_end, "FREESPACE_TRAJOPT", mi_freespace);
+          ProcessPlanningRequest request = problem_generator.construct_request_p2p_cart(p2p_start, p2p_end, "FREESPACE_TRAJOPT", mi_freespace);
           request.seed = *p2p_responses[0].results.get();
           p2p_requests.push_back(request);
 

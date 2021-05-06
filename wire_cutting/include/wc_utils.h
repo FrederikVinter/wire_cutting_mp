@@ -84,7 +84,10 @@ void loadTestData(TestType &test_type,
                 const std::string &test_name, 
                 InitMethodCut &init_method_cut, 
                 Methodp2p &method_p2p, 
-                tesseract_common::JointState &p2p_start, 
-                tesseract_common::JointState &p2p_end);
+                Isometry3d &p2p_start, 
+                Isometry3d &p2p_end,
+                bool &bbox,
+                VectorXd &bbox_pos,
+                VectorXd &bbox_size);
 
 #endif

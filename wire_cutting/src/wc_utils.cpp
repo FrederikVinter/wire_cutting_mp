@@ -379,8 +379,11 @@ void loadTestData(TestType &test_type,
                 const std::string &test_name, 
                 InitMethodCut &init_method_cut, 
                 Methodp2p &method_p2p, 
-                tesseract_common::JointState &p2p_start, 
-                tesseract_common::JointState &p2p_end)
+                Isometry3d &p2p_start, 
+                Isometry3d &p2p_end,
+                bool &bbox,
+                VectorXd &bbox_pos,
+                VectorXd &bbox_size)
 {
   tinyxml2::XMLDocument test_def;
   std::string test_def_s = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/test_def.xml";
@@ -437,6 +440,9 @@ void loadTestData(TestType &test_type,
     const tinyxml2::XMLElement* method = p2p->FirstChildElement("Method");
     const tinyxml2::XMLElement* p2p_start_ele = p2p->FirstChildElement("Start");
     const tinyxml2::XMLElement* p2p_end_ele = p2p->FirstChildElement("End");
+    const tinyxml2::XMLElement* bbox_enabled = p2p->FirstChildElement("BboxEnabled");
+    const tinyxml2::XMLElement* bbox_pos_el = p2p->FirstChildElement("BboxPos");
+    const tinyxml2::XMLElement* bbox_size_el = p2p->FirstChildElement("BboxSize");
 
     if(!method)
       throw std::runtime_error("p2p must contain method!");
@@ -450,6 +456,71 @@ void loadTestData(TestType &test_type,
       std::cout << "Method p2p: " << method_p2p << std::endl;
     }
 
+
+  if(bbox_enabled)
+  {
+    tinyxml2::XMLError status = bbox_enabled->QueryBoolText(&bbox);
+    if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+      throw std::runtime_error("Test def Error parsing show iterations");
+
+    std::cout << "bbox: " << bbox << std::endl;
+  }
+
+  if(bbox_pos_el)
+  {
+    std::vector<std::string> start_tokens;
+    std::string start_string;
+    status = tesseract_common::QueryStringText(bbox_pos_el, start_string);
+    if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+      throw std::runtime_error("Error parsing p2p start");
+
+    boost::split(start_tokens, start_string, boost::is_any_of(" "), boost::token_compress_on);
+
+    std::size_t length = start_tokens.size();
+    if(length != 3)
+      throw std::runtime_error("bbox pos must contain 3 values");
+
+    if (!tesseract_common::isNumeric(start_tokens))
+      throw std::runtime_error("bbox pos are not all numeric values.");
+
+    std::vector<double> temp;
+    temp.resize(static_cast<long>(length));
+    for (std::size_t i = 0; i < start_tokens.size(); ++i)
+      tesseract_common::toNumeric<double>(start_tokens[i], temp[static_cast<long>(i)]);
+
+
+    bbox_pos.resize(3);
+    bbox_pos << temp[0], temp[1], temp[2];
+  }
+
+  if(bbox_size_el)
+  {
+    std::vector<std::string> start_tokens;
+      std::string start_string;
+      status = tesseract_common::QueryStringText(bbox_size_el, start_string);
+      if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+        throw std::runtime_error("Error parsing p2p start");
+
+      boost::split(start_tokens, start_string, boost::is_any_of(" "), boost::token_compress_on);
+
+      std::size_t length = start_tokens.size();
+      if(length != 3)
+        throw std::runtime_error("bbox pos must contain 3 values");
+
+      if (!tesseract_common::isNumeric(start_tokens))
+        throw std::runtime_error("bbox pos are not all numeric values.");
+
+      std::vector<double> temp;
+      temp.resize(static_cast<long>(length));
+      for (std::size_t i = 0; i < start_tokens.size(); ++i)
+        tesseract_common::toNumeric<double>(start_tokens[i], temp[static_cast<long>(i)]);
+
+      bbox_size.resize(3);
+      bbox_size << temp[0], temp[1], temp[2];
+  }
+
+    
+
     if(!p2p_start_ele)
       throw std::runtime_error("p2p must contain start!");
     else {
@@ -462,16 +533,22 @@ void loadTestData(TestType &test_type,
       boost::split(start_tokens, start_string, boost::is_any_of(" "), boost::token_compress_on);
 
       std::size_t length = start_tokens.size();
-      if(length != 6)
-        throw std::runtime_error("Start must contain 6 joint values");
+      if(length != 7)
+        throw std::runtime_error("Start must contain 6 values");
 
       if (!tesseract_common::isNumeric(start_tokens))
         throw std::runtime_error("p2p start are not all numeric values.");
 
-      p2p_start.position.resize(static_cast<long>(length));
+      std::vector<double> temp;
+      temp.resize(static_cast<long>(length));
       for (std::size_t i = 0; i < start_tokens.size(); ++i)
-        tesseract_common::toNumeric<double>(start_tokens[i], p2p_start.position[static_cast<long>(i)]);
-      std::cout << "p2p start pos: " << std::endl << p2p_start.position << std::endl;
+        tesseract_common::toNumeric<double>(start_tokens[i], temp[static_cast<long>(i)]);
+        
+      p2p_start = Eigen::Isometry3d::Identity() * Eigen::Translation3d(temp[0], temp[1], temp[2]) * Eigen::Quaterniond(temp[3], temp[4], temp[5], temp[6]);
+
+      std::cout << "Start: " << std::endl << "Translation:" << p2p_start.translation() << std::endl;
+      std::cout << "Rotation: " << p2p_start.rotation() << std::endl;
+      
     }
 
     if(!p2p_end_ele)
@@ -486,16 +563,21 @@ void loadTestData(TestType &test_type,
       boost::split(end_tokens, end_string, boost::is_any_of(" "), boost::token_compress_on);
 
       std::size_t length = end_tokens.size();
-      if(length != 6)
-        throw std::runtime_error("End must contain 6 joint values");
+      if(length != 7)
+        throw std::runtime_error("End must contain 6 values");
 
       if (!tesseract_common::isNumeric(end_tokens))
         throw std::runtime_error("p2p end are not all numeric values.");
 
-      p2p_end.position.resize(static_cast<long>(length));
+      std::vector<double> temp;
+      temp.resize(static_cast<long>(length));
       for (std::size_t i = 0; i < end_tokens.size(); ++i)
-        tesseract_common::toNumeric<double>(end_tokens[i], p2p_end.position[static_cast<long>(i)]);
-      std::cout << "p2p end pos: " << std::endl << p2p_end.position << std::endl;
+        tesseract_common::toNumeric<double>(end_tokens[i], temp[static_cast<long>(i)]);
+        
+      p2p_end = Eigen::Isometry3d::Identity() * Eigen::Translation3d(temp[0], temp[1], temp[2]) * Eigen::Quaterniond(temp[3], temp[4], temp[5], temp[6]);
+
+      std::cout << "End: " << std::endl << "Translation:" << p2p_end.translation() << std::endl;
+      std::cout << "Rotation: " << p2p_end.rotation() << std::endl;
     }
 
   }
