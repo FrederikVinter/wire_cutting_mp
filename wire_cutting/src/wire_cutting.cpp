@@ -443,18 +443,9 @@ bool WireCutting::run()
  
   std::vector<std::vector<std::vector<Isometry3d>>> segment_coordinates = loadInstructionsFromXML(cis, env_, test_name);
 
-  for (size_t i = 0; i < segment_coordinates.size(); i++) {
-    std::cout << "SEGMENT " << i+1 << "\n";
-      for (size_t j = 0; j < segment_coordinates[i].size(); j++) {
-        std::cout << setw(10) << "WAYPOINT " << j+1 << "\n";
-        for (size_t k = 0; k < segment_coordinates[i][j].size(); k++) {
-          std::cout << setw(20) << "XYZ COORDINATES" << k << "\n";
-          std::cout << setw(20) << segment_coordinates[i][j][k].translation() << "\n";
-        }
-      }
-  }
   for(std::size_t i = 0; i < segment_coordinates.size(); i++)
   {
+    std::cout << "tp size: " << tool_poses[i].size() << " segment size: " << segment_coordinates[i].size() << std::endl;
     evaluate_path(tool_poses[i], segment_coordinates[i]);
   }
 

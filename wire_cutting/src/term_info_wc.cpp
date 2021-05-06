@@ -21,6 +21,18 @@ TRAJOPT_IGNORE_WARNINGS_POP
 
 #include <tesseract_kinematics/kdl/kdl_fwd_kin_chain.h>
 
+Vector3d rpy(Eigen::Isometry3d transform){
+    auto rotationMatrix = transform.rotation();
+    double roll = std::atan2(rotationMatrix(2,1),rotationMatrix(2,2));
+    double pitch = std::atan2( -rotationMatrix(2,0), std::pow( rotationMatrix(2,1)*rotationMatrix(2,1) +rotationMatrix(2,2)*rotationMatrix(2,2) ,0.5  )  );
+    double yaw = std::atan2(rotationMatrix(1,0),rotationMatrix(0,0));
+
+    std::cout << roll << " " << pitch << " " << yaw << std::endl;
+    
+    Vector3d ret{roll, pitch, yaw};
+    return ret;
+}
+
 
 void ensure_only_members(const Json::Value& v, const char** fields, int nvalid)
 {
@@ -255,7 +267,7 @@ void CartRotVelTermInfo::hatch(TrajOptProb& prob)
       
       prob.addCost(std::make_shared<TrajOptCostFromErrFunc>(
           f,
-          dfdx,
+          //dfdx,
           concat(prob.GetVarRow(iStep, 0, n_dof), prob.GetVarRow(iStep + 1, 0, n_dof)),
           rot_coeffs,
           penalty_type,
@@ -400,8 +412,8 @@ VectorXd CartRotVelErrCalculator::operator()(const VectorXd& dof_vals) const
     std::cout << out[1] << std::endl << std::endl;*/
 
     VectorXd out(6);
-    out.topRows(3) = (pose1.rotation().eulerAngles(0, 1, 2) - pose0.rotation().eulerAngles(0, 1, 2) - Vector3d(limit_, limit_, limit_));
-    out.bottomRows(3) = (pose0.rotation().eulerAngles(0, 1, 2) - pose1.rotation().eulerAngles(0, 1, 2) - Vector3d(limit_, limit_, limit_));
+    out.topRows(3) = (rpy(pose1) - rpy(pose0) - Vector3d(limit_, limit_, limit_));
+    out.bottomRows(3) = (rpy(pose0) - rpy(pose1) - Vector3d(limit_, limit_, limit_));
 
     /*for(std::size_t i = 0; i < 6; i++)
       out[i] = std::pow(out[i],2);*/

@@ -9,10 +9,15 @@ double runningAverage(double avg, double new_sample, int samples) {
     return avg;
 }
 
+double pitch(Eigen::Isometry3d transform){
+    auto rotationMatrix = transform.rotation();
+    return std::atan2( -rotationMatrix(2,0), std::pow( rotationMatrix(2,1)*rotationMatrix(2,1) +rotationMatrix(2,2)*rotationMatrix(2,2) ,0.5  )  );
+}
+
 void evaluate_path(tesseract_common::VectorIsometry3d tool_poses, 
                    std::vector<std::vector<Eigen::Isometry3d>> path)
 {
-    assert(tool_poses.size() == path.size()-1);
+    assert(tool_poses.size()-1 == path.size());
 
     double average_rot_cost = 0;
     double average_trans_cost = 0;
@@ -54,16 +59,17 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
             }
             
             // Position
-            double y_rotation = transform.rotation().eulerAngles(0, 1, 2)[1];
+            double y_rotation = pitch(transform);
+            //std::cout << y_rotation << std::endl;
             average_rot_cost = runningAverage(average_rot_cost, std::abs(y_rotation), pose_num);
             double y_translation = translation.y()-segment_y_trans*(length_acum/segment_length);
-            std::cout << "Y translation: " << y_translation << " Y trans: " << translation.y() << " Y seg: " << segment_y_trans 
-            << " length: "<< length << " seg length: " << segment_length << std::endl;
+            //std::cout << "Y translation: " << y_translation << " Y trans: " << translation.y() << " Y seg: " << segment_y_trans 
+            //<< " length: "<< length << " seg length: " << segment_length << std::endl;
             average_trans_cost = runningAverage(average_trans_cost, std::abs(y_translation), pose_num);
 
             if(pose_num > 1) // Displacement
             {
-                const double y_rotation_sub1 = transformsub1.rotation().eulerAngles(0, 1, 2)[1];
+                const double y_rotation_sub1 = pitch(transformsub1);
                 disp_rot_cost = y_rotation_sub1-y_rotation;
                 average_disp_rot_cost = runningAverage(average_disp_rot_cost, std::abs(disp_rot_cost/length), pose_num-1);
 
