@@ -9,6 +9,8 @@
 #include <tesseract_visualization/markers/toolpath_marker.h>
 #include <tesseract_rosutils/plotting.h>
 #include <term_info_wc.h>
+#include <tesseract_command_language/command_language.h>
+#include <tesseract_command_language/utils/utils.h>
 TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
 #include <string>
 TESSERACT_COMMON_IGNORE_WARNINGS_POP
@@ -29,6 +31,13 @@ PathData loadToolPosesCFR(std::string file);
 
 std::vector<std::vector<Eigen::VectorXd>> loadOptimizationResults(std::string path);
 void plotIterations(const tesseract_environment::Environment::Ptr& env, const tesseract_rosutils::ROSPlottingPtr& plotter, const std::vector<std::string>& joint_names, std::string path);
+void saveInstructionsAsXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis);
+std::vector<std::vector<std::vector<Isometry3d>>> loadInstructionsFromXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis, const tesseract_environment::Environment::Ptr& env);
+
+void calculateRotError(const tesseract_environment::Environment::Ptr& env,
+                       const tesseract_rosutils::ROSPlottingPtr& plotter,
+                       const std::vector<std::string>& joint_names,
+                       std::string path);
 
 tesseract_common::VectorIsometry3d sampleToolAxis_WC(const Eigen::Isometry3d& tool_pose,
                                                     double resolution,

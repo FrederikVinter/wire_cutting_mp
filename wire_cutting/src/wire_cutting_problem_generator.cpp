@@ -142,7 +142,7 @@ CompositeInstruction WireCuttingProblemGenerator::generate_conf_interpolated_see
       std::cout << solver << "\n";
       if (solver == "KDLInvKinChainLMA") {
         env->getManipulatorManager()->setDefaultInvKinematicSolver("manipulator", "KDLInvKinChainLMA");
-        std::cout << "Using KDLInvKinChainLMA to generate configuration-interpolated seed";
+        std::cout << "Using KDLInvKinChainLMA to generate configuration-interpolated seed\n";
       }
   }
 

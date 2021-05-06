@@ -33,6 +33,8 @@ TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud_conversion.h>
 TESSERACT_COMMON_IGNORE_WARNINGS_POP
+#include <iostream>
+#include <sstream>
 
 #include <wire_cutting.h>
 #include <trajopt_wire_cutting_plan_profile.h>
@@ -40,6 +42,8 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <wc_utils.h>
 #include <trajopt_wire_cutting_composite_profile.h>
 #include <wire_cutting_problem_generator.h>
+#include <timer.h>
+#include <test_results.h>
 
 #include <tesseract_environment/core/utils.h>
 #include <tesseract_rosutils/plotting.h>
@@ -133,13 +137,14 @@ bool WireCutting::run()
 
   console_bridge::setLogLevel(console_bridge::LogLevel::CONSOLE_BRIDGE_LOG_DEBUG);
 
+  TestResults test_results;
+
   // Initial setup
   std::string urdf_xml_string, srdf_xml_string, urdf_xml_string_freespace, srdf_xml_string_freespace;
   nh_.getParam(ROBOT_DESCRIPTION_PARAM, urdf_xml_string);
   nh_.getParam(ROBOT_SEMANTIC_PARAM, srdf_xml_string);
   nh_.getParam(ROBOT_DESCRIPTION_FREESPACE_PARAM, urdf_xml_string_freespace);
   nh_.getParam(ROBOT_SEMANTIC_FREESPACE_PARAM, srdf_xml_string_freespace);
-
 
   ResourceLocator::Ptr locator = std::make_shared<tesseract_rosutils::ROSResourceLocator>();
   if (!env_->init<OFKTStateSolver>(urdf_xml_string, srdf_xml_string, locator))
@@ -238,7 +243,7 @@ bool WireCutting::run()
   pathData.has_bbox = true;*/
   
   
-  PathData path_data = loadToolPosesCFR("HardProb_v2.txt");
+  PathData path_data = loadToolPosesCFR("linear_test.txt");
   std::vector<tesseract_common::VectorIsometry3d> tool_poses = path_data.path;
   assert(!tool_poses.empty());
 
@@ -324,7 +329,6 @@ bool WireCutting::run()
   trajopt_solver_profile->opt_info.log_results = iterationDebug;
   
 
-
   // Add profiles to Dictionary                                                                             
   planning_server.getProfiles()->addProfile<tesseract_planning::TrajOptCompositeProfile>("DEFAULT",
                                                                                          trajopt_composite_profile);
@@ -344,6 +348,12 @@ bool WireCutting::run()
   plotter->waitForInput();
 
   WireCuttingProblemGenerator problem_generator;
+
+
+                          // start timer
+                          Timer<std::milli, size_t> timer; // milliseconds
+                          timer.start();
+
   // Generate cut requests from tool poses
   std::size_t segments = tool_poses.size();
   
@@ -352,12 +362,10 @@ bool WireCutting::run()
   for(std::size_t i = 0; i < segments; i++)
   {
     auto manipinfo = ManipulatorInfo("manipulator");
-    cut_seed[i] = problem_generator.generate_descartes_seed(tool_poses[i], mi, env_, descartes_plan_profile);
-    // cut_seed[i] = problem_generator.generate_conf_interpolated_seed(tool_poses[i], mi, env_);
+    //cut_seed[i] = problem_generator.generate_descartes_seed(tool_poses[i], mi, env_, descartes_plan_profile);
+    cut_seed[i] = problem_generator.generate_conf_interpolated_seed(tool_poses[i], mi, env_);
     //cut_seed[i] = problem_generator.generate_naive_seed(tool_poses[i], mi, env_);
   }
-
-
 
   // Solve process plans for cuts
   std::vector<ProcessPlanningRequest> cut_requests(segments);
@@ -377,15 +385,37 @@ bool WireCutting::run()
       planning_server.waitForAll(); 
       plotter->waitForInput();   
       ROS_INFO("Plotting path iterations");  
-      plotIterations(env_, plotter, joint_names, "/tmp/trajopt_vars.log");
+      // plotIterations(env_, plotter, joint_names, "/tmp/trajopt_vars.log");
+      calculateRotError(env_, plotter, joint_names, "/tmp/trajopt_vars.log");
     }
   }
   planning_server.waitForAll();
+
+                            timer.stop();
+                            test_results.cut_duration = timer.count() / 1000.0;
+  
 
   // Cast responses to composite instructions
   std::vector<const CompositeInstruction*> cis(segments);
   for(std::size_t i = 0; i < segments; i++)
     cis[i] = cut_responses[i].results->cast_const<tesseract_planning::CompositeInstruction>();
+
+  // Save responses to XML
+  saveInstructionsAsXML(cis);
+  
+  // Load them
+  std::vector<std::vector<std::vector<Isometry3d>>> segment_coordinates = loadInstructionsFromXML(cis, env_);
+
+  for (size_t i = 0; i < segment_coordinates.size(); i++) {
+    std::cout << "SEGMENT " << i+1 << "\n";
+      for (size_t j = 0; j < segment_coordinates[i].size(); j++) {
+        std::cout << setw(10) << "WAYPOINT " << j+1 << "\n";
+        for (size_t k = 0; k < segment_coordinates[i][j].size(); k++) {
+          std::cout << setw(20) << "XYZ COORDINATES" << k << "\n";
+          std::cout << setw(20) << segment_coordinates[i][j][k].translation() << "\n";
+        }
+      }
+  }
  
   // Convert CIs to joint trajectories
   std::vector<JointTrajectory> trajectories(segments);
@@ -403,6 +433,8 @@ bool WireCutting::run()
   planning_server_freespace.registerProcessPlanner(ompl_planner_name,
                                                   std::make_unique<tesseract_planning::OMPLTaskflow>(params));
 
+  timer.start();
+  
   // Generate point to point requests
   ROS_INFO("Generate point to point requests");
   std::vector<ProcessPlanningRequest> p2p_requests;
@@ -439,17 +471,16 @@ bool WireCutting::run()
           ROS_INFO("Succeeded with RRT as seed");
         } else {
           ROS_INFO("RRT succeeded but was unable to be optimized");
-          // for(size_t i = 0; i < p2p_responses_seed.size(); i ++)
-          //   p2p_responses[i] = p2p_responses_seed[i];
-          p2p_responses.resize(cut_responses.size()-1);
-          // p2p_responses = p2p_responses;
+          p2p_responses = std::move(p2p_responses_seed);
         }
     } else {
       ROS_INFO("RRT did not succeed");
     }
   }
+  planning_server.waitForAll();
 
- 
+  timer.stop();
+  test_results.p2p_duration = timer.count() / 1000.0;
 
   plotter->waitForInput();
   ROS_INFO("Combine toolpath and trajectory for cut and p2p");
@@ -482,20 +513,10 @@ bool WireCutting::run()
     plotter->plotTrajectory(combined_trajectory, env_->getStateSolver());
   }
 
-
-  tinyxml2::XMLDocument xmlDoc;
-
-  XMLNode * pRoot = xmlDoc.NewElement("Instructions");    // Creat root element
-  xmlDoc.InsertFirstChild(pRoot);                 // Insert element
-
-  //XMLElement* pResults = trajopt_composite_profile->toXML(xmlDoc);
-  XMLElement * pResults = cut_responses[0].results->toXML(xmlDoc);
-  pRoot->InsertEndChild(pResults);                // insert element as child
-
-  const char* fileName = "/home/frederik/ws_tesseract_wirecut/trajopt_results.xml";
-  tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);
-
-
+  std::cout << "TEST RESULTS:\n";
+  std::cout << "success: " << test_results.success << "\n";
+  std::cout << "cut time: " << test_results.cut_duration << " seconds\n";
+  std::cout << "p2p time: " << test_results.p2p_duration << " seconds\n";
 
   ROS_INFO("Final trajectory is collision free");
   return true;

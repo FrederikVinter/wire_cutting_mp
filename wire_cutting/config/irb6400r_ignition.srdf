@@ -28,6 +28,7 @@
     <disable_collisions link1="base_link" link2="link_2" reason="Never"/>
     <disable_collisions link1="CH_left" link2="link_6" reason="Never"/>
     <disable_collisions link1="link_2" link2="link_6" reason="Never"/>
+    <disable_collisions link1="link_2" link2="link_4" reason="Never"/>
     <disable_collisions link1="base_link" link2="link_3" reason="Never"/>
     <disable_collisions link1="carbon_hotwire" link2="link_3" reason="Never"/>
     <disable_collisions link1="CH_right" link2="link_5" reason="Never"/>
