@@ -125,6 +125,7 @@ WireCutting::WireCutting(const ros::NodeHandle& nh, bool plotting, bool rviz)
 
 bool WireCutting::run()
 {
+   nh_.getParam(TEST_NAME, test_name);
   using tesseract_planning::CartesianWaypoint;
   using tesseract_planning::CompositeInstruction;
   using tesseract_planning::CompositeInstructionOrder;
@@ -281,7 +282,7 @@ bool WireCutting::run()
 
   // Load plan profile
   tinyxml2::XMLDocument xml_plan_cut;
-  std::string plan_cut_path = ros::package::getPath("wire_cutting") + "/planners/plan_cut_profile.xml";
+  std::string plan_cut_path = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/planners/plan_cut_profile.xml";
   xml_plan_cut.LoadFile(plan_cut_path.c_str());
   XMLElement* planElement = xml_plan_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptPlanProfile");
   
@@ -293,14 +294,14 @@ bool WireCutting::run()
 
   // Load composite profile
   tinyxml2::XMLDocument xml_composite_cut;
-  std::string composite_cut_path = ros::package::getPath("wire_cutting") + "/planners/composite_cut_profile.xml";
+  std::string composite_cut_path = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/planners/composite_cut_profile.xml";
   xml_composite_cut.LoadFile(composite_cut_path.c_str());
   XMLElement* compositeElement = xml_composite_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptCompositeProfile");
   auto trajopt_composite_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement);
   
   // Load composite p2p profile
   tinyxml2::XMLDocument xml_composite_p2p;
-  std::string composite_p2p_path = ros::package::getPath("wire_cutting") + "/planners/composite_p2p_profile.xml";
+  std::string composite_p2p_path = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/planners/composite_p2p_profile.xml";
   xml_composite_p2p.LoadFile(composite_p2p_path.c_str());
   XMLElement* compositeElement_p2p = xml_composite_p2p.FirstChildElement("Planner")->FirstChildElement("TrajoptCompositeProfile");
   auto trajopt_composite_p2p_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement_p2p);
@@ -347,7 +348,6 @@ bool WireCutting::run()
   
 
   // Load test data
-  nh_.getParam(TEST_NAME, test_name);
   std::string poses_path;
   nh_.getParam(TEST_POSES, poses_path);
 
@@ -373,7 +373,8 @@ bool WireCutting::run()
   std::cout << "Path loaded" << std::endl;
   
   loadTestData(test_type, iterationDebug, test_name, init_method_cut, method_p2p, p2p_start, p2p_end, p2p_bbox, bbox_pos, bbox_size);
-
+  std::string file_path = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/results.txt";
+  std::ofstream ofile(file_path);
   std::cout << "Test data loaded" << std::endl;
 
   WireCuttingProblemGenerator problem_generator;
@@ -452,8 +453,12 @@ bool WireCutting::run()
   for(std::size_t i = 0; i < segment_coordinates.size(); i++)
   {
     std::cout << "tp size: " << tool_poses[i].size() << " segment size: " << segment_coordinates[i].size() << std::endl;
-    evaluate_path(tool_poses[i], segment_coordinates[i], test_name, i+1);
+    evaluate_path(tool_poses[i], segment_coordinates[i], ofile, i+1);
+    ofile << "Init time: " <<timers_init[i].count() << std::endl << std::endl;
   }
+  ofile << "Total trajopt time: " << timer.count() << std::endl;
+  
+  
 
 
   // Convert CIs to joint trajectories
@@ -496,6 +501,7 @@ bool WireCutting::run()
   problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses);
   
   timer_p2p.stop();
+  ofile << "Total p2p time: " << timer_p2p.count() << std::endl;
 
   ROS_INFO("Combine toolpath and trajectory for cut and p2p");
 
@@ -576,19 +582,33 @@ bool WireCutting::run()
 
     std::vector<ProcessPlanningFuture> p2p_responses;
 
+
+    Timer<std::milli, size_t> timer;
+    size_t init, p2p;
+    timer.start();
     if (problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
+        timer.stop();
+        p2p = timer.count();
         // Trajopt after seed
         if(method_p2p == Methodp2p::rrt_trajopt || method_p2p == Methodp2p::naive_trajopt ) {
+          init = p2p;
+          ofile << "Init time: " << init << std::endl;
+          
           p2p_requests.clear();
           ProcessPlanningRequest request = problem_generator.construct_request_p2p_cart(p2p_start, p2p_end, "FREESPACE_TRAJOPT", mi_freespace);
           request.seed = *p2p_responses[0].results.get();
           p2p_requests.push_back(request);
 
           p2p_responses.clear();
+          timer.start();
           if(problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
             ROS_INFO("Succeeded with seed");
           }
+          timer.stop();
+          p2p = timer.count();
         }
+        ofile << "p2p time: " << p2p << std::endl;
+        
       }
 
     if(iterationDebug) {  
@@ -605,7 +625,7 @@ bool WireCutting::run()
   }
 
 
-
+  ofile.close();
   // Plot Process Trajectory
   if (rviz_ && plotter != nullptr && plotter->isConnected())
   {

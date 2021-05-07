@@ -16,7 +16,7 @@ double pitch(Eigen::Isometry3d transform){
 
 void evaluate_path(tesseract_common::VectorIsometry3d tool_poses, 
                    std::vector<std::vector<Eigen::Isometry3d>> path,
-                   std::string test_name,
+                   std::ofstream& ofile,
                    int path_num)
 {
     assert(tool_poses.size()-1 == path.size());
@@ -99,11 +99,9 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
             transformsub2 = transformsub1;
         }
     }
-    std::string file_path = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/results_" + std::to_string(path_num) + ".txt";
-    std::ofstream ofile(file_path);
+    ofile << "Cut_" << path_num << std::endl;
     ofile << average_rot_cost << ", " << average_disp_rot_cost << ", " << average_acc_rot_cost << std::endl;
     ofile << average_trans_cost << ", " << average_disp_trans_cost << ", " << average_acc_trans_cost << std::endl;
-    ofile.close();
 
     std::cout << "Rot cost: " << average_rot_cost << " Trans cost: " << average_trans_cost << std::endl;
     std::cout << "Rot disp cost: " << average_disp_rot_cost << " Trans disp cost: " << average_disp_trans_cost << std::endl;
