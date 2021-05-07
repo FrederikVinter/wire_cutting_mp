@@ -41,6 +41,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 #include <trajopt_wire_cutting_composite_profile.h>
 #include <wire_cutting_problem_generator.h>
 #include <test_wc.h>
+#include <timer.h>
 
 #include <tesseract_environment/core/utils.h>
 #include <tesseract_rosutils/plotting.h>
@@ -386,10 +387,11 @@ bool WireCutting::run()
   if(test_type == TestType::cut || test_type == TestType::full)
   {
   std::vector<CompositeInstruction> cut_seed(segments);
+  std::vector<Timer<std::milli, size_t>> timers_init(segments); // milliseconds
   for(std::size_t i = 0; i < segments; i++)
   {
     auto manipinfo = ManipulatorInfo("manipulator");
-
+    timers_init[i].start();
     switch(init_method_cut)
     {
       case InitMethodCut::decartes : 
@@ -402,6 +404,7 @@ bool WireCutting::run()
         cut_seed[i] = problem_generator.generate_naive_seed(tool_poses[i], mi, env_);
         break;
     }
+    timers_init[i].stop();
   }
 
   //const CompositeInstruction* ci_seed = cut_seed[0].cast_const<tesseract_planning::CompositeInstruction>();
@@ -422,6 +425,8 @@ bool WireCutting::run()
   }
 
   std::vector<ProcessPlanningFuture> cut_responses(segments);
+  Timer<std::milli, size_t> timer; 
+  timer.start();
   for(std::size_t i = 0; i < segments; i++)
   {
     cut_responses[i] = planning_server.run(cut_requests[i]);
@@ -433,6 +438,7 @@ bool WireCutting::run()
     }
   }
   planning_server.waitForAll();
+  timer.stop();
 
   // Cast responses to composite instructions
   std::vector<const CompositeInstruction*> cis(segments);
@@ -446,7 +452,7 @@ bool WireCutting::run()
   for(std::size_t i = 0; i < segment_coordinates.size(); i++)
   {
     std::cout << "tp size: " << tool_poses[i].size() << " segment size: " << segment_coordinates[i].size() << std::endl;
-    evaluate_path(tool_poses[i], segment_coordinates[i]);
+    evaluate_path(tool_poses[i], segment_coordinates[i], test_name, i+1);
   }
 
 
@@ -467,12 +473,29 @@ bool WireCutting::run()
 
     std::cout << "Start p2p: " << std::endl << last.position << std::endl;
     std::cout << "End p2p: " << std::endl << first.position << std::endl;
-    p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_TRAJOPT", mi_freespace));
+
+    switch(method_p2p)
+    {
+      case Methodp2p::trajopt_only :
+        p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_TRAJOPT", mi_freespace));
+        break;
+
+      case Methodp2p::rrt_only :
+        p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_OMPL", mi_freespace));
+        break;
+
+      case Methodp2p::rrt_trajopt :
+        p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_OMPL", mi_freespace));
+        break;
+    
+    } 
   }
 
-  if (problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
-    ROS_INFO("Succeeded with TrajOpt only");
-  }  
+  Timer<std::milli, size_t> timer_p2p; // milliseconds
+  timer_p2p.start();
+  problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses);
+  
+  timer_p2p.stop();
 
   ROS_INFO("Combine toolpath and trajectory for cut and p2p");
 

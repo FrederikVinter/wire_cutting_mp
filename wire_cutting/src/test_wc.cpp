@@ -15,7 +15,9 @@ double pitch(Eigen::Isometry3d transform){
 }
 
 void evaluate_path(tesseract_common::VectorIsometry3d tool_poses, 
-                   std::vector<std::vector<Eigen::Isometry3d>> path)
+                   std::vector<std::vector<Eigen::Isometry3d>> path,
+                   std::string test_name,
+                   int path_num)
 {
     assert(tool_poses.size()-1 == path.size());
 
@@ -78,8 +80,8 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
             }
             if(pose_num > 2) // Change in displacement
             {
-                const double y_rotation_sub1 = transformsub1.rotation().eulerAngles(0, 1, 2)[1];
-                const double y_rotation_sub2 = transformsub1.rotation().eulerAngles(0, 1, 2)[1];
+                const double y_rotation_sub1 = pitch(transformsub1);
+                const double y_rotation_sub2 = pitch(transformsub2);
                 double acc_rot_cost = std::abs(disp_rot_cost_sub1-disp_rot_cost);
 
                 double average_length = (length+lengthsub1)/2.0;
@@ -96,9 +98,14 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
             transformsub1 = transform;
             transformsub2 = transformsub1;
         }
-
-        std::cout << "Rot cost: " << average_rot_cost << " Trans cost: " << average_trans_cost << std::endl;
-        std::cout << "Rot disp cost: " << average_disp_rot_cost << " Trans disp cost: " << average_disp_trans_cost << std::endl;
-        std::cout << "Rot acc cost: " << average_acc_rot_cost << " Trans acc cost: " << average_acc_trans_cost << std::endl;
     }
+    std::string file_path = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/results_" + std::to_string(path_num) + ".txt";
+    std::ofstream ofile(file_path);
+    ofile << average_rot_cost << ", " << average_disp_rot_cost << ", " << average_acc_rot_cost << std::endl;
+    ofile << average_trans_cost << ", " << average_disp_trans_cost << ", " << average_acc_trans_cost << std::endl;
+    ofile.close();
+
+    std::cout << "Rot cost: " << average_rot_cost << " Trans cost: " << average_trans_cost << std::endl;
+    std::cout << "Rot disp cost: " << average_disp_rot_cost << " Trans disp cost: " << average_disp_trans_cost << std::endl;
+    std::cout << "Rot acc cost: " << average_acc_rot_cost << " Trans acc cost: " << average_acc_trans_cost << std::endl;
 }

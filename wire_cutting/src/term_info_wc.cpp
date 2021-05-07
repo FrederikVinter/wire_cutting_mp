@@ -27,7 +27,7 @@ Vector3d rpy(Eigen::Isometry3d transform){
     double pitch = std::atan2( -rotationMatrix(2,0), std::pow( rotationMatrix(2,1)*rotationMatrix(2,1) +rotationMatrix(2,2)*rotationMatrix(2,2) ,0.5  )  );
     double yaw = std::atan2(rotationMatrix(1,0),rotationMatrix(0,0));
 
-    std::cout << roll << " " << pitch << " " << yaw << std::endl;
+    //std::cout << roll << " " << pitch << " " << yaw << std::endl;
     
     Vector3d ret{roll, pitch, yaw};
     return ret;
