@@ -101,8 +101,8 @@ install(
   TARGETS
     ${PROJECT_NAME}_wire_cutting
     ${PROJECT_NAME}_wire_cutting_node
-    ${PROJECT_NAME}_iterations_plotter
-    ${PROJECT_NAME}_iterations_plotter_node
+    #${PROJECT_NAME}_iterations_plotter
+    #${PROJECT_NAME}_iterations_plotter_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

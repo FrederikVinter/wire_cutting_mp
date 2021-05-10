@@ -64,7 +64,14 @@ public:
   CollisionCostConfig collision_cost_config;
   /** @brief Configuration info for collisions that are modeled as constraints */
   CollisionConstraintConfig collision_constraint_config;
-  
+
+  // Vector of displacements, contains n-1 elements
+  std::vector<double> displacements;
+  /** @brief If true, cart accel constraint is enabled*/
+  bool cart_acceleration = true;
+  Eigen::VectorXd cart_acc_coeff{ Eigen::VectorXd::Constant(6, 1, 0) };
+  sco::PenaltyType cart_acc_penalty_type = sco::ABS;
+
   /** @brief If true, velocity constraint is enabled (added 05/03/2021)*/
   bool constrain_velocity = true;
   Eigen::VectorXd cart_vel_coeff{ Eigen::VectorXd::Constant(6, 1, 0) };
@@ -146,6 +153,14 @@ protected:
 
   void addVelocityConstraint(trajopt::ProblemConstructionInfo& pci,
                               double max_displacement,
+                              int start_index,
+                              int end_index,
+                              const std::string& link,
+                              trajopt::TermType type,
+                              const std::vector<int>& /*fixed_indices*/) const;
+
+  void addCartAcceleration(trajopt::ProblemConstructionInfo& pci,
+                              std::vector<double> displacements,
                               int start_index,
                               int end_index,
                               const std::string& link,

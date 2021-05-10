@@ -84,6 +84,14 @@ trajopt::TermInfo::Ptr createCartesianWaypointTermInfoWC(const Eigen::Isometry3d
                                                        trajopt::TermType type,
                                                        sco::PenaltyType penalty_type);
 
+trajopt::TermInfo::Ptr createCartAccelTermInfo(std::vector<double> displacements,
+                                                int start_index,
+                                                int end_index,
+                                                const std::string& link,
+                                                trajopt::TermType type,
+                                                const Eigen::VectorXd& coeff,
+                                                sco::PenaltyType penalty_type);
+
 void loadTestData(TestType &test_type,
                 bool &show_iterations,
                 const std::string &test_name, 
@@ -94,5 +102,7 @@ void loadTestData(TestType &test_type,
                 bool &bbox,
                 VectorXd &bbox_pos,
                 VectorXd &bbox_size);
+
+std::vector<double> createDisplacementVector(const tesseract_common::VectorIsometry3d& tool_path);
 
 #endif

@@ -388,6 +388,103 @@ void CartVelTermInfoWC::hatch(TrajOptProb& prob)
   }
 }
 
+void CartAccTermInfoWC::fromJson(ProblemConstructionInfo& pci, const Json::Value& v)
+{
+
+}
+
+void CartAccTermInfoWC::hatch(TrajOptProb& prob)
+{
+  int n_dof = static_cast<int>(prob.GetKin()->numJoints());
+
+  tesseract_environment::EnvState::ConstPtr state = prob.GetEnv()->getCurrentState();
+  Eigen::Isometry3d world_to_base = Eigen::Isometry3d::Identity();
+  try
+  {
+    world_to_base = state->link_transforms.at(prob.GetKin()->getBaseLinkName());
+  }
+  catch (const std::exception&)
+  {
+    PRINT_AND_THROW(boost::format("Failed to find transform for link '%s'") % prob.GetKin()->getBaseLinkName());
+  }
+
+  tesseract_environment::AdjacencyMap::Ptr adjacency_map = std::make_shared<tesseract_environment::AdjacencyMap>(
+      prob.GetEnv()->getSceneGraph(), prob.GetKin()->getActiveLinkNames(), state->link_transforms);
+
+  if (term_type == (TT_COST | TT_USE_TIME))
+  {
+    CONSOLE_BRIDGE_logError("Use time version of this term has not been defined.");
+  }
+  else if (term_type == (TT_CNT | TT_USE_TIME))
+  {
+    CONSOLE_BRIDGE_logError("Use time version of this term has not been defined.");
+  }
+  else if ((term_type & TT_COST) && ~(term_type | ~TT_USE_TIME))
+  {
+    for (int iStep = first_step; iStep <= last_step; ++iStep)
+    {
+      auto f =
+          std::make_shared<CartAccErrCalculator>(prob.GetKin(), adjacency_map, world_to_base, link);
+
+      //auto weighted_coeffs = coeffs;
+      //weighted_coeffs *= 1.0/(std::pow((displacements[iStep-1]+displacements[iStep])/2.0,2.0));
+      auto temp = concat(prob.GetVarRow(iStep - 1, 0, n_dof), prob.GetVarRow(iStep, 0, n_dof));
+      prob.addCost(std::make_shared<TrajOptCostFromErrFunc>(
+          f,
+          //dfdx,
+          concat(temp, prob.GetVarRow(iStep + 1, 0, n_dof)),
+          coeffs,
+          penalty_type,
+          "Acc: " + std::to_string(iStep)));
+    }
+  }
+  else if ((term_type & TT_CNT) && ~(term_type | ~TT_USE_TIME))
+  {
+    CONSOLE_BRIDGE_logError("Constraint version of this term has not been defined.");  
+  }
+  else
+  {
+    CONSOLE_BRIDGE_logWarn("CartVelTermInfo does not have a valid term_type defined. No cost/constraint applied");
+  }
+}
+
+VectorXd CartAccErrCalculator::operator()(const VectorXd& dof_vals) const
+{
+    auto n_dof = static_cast<int>(manip_->numJoints());
+    Isometry3d pose0, pose1, pose2;
+
+    manip_->calcFwdKin(pose0, dof_vals.topRows(n_dof), kin_link_->link_name);
+    manip_->calcFwdKin(pose1, dof_vals.segment(n_dof, n_dof), kin_link_->link_name);
+    manip_->calcFwdKin(pose2, dof_vals.bottomRows(n_dof), kin_link_->link_name);
+
+
+    pose0 = world_to_base_ * pose0 * kin_link_->transform * tcp_;
+    pose1 = world_to_base_ * pose1 * kin_link_->transform * tcp_;
+    pose2 = world_to_base_ * pose2 * kin_link_->transform * tcp_;
+
+    auto p0_trans = pose0.translation();
+    auto p1_trans = pose1.translation();
+    auto p2_trans = pose2.translation();
+
+    auto p0_rot = rpy(pose0);
+    auto p1_rot = rpy(pose1);
+    auto p2_rot = rpy(pose2);
+
+    VectorXd out(6);
+    /*std::cout << std::endl << "p0: " << p0_rot.y() << std::endl;
+    std::cout << std::endl << "p1: " << p1_rot.y()<< std::endl;
+    std::cout << std::endl << "p2: " << p2_rot.y() << std::endl;*/
+    out[0] = p2_trans.x() - 2*p1_trans.x() + p0_trans.x();
+    out[1] = (p2_trans.y() - 2*p1_trans.y() + p0_trans.y());
+    out[2] = p2_trans.z() - 2*p1_trans.z() + p0_trans.z();
+
+    out[3] = p2_rot.x() - 2*p1_rot.x() + p0_rot.x();
+    out[4] = (p2_rot.y() - 2*p1_rot.y() + p0_rot.y());
+    out[5] = p2_rot.z() - 2*p1_rot.z() + p0_rot.z();
+    //std::cout << std::endl << "out y: " << out[4] << std::endl;
+
+    return out;
+}
 
 VectorXd CartRotVelErrCalculator::operator()(const VectorXd& dof_vals) const
 {
@@ -399,21 +496,16 @@ VectorXd CartRotVelErrCalculator::operator()(const VectorXd& dof_vals) const
 
     pose0 = world_to_base_ * pose0 * kin_link_->transform * tcp_;
     pose1 = world_to_base_ * pose1 * kin_link_->transform * tcp_;
-
     
-    /*auto pose0_RPY = pose0.rotation().eulerAngles(0, 1, 2);
-    auto pose1_RPY = pose1.rotation().eulerAngles(0, 1, 2);
-
-    VectorXd out(2);
-    out[0] = pose0_RPY[1] - pose1_RPY[1];
-    out[1] = pose1_RPY[1] - pose0_RPY[1];
-
-    std::cout << out[0] << std::endl << std::endl;
-    std::cout << out[1] << std::endl << std::endl;*/
+    //double zxlength = std::sqrt(std::pow(pose0.translation().x() + pose1.translation().x(),2.0)
+    //  +std::pow(pose0.translation().z() + pose1.translation().z(),2.0));
+    
 
     VectorXd out(6);
-    out.topRows(3) = (rpy(pose1) - rpy(pose0) - Vector3d(limit_, limit_, limit_));
-    out.bottomRows(3) = (rpy(pose0) - rpy(pose1) - Vector3d(limit_, limit_, limit_));
+    out.topRows(3) = (rpy(pose1) - rpy(pose0));
+    out.bottomRows(3) = (rpy(pose0) - rpy(pose1));
+    //out[1] = out[1]/zxlength;
+    //out[4] = out[4]/zxlength;
 
     /*for(std::size_t i = 0; i < 6; i++)
       out[i] = std::pow(out[i],2);*/

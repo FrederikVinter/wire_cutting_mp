@@ -1,7 +1,7 @@
 Cut_1
-0.00250021, 0.0200776, 0.0225347
-5.52739e-06, 7.38799e-05, 7.19111e-05
-Init time: 2
+0.00246545, 0.0192226, 0.101248
+5.3082e-06, 7.19417e-05, 7.02818e-05
+Init time: 3
 
-Total trajopt time: 4073
-Total p2p time: 83909
+Total trajopt time: 5676
+Total p2p time: 103235

@@ -80,15 +80,13 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
             }
             if(pose_num > 2) // Change in displacement
             {
-                const double y_rotation_sub1 = pitch(transformsub1);
-                const double y_rotation_sub2 = pitch(transformsub2);
-                double acc_rot_cost = std::abs(disp_rot_cost_sub1-disp_rot_cost);
-
                 double average_length = (length+lengthsub1)/2.0;
-                average_acc_rot_cost = runningAverage(average_disp_rot_cost, acc_rot_cost/average_length, pose_num-2);
+                double acc_rot_cost = (disp_rot_cost_sub1 - disp_rot_cost)/average_length;
 
-                double acc_trans_cost = std::abs(disp_trans_cost_sub1-disp_trans_cost);
-                average_acc_trans_cost = runningAverage(average_disp_trans_cost, acc_trans_cost/average_length, pose_num-2);
+                average_acc_rot_cost = runningAverage(average_disp_rot_cost, std::abs(acc_rot_cost), pose_num-2);
+
+                double acc_trans_cost = disp_trans_cost_sub1-disp_trans_cost/average_length;
+                average_acc_trans_cost = runningAverage(average_disp_trans_cost, std::abs(acc_trans_cost), pose_num-2);
             }
             
             y_translation_sub1 = y_translation;

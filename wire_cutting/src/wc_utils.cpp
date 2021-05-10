@@ -75,7 +75,7 @@ PathData loadToolPosesCFR(std::string file)
   std::ifstream indata;                     // input file
 
   // You could load your parts from anywhere, but we are transporting them with
-  std::string filename = ros::package::getPath("wire_cutting") + "/config/" + file;
+  std::string filename = ros::package::getPath("wire_cutting") + "/programs/" + file;
   indata.open(filename);
   assert(indata.is_open());
   
@@ -332,6 +332,31 @@ trajopt::TermInfo::Ptr createRotationalVelocityTermInfo(double max_displacement,
   term->link = link;
   term->term_type = type;
   term->rot_coeffs = coeff;
+  term->penalty_type = penalty_type;  
+
+  return term;
+}
+
+trajopt::TermInfo::Ptr createCartAccelTermInfo(std::vector<double> displacements,
+                                                int start_index,
+                                                int end_index,
+                                                const std::string& link,
+                                                trajopt::TermType type,
+                                                const Eigen::VectorXd& coeff,
+                                                sco::PenaltyType penalty_type)
+{
+  if ((end_index - start_index) < 3)
+    throw std::runtime_error("TrajOpt CartAccTermInfo requires at least three states!");
+
+  std::shared_ptr<CartAccTermInfoWC> term = std::make_shared<CartAccTermInfoWC>();
+  
+  term->first_step = start_index+1;
+  term->last_step = end_index-1;
+  term->displacements = displacements;
+
+  term->link = link;
+  term->term_type = type;
+  term->coeffs = coeff;
   term->penalty_type = penalty_type;  
 
   return term;
@@ -672,5 +697,15 @@ std::vector<std::vector<std::vector<Isometry3d>>> loadInstructionsFromXML(const 
       segment_coordinates.push_back(wp_to_wp);
     }
     return segment_coordinates;
+}
+
+std::vector<double> createDisplacementVector(const tesseract_common::VectorIsometry3d& tool_path)
+{
+  std::vector<double> displacements(tool_path.size()-1);
+  for(std::size_t i = 0; i < tool_path.size()-1; i++)
+  {
+    displacements[i] = (tool_path[i+1].translation()-tool_path[i].translation()).norm();
+    std::cout << "disp_" << i << " " << displacements[i] << std::endl;
+  }
 }
 

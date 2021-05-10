@@ -125,7 +125,7 @@ WireCutting::WireCutting(const ros::NodeHandle& nh, bool plotting, bool rviz)
 
 bool WireCutting::run()
 {
-   nh_.getParam(TEST_NAME, test_name);
+  nh_.getParam(TEST_NAME, test_name);
   using tesseract_planning::CartesianWaypoint;
   using tesseract_planning::CompositeInstruction;
   using tesseract_planning::CompositeInstructionOrder;
@@ -285,11 +285,7 @@ bool WireCutting::run()
   std::string plan_cut_path = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/planners/plan_cut_profile.xml";
   xml_plan_cut.LoadFile(plan_cut_path.c_str());
   XMLElement* planElement = xml_plan_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptPlanProfile");
-  
   auto plan_profile_cut = std::make_shared<TrajOptWireCuttingPlanProfile>(*planElement);
-  std::cout << "Plan costs: " << std::endl << plan_profile_cut->cart_coeff_cost << std::endl;
-  std::cout << "Plan cnt: " << std::endl << plan_profile_cut->cart_coeff_cnt << std::endl;
-
   plan_profile_cut->addFourBarLinkageConstraints();
 
   // Load composite profile
@@ -298,7 +294,7 @@ bool WireCutting::run()
   xml_composite_cut.LoadFile(composite_cut_path.c_str());
   XMLElement* compositeElement = xml_composite_cut.FirstChildElement("Planner")->FirstChildElement("TrajoptCompositeProfile");
   auto trajopt_composite_profile = std::make_shared<TrajOptWireCuttingCompositeProfile>(*compositeElement);
-  
+
   // Load composite p2p profile
   tinyxml2::XMLDocument xml_composite_p2p;
   std::string composite_p2p_path = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/planners/composite_p2p_profile.xml";

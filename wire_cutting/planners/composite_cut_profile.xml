@@ -23,7 +23,7 @@
 		<PenaltyType type="1"/>
 	    </LinearCartesianVelocity>
     	    <RotationalCartesianVelocity>
-		<Enabled>true</Enabled>
+		<Enabled>false</Enabled>
 		<Coefficients>0 1 0 0 1 0</Coefficients>
 		<PenaltyType type="2"/>
 	    </RotationalCartesianVelocity>	    
