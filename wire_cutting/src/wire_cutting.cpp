@@ -369,7 +369,7 @@ bool WireCutting::run()
   std::cout << "Path loaded" << std::endl;
   
   loadTestData(test_type, iterationDebug, test_name, init_method_cut, method_p2p, p2p_start, p2p_end, p2p_bbox, bbox_pos, bbox_size);
-  std::string file_path = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/results.txt";
+  std::string file_path = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/results_" + poses_path + ".txt";
   std::ofstream ofile(file_path);
   std::cout << "Test data loaded" << std::endl;
 
