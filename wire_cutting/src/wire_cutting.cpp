@@ -262,11 +262,14 @@ bool WireCutting::run()
   // Create OMPL Profile
   double range = 0.01;
   double planning_time = 15.0;
+  CollisionMarginData collisiton_margin(0.05); // 5cm margin
   auto ompl_profile = std::make_shared<tesseract_planning::OMPLDefaultPlanProfile>();
   auto ompl_planner_config = std::make_shared<tesseract_planning::RRTConnectConfigurator>();
   ompl_planner_config->range = range;
   ompl_profile->planning_time = planning_time;
   ompl_profile->collision_continuous = true;
+  ompl_profile->optimize = false;
+  ompl_profile->collision_margin_data = collisiton_margin;
   ompl_profile->planners = { ompl_planner_config, ompl_planner_config };
 
   // Create Descartes profile
@@ -637,7 +640,20 @@ bool WireCutting::run()
 
     ofile << "Init time: " << init << std::endl;
     ofile << "p2p time: " << p2p << std::endl;
-        
+
+
+    std::cout << "P2P responses SIZE: " << p2p_responses.size() << "\n";
+    std::vector<const CompositeInstruction*> cis_p2p(p2p_responses.size());
+    for (size_t i = 0; i < cis_p2p.size(); i++) {
+      cis_p2p[0] = p2p_responses[0].results->cast_const<tesseract_planning::CompositeInstruction>();
+    }
+    saveInstructionsAsXML(cis_p2p, test_name);
+
+    // Load them
+    std::vector<std::vector<std::vector<VectorXd>>> segment_coordinates = loadJointAnglesFromXML(cis_p2p, env_, test_name);
+    VectorXd total_displacement = calculate_joint_displacement(segment_coordinates);
+
+     ofile << "total joint displacement: " << total_displacement.sum() << std::endl;
 
 
     if(iterationDebug && rviz_) {  

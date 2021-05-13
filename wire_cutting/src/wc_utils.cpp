@@ -629,7 +629,9 @@ void saveInstructionsAsXML(const std::vector<const tesseract_planning::Composite
   }
 }
 
-std::vector<std::vector<std::vector<Isometry3d>>> loadInstructionsFromXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis, const tesseract_environment::Environment::Ptr& env, std::string test_name)
+std::vector<std::vector<std::vector<Isometry3d>>> loadInstructionsFromXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis,
+                                                                          const tesseract_environment::Environment::Ptr& env, 
+                                                                          std::string test_name)
 {
   using namespace tinyxml2;
 
@@ -697,6 +699,90 @@ std::vector<std::vector<std::vector<Isometry3d>>> loadInstructionsFromXML(const 
       segment_coordinates.push_back(wp_to_wp);
     }
     return segment_coordinates;
+}
+
+std::vector<std::vector<std::vector<VectorXd>>> loadJointAnglesFromXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis,
+                                                                          const tesseract_environment::Environment::Ptr& env, 
+                                                                          std::string test_name)
+{
+  using namespace tinyxml2;
+
+  // SEGMENTS
+  //  -> WAYPOINTS
+  //  --> COORDINATES    
+
+    std::vector<std::vector<std::vector<VectorXd>>> segment_coordinates;
+
+    for(size_t i = 0; i < cis.size(); i++) {
+      std::vector<std::vector<VectorXd>> wp_to_wp;
+      tinyxml2::XMLError status;
+
+      tinyxml2::XMLDocument results;
+      std::string fileName = ros::package::getPath("wire_cutting") + "/test/" + test_name +  "/paths/path_" + std::to_string(i) + ".xml";
+      results.LoadFile(fileName.c_str());
+
+      // navigate to root of all instructions
+      XMLElement* instructions_root = results.FirstChildElement("Instructions")->FirstChildElement("Instruction")->FirstChildElement("CompositeInstruction");
+
+      // Position of 1st instruction of waypoint_1
+      XMLElement* ci = instructions_root->FirstChildElement("Instruction");
+
+      while(ci) {
+        std::vector<VectorXd> joint_config; // joint config for each waypoint_N
+
+        // Navigate to position of 1st instruction
+        XMLElement* instruction =  ci->FirstChildElement("CompositeInstruction")->FirstChildElement("Instruction");
+
+        // Get all sibilings
+        while(instruction) {
+          XMLElement* instruction_pos = instruction->FirstChildElement("MoveInstruction")->FirstChildElement("Waypoint")->FirstChildElement("StateWaypoint")->FirstChildElement("Position");
+
+          // Print position
+          std::string pos;
+          status = tesseract_common::QueryStringText(instruction_pos, pos);
+          if (status != tinyxml2::XML_NO_ATTRIBUTE && status != tinyxml2::XML_SUCCESS)
+            throw std::runtime_error("loadInstructionsAsXML failed: entry 'Position' not found");
+
+
+          // Put joint angles in vector
+          auto iss = std::istringstream{pos};
+          auto str = std::string{};
+          VectorXd joint_angles(6);
+          int j = 0;
+          while (iss >> str) {
+            joint_angles(j) = std::stod(str);
+            j++;
+          }
+          joint_config.push_back(joint_angles);
+
+          instruction = instruction->NextSiblingElement(); // get next instruction
+        }
+        wp_to_wp.push_back(joint_config);
+
+        ci = ci->NextSiblingElement(); //advance from waypoint_N -> waypoint_N+1
+      }
+      segment_coordinates.push_back(wp_to_wp);
+    }
+    return segment_coordinates;
+}
+
+VectorXd calculate_joint_displacement(std::vector<std::vector<std::vector<VectorXd>>> segment_coordinates) {
+
+  VectorXd total_displacement(6);
+  total_displacement << 0, 0, 0, 0, 0, 0;
+
+  for (size_t i = 0; i < segment_coordinates.size(); i++) {
+    for (size_t j = 0; j < segment_coordinates[i].size(); j++) {
+      for (size_t k = 1; k < segment_coordinates[i][j].size(); k++) {
+        VectorXd displacement = segment_coordinates[i][j][k-1] - segment_coordinates[i][j][k];
+        total_displacement = total_displacement + displacement.cwiseAbs();
+      }
+    }
+  }
+  std::cout << "TOTAL DISPLACEMENT" << "\n";
+  std::cout << setw(20) << total_displacement << "\n";
+
+  return total_displacement;
 }
 
 std::vector<double> createDisplacementVector(const tesseract_common::VectorIsometry3d& tool_path)

@@ -1,3 +1,4 @@
-Init time: 5888
 success: 1
-p2p time: 1922
+Init time: 6899
+p2p time: 7544
+total joint displacement: 3.25448

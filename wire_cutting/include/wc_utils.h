@@ -48,8 +48,16 @@ tesseract_common::VectorIsometry3d loadToolPoses();
 PathData loadToolPosesCFR(std::string file);
 
 void saveInstructionsAsXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis, std::string test_name);
-std::vector<std::vector<std::vector<Isometry3d>>> loadInstructionsFromXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis, const tesseract_environment::Environment::Ptr& env, std::string test_name);
 
+std::vector<std::vector<std::vector<Isometry3d>>> loadInstructionsFromXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis,
+                                                                          const tesseract_environment::Environment::Ptr& env, 
+                                                                          std::string test_name);
+
+std::vector<std::vector<std::vector<VectorXd>>> loadJointAnglesFromXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis,
+                                                                       const tesseract_environment::Environment::Ptr& env, 
+                                                                       std::string test_name);
+
+VectorXd calculate_joint_displacement(std::vector<std::vector<std::vector<VectorXd>>> segment_coordinates);
 
 std::vector<std::vector<Eigen::VectorXd>> loadOptimizationResults(std::string path);
 void plotIterations(const tesseract_environment::Environment::Ptr& env, const tesseract_rosutils::ROSPlottingPtr& plotter, const std::vector<std::string>& joint_names, std::string path);
