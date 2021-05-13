@@ -486,15 +486,15 @@ bool WireCutting::run()
     switch(method_p2p)
     {
       case Methodp2p::trajopt_only :
-        p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_TRAJOPT", mi_freespace));
+        p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_TRAJOPT", mi_freespace, true));
         break;
 
       case Methodp2p::rrt_only :
-        p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_OMPL", mi_freespace));
+        p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_OMPL", mi_freespace, true));
         break;
 
       case Methodp2p::rrt_trajopt :
-        p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_OMPL", mi_freespace));
+        p2p_requests.push_back(problem_generator.construct_request_p2p(last, first, "FREESPACE_OMPL", mi_freespace, false));
         break;
     
     } 
@@ -574,15 +574,15 @@ bool WireCutting::run()
     switch(method_p2p)
     {
       case Methodp2p::trajopt_only :
-        p2p_requests.push_back(problem_generator.construct_request_p2p(s, e, "FREESPACE_TRAJOPT", mi_freespace));
+        p2p_requests.push_back(problem_generator.construct_request_p2p(s, e, "FREESPACE_TRAJOPT", mi_freespace, true));
         break;
 
       case Methodp2p::rrt_only :
-        p2p_requests.push_back(problem_generator.construct_request_p2p(s, e, "FREESPACE_OMPL", mi_freespace));
+        p2p_requests.push_back(problem_generator.construct_request_p2p(s, e, "FREESPACE_OMPL", mi_freespace, true));
         break;
 
       case Methodp2p::rrt_trajopt :
-        p2p_requests.push_back(problem_generator.construct_request_p2p(s, e, "FREESPACE_OMPL", mi_freespace));
+        p2p_requests.push_back(problem_generator.construct_request_p2p(s, e, "FREESPACE_OMPL", mi_freespace, false));
         break;
     
     }   
@@ -593,30 +593,52 @@ bool WireCutting::run()
     Timer<std::milli, size_t> timer;
     size_t init, p2p;
     timer.start();
-    if (problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
+
+    if(method_p2p == Methodp2p::trajopt_only || method_p2p == Methodp2p::rrt_only)  {
+      if(problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
+        ROS_INFO("p2p request succeeded");
+          ofile << "success: " << 1 << std::endl;
+      } else {
+        ofile << "success: " << 0 << std::endl;
+      }
+      timer.stop();
+      p2p = timer.count();
+      init = 0;
+    }
+
+    // Trajopt after seed
+    if(method_p2p == Methodp2p::rrt_trajopt || method_p2p == Methodp2p::naive_trajopt ) {
+      if(problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
+        ROS_INFO("p2p request succeeded");
+
+        timer.stop();  
+        init = timer.count();
+        
+        p2p_requests.clear();
+        ProcessPlanningRequest request = problem_generator.construct_request_p2p_cart(p2p_start, p2p_end, "FREESPACE_TRAJOPT", mi_freespace, true);
+        request.seed = *p2p_responses[0].results.get();
+        p2p_requests.push_back(request);
+
+        p2p_responses.clear();
+        timer.start();
+        if(problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
+          ROS_INFO("Succeeded with seed");
+          ofile << "success: " << 1 << std::endl;
+        } else {
+          ofile << "success: " << 0 << std::endl;
+        }
         timer.stop();
         p2p = timer.count();
-        // Trajopt after seed
-        if(method_p2p == Methodp2p::rrt_trajopt || method_p2p == Methodp2p::naive_trajopt ) {
-          init = p2p;
-          ofile << "Init time: " << init << std::endl;
-          
-          p2p_requests.clear();
-          ProcessPlanningRequest request = problem_generator.construct_request_p2p_cart(p2p_start, p2p_end, "FREESPACE_TRAJOPT", mi_freespace);
-          request.seed = *p2p_responses[0].results.get();
-          p2p_requests.push_back(request);
-
-          p2p_responses.clear();
-          timer.start();
-          if(problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
-            ROS_INFO("Succeeded with seed");
-          }
-          timer.stop();
-          p2p = timer.count();
-        }
-        ofile << "p2p time: " << p2p << std::endl;
-        
       }
+      else {
+        ofile << "success: " << 0 << std::endl;
+      }
+    }
+
+    ofile << "Init time: " << init << std::endl;
+    ofile << "p2p time: " << p2p << std::endl;
+        
+
 
     if(iterationDebug && rviz_) {  
       plotter->waitForInput();   

@@ -213,7 +213,8 @@ CompositeInstruction WireCuttingProblemGenerator::generate_naive_seed(const Vect
 ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const JointState& start,
                                                                           const JointState& end, 
                                                                           const std::string& planner_name, 
-                                                                          ManipulatorInfo& mi)
+                                                                          ManipulatorInfo& mi,
+                                                                          bool post_collision_check)
 {
   std::cout << "p2p start: " << std::endl << start.position << std::endl << std::endl;;
   std::cout << "p2p end: " << std::endl << end.position << std::endl << std::endl;
@@ -234,7 +235,10 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const 
     request.name = tesseract_planning::process_planner_names::TRAJOPT_PLANNER_NAME;
   }
   else if(planner_name == "FREESPACE_OMPL") {
-    request.name = "OMPL_NO_POST_CHECK";
+    if (post_collision_check == true)
+      request.name = tesseract_planning::process_planner_names::OMPL_PLANNER_NAME;
+    else
+      request.name = "OMPL_NO_POST_CHECK";
   }
   request.instructions = Instruction(program);
 
@@ -244,7 +248,8 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p(const 
 ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p_cart(const Isometry3d& start,
                                                                           const Isometry3d& end, 
                                                                           const std::string& planner_name, 
-                                                                          ManipulatorInfo& mi)
+                                                                          ManipulatorInfo& mi,
+                                                                          bool post_collision_check)
 {
 
   CompositeInstruction program(planner_name, CompositeInstructionOrder::ORDERED, mi);
@@ -266,7 +271,10 @@ ProcessPlanningRequest WireCuttingProblemGenerator::construct_request_p2p_cart(c
     request.name = tesseract_planning::process_planner_names::TRAJOPT_PLANNER_NAME;
   }
   else if(planner_name == "FREESPACE_OMPL") {
-    request.name = "OMPL_NO_POST_CHECK";
+    if (post_collision_check == true)
+      request.name = tesseract_planning::process_planner_names::OMPL_PLANNER_NAME;
+    else
+      request.name = "OMPL_NO_POST_CHECK";
   }
   request.instructions = Instruction(program);
 
@@ -295,8 +303,8 @@ bool WireCuttingProblemGenerator::run_request_p2p(std::vector<ProcessPlanningReq
   for(std::size_t i = 0; i < p2p_moves; i++) {
     if(p2p_responses[i].interface->isAborted()) {
       ROS_INFO("run_request_p2p: 1 or more requests did not succeed");
-      p2p_requests.clear();
-      p2p_responses.clear();
+      // p2p_requests.clear();
+      // p2p_responses.clear();
       return false;
     }
   }

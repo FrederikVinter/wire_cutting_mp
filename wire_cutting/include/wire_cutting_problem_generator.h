@@ -69,12 +69,17 @@ public:
                                             std::shared_ptr<tesseract_planning::OMPLDefaultPlanProfile> ompl_plan_profile);
 
 
-    ProcessPlanningRequest construct_request_p2p(const JointState& start, const JointState& end, const std::string& planner_name, ManipulatorInfo& mi);
+    ProcessPlanningRequest construct_request_p2p(const JointState& start, 
+                                                 const JointState& end, 
+                                                 const std::string& planner_name, 
+                                                 ManipulatorInfo& mi, 
+                                                 bool post_collision_check);
 
     ProcessPlanningRequest construct_request_p2p_cart(const Isometry3d& start,
                                                                           const Isometry3d& end, 
                                                                           const std::string& planner_name, 
-                                                                          ManipulatorInfo& mi);
+                                                                          ManipulatorInfo& mi,
+                                                                          bool post_collision_check);
 
     bool run_request_p2p(std::vector<ProcessPlanningRequest>& p2p_requests, 
                         const tesseract_rosutils::ROSPlottingPtr& plotter,

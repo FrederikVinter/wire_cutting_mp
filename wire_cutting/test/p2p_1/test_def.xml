@@ -1,0 +1,13 @@
+<Test type="1">
+	<InitMethodCut type="1"/>
+	<ShowIterations>false</ShowIterations>	
+	<p2p>
+		<Method type="2" />
+		<Start>-0.8 2.5 -0.5 0 0 1 0</Start>
+		<End>0.8 2.5 -0.5 0 0 1 0</End>
+		<BboxEnabled>true</BboxEnabled>
+		<BboxPos>0 2.0 -0.3</BboxPos>
+		<BboxSize>1 2.0 0.3</BboxSize>
+	</p2p>
+</Test>
+

@@ -196,7 +196,7 @@ Visualization Manager:
     - Class: tesseract_rviz/TesseractState
       Enabled: true
       Environment:
-        Alpha: 1
+        Alpha: 0
         Display Mode: Monitor
         Monitor Namespace: tesseract_ros_examples
         Show All Links: true
@@ -332,7 +332,7 @@ Visualization Manager:
       Value: true
   Enabled: true
   Global Options:
-    Background Color: 48; 48; 48
+    Background Color: 240; 240; 240
     Default Light: true
     Fixed Frame: world
     Frame Rate: 30
