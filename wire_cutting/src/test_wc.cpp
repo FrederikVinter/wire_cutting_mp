@@ -14,9 +14,11 @@ double pitch(Eigen::Isometry3d transform){
     return std::atan2( -rotationMatrix(2,0), std::pow( rotationMatrix(2,1)*rotationMatrix(2,1) +rotationMatrix(2,2)*rotationMatrix(2,2) ,0.5  )  );
 }
 
+
 void evaluate_path(tesseract_common::VectorIsometry3d tool_poses, 
                    std::vector<std::vector<Eigen::Isometry3d>> path,
                    std::ofstream& ofile,
+                   std::ofstream& ofile2,
                    int path_num)
 {
     assert(tool_poses.size()-1 == path.size());
@@ -35,6 +37,8 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
     double length = 0, lengthsub1;
     double disp_rot_cost_sub1, disp_trans_cost_sub1, disp_rot_cost, disp_trans_cost;
     double y_translation_sub1;
+    std::vector<double> rot_util, trans_util, length_acum_vec;
+    length_acum_vec.push_back(0.0);
     for(std::size_t i = 0; i < path.size(); i++)
     {
         auto segment_start = tool_poses[i];
@@ -45,7 +49,7 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
         double segment_length = std::sqrt(std::pow(end_transform.translation().x(),2.0)
                                 +std::pow(end_transform.translation().z(),2.0));
 
-        double length_acum;
+        double length_acum = 0;
         for(std::size_t j = 0; j < path[i].size(); j++)
         {
             pose_num++;
@@ -58,13 +62,17 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
                 length = std::sqrt(std::pow(transformsub1.translation().x()-transform.translation().x(),2.0)
                     +std::pow(transformsub1.translation().z()-transform.translation().z(),2.0));
                 length_acum+=length;
+                length_acum_vec.push_back(length+length_acum_vec.back());
             }
+
             
             // Position
             double y_rotation = pitch(transform);
+            rot_util.push_back(y_rotation);
             //std::cout << y_rotation << std::endl;
             average_rot_cost = runningAverage(average_rot_cost, std::abs(y_rotation), pose_num);
             double y_translation = translation.y()-segment_y_trans*(length_acum/segment_length);
+            trans_util.push_back(y_translation);
             //std::cout << "Y translation: " << y_translation << " Y trans: " << translation.y() << " Y seg: " << segment_y_trans 
             //<< " length: "<< length << " seg length: " << segment_length << std::endl;
             average_trans_cost = runningAverage(average_trans_cost, std::abs(y_translation), pose_num);
@@ -100,6 +108,28 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
     ofile << "Cut_" << path_num << std::endl;
     ofile << average_rot_cost << ", " << average_disp_rot_cost << ", " << average_acc_rot_cost << std::endl;
     ofile << average_trans_cost << ", " << average_disp_trans_cost << ", " << average_acc_trans_cost << std::endl;
+
+    for(std::size_t i = 0; i < rot_util.size(); i++)
+    {
+        ofile2 << rot_util[i];
+        if(rot_util.size()-1 != i)
+            ofile2 << ", ";
+    }
+    ofile2 << std::endl;
+    for(std::size_t i = 0; i < trans_util.size(); i++)
+    {
+        ofile2 << trans_util[i];
+        if(trans_util.size()-1 != i)
+            ofile2 << ", ";
+    }
+    ofile2 << std::endl;
+    for(std::size_t i = 0; i < length_acum_vec.size(); i++)
+    {
+        ofile2 << length_acum_vec[i];
+        if(length_acum_vec.size()-1 != i)
+            ofile2 << ", ";
+    }
+    
 
     std::cout << "Rot cost: " << average_rot_cost << " Trans cost: " << average_trans_cost << std::endl;
     std::cout << "Rot disp cost: " << average_disp_rot_cost << " Trans disp cost: " << average_disp_trans_cost << std::endl;

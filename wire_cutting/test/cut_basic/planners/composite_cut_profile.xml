@@ -19,7 +19,7 @@
 	    </CollisionConstraintConfig>
 	    
 	    <LinearCartesianVelocity>
-		<Enabled>false</Enabled>
+		<Enabled>true</Enabled>
 		<Coefficients>0 1 0 0 1 0</Coefficients>
 		<PenaltyType type="1"/>
 	    </LinearCartesianVelocity>
@@ -29,9 +29,9 @@
 		<PenaltyType type="2"/>
 	    </RotationalCartesianVelocity>	    
      	    <CartesianAcceleration>
-		<Enabled>true</Enabled>
+		<Enabled>false</Enabled>
 		<Coefficients>0 0 0 0 1 0</Coefficients>
-		<PenaltyType type="1"/>
+		<PenaltyType type="2"/>
 	    </CartesianAcceleration>	
 	    
 	    <SmoothVelocities>

@@ -234,7 +234,8 @@ bool WireCutting::run()
 
   env_->setState(joint_names, joint_pos);
 
-  plotter->waitForInput(); 
+  if(rviz_)
+    plotter->waitForInput(); 
 
 
   /* Freespace a void bbox 
@@ -347,7 +348,8 @@ bool WireCutting::run()
   std::string poses_path;
   nh_.getParam(TEST_POSES, poses_path);
 
-  plotter->waitForInput(); 
+  if(rviz_)
+    plotter->waitForInput(); 
   PathData path_data = loadToolPosesCFR(poses_path);
   std::vector<tesseract_common::VectorIsometry3d> tool_poses = path_data.path;
 
@@ -369,7 +371,7 @@ bool WireCutting::run()
   std::cout << "Path loaded" << std::endl;
   
   loadTestData(test_type, iterationDebug, test_name, init_method_cut, method_p2p, p2p_start, p2p_end, p2p_bbox, bbox_pos, bbox_size);
-  std::string file_path = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/results_" + poses_path + ".txt";
+  std::string file_path = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/results_" + poses_path;
   std::ofstream ofile(file_path);
   std::cout << "Test data loaded" << std::endl;
 
@@ -407,9 +409,12 @@ bool WireCutting::run()
   //const CompositeInstruction* ci_seed = cut_seed[0].cast_const<tesseract_planning::CompositeInstruction>();
   tesseract_common::Toolpath toolpath_seed = tesseract_planning::toToolpath(cut_seed[0], env_);
   std::cout << toolpath_seed.size() << std::endl;
-  plotter->plotMarker(ToolpathMarker(toolpath_seed));
 
-  plotter->waitForInput(); 
+  if(rviz_)
+  {
+    plotter->plotMarker(ToolpathMarker(toolpath_seed));
+    plotter->waitForInput(); 
+  }
 
 
   std::vector<ProcessPlanningRequest> cut_requests(segments);
@@ -427,7 +432,7 @@ bool WireCutting::run()
   for(std::size_t i = 0; i < segments; i++)
   {
     cut_responses[i] = planning_server.run(cut_requests[i]);
-    if(iterationDebug) {  
+    if(iterationDebug && rviz_) {  
       planning_server.waitForAll(); 
       plotter->waitForInput();   
       ROS_INFO("Plotting path iterations");  
@@ -448,9 +453,12 @@ bool WireCutting::run()
 
   for(std::size_t i = 0; i < segment_coordinates.size(); i++)
   {
+    std::string file_path2 = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/redundancy_util_" + poses_path;
+    std::ofstream ofile2(file_path2);
     std::cout << "tp size: " << tool_poses[i].size() << " segment size: " << segment_coordinates[i].size() << std::endl;
-    evaluate_path(tool_poses[i], segment_coordinates[i], ofile, i+1);
-    ofile << "Init time: " <<timers_init[i].count() << std::endl << std::endl;
+    evaluate_path(tool_poses[i], segment_coordinates[i], ofile, ofile2, i+1);
+    ofile2.close();
+    ofile << "Init time: " << timers_init[i].count() << std::endl << std::endl;
   }
   ofile << "Total trajopt time: " << timer.count() << std::endl;
   
@@ -492,12 +500,15 @@ bool WireCutting::run()
     } 
   }
 
-  Timer<std::milli, size_t> timer_p2p; // milliseconds
-  timer_p2p.start();
-  problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses);
-  
-  timer_p2p.stop();
-  ofile << "Total p2p time: " << timer_p2p.count() << std::endl;
+  if(segments > 1)
+  {
+    Timer<std::milli, size_t> timer_p2p; // milliseconds
+    timer_p2p.start();
+    problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses);
+    
+    timer_p2p.stop();
+    ofile << "Total p2p time: " << timer_p2p.count() << std::endl;
+  }
 
   ROS_INFO("Combine toolpath and trajectory for cut and p2p");
 
@@ -607,7 +618,7 @@ bool WireCutting::run()
         
       }
 
-    if(iterationDebug) {  
+    if(iterationDebug && rviz_) {  
       plotter->waitForInput();   
       ROS_INFO("Plotting path iterations");  
       plotIterations(env_, plotter, joint_names, "/tmp/trajopt_vars.log");
@@ -631,23 +642,8 @@ bool WireCutting::run()
     plotter->plotTrajectory(combined_trajectory, env_->getStateSolver());
   }
 
-
-  /*tinyxml2::XMLDocument xmlDoc;
-
-  XMLNode * pRoot = xmlDoc.NewElement("Instructions");    // Creat root element
-  xmlDoc.InsertFirstChild(pRoot);                 // Insert element
-
-  //XMLElement* pResults = trajopt_composite_profile->toXML(xmlDoc);
-  XMLElement * pResults = cut_responses[0].results->toXML(xmlDoc);
-  pRoot->InsertEndChild(pResults);                // insert element as child
-
-  const char* fileName = "/home/frederik/ws_tesseract_wirecut/trajopt_results.xml";
-  tinyxml2::XMLError eResult = xmlDoc.SaveFile(fileName);*/
-
-
-
-  ROS_INFO("Final trajectory is collision free");
-  return true;
+  ros::shutdown();
+  return 0;
 }
 
 } // Namespace 

@@ -12,6 +12,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 void evaluate_path(tesseract_common::VectorIsometry3d tool_poses, 
                    std::vector<std::vector<Eigen::Isometry3d>> path,
                    std::ofstream& ofile,
+                   std::ofstream& ofile2,
                    int path_num);
 
 

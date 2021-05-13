@@ -340,6 +340,8 @@ void CartVelTermInfoWC::hatch(TrajOptProb& prob)
 
   if (term_type == (TT_COST | TT_USE_TIME))
   {
+    trajopt::VarArray vars = prob.GetVars();
+    sco::VarVector time_vars_vec = vars.cblock(first_step, vars.cols() - 1, last_step - first_step + 1);
     CONSOLE_BRIDGE_logError("Use time version of this term has not been defined.");
   }
   else if (term_type == (TT_CNT | TT_USE_TIME))
@@ -413,7 +415,29 @@ void CartAccTermInfoWC::hatch(TrajOptProb& prob)
 
   if (term_type == (TT_COST | TT_USE_TIME))
   {
-    CONSOLE_BRIDGE_logError("Use time version of this term has not been defined.");
+    trajopt::VarArray vars = prob.GetVars();
+    sco::VarVector time_vars_vec = vars.cblock(first_step, vars.cols() - 1, last_step - first_step + 1);
+    
+    std::cout << "time_vars_vec size: " << time_vars_vec.size() << std::endl;
+    for (int iStep = first_step; iStep <= last_step; ++iStep)
+    {
+      auto f =
+          std::make_shared<CartAccErrCalculator>(prob.GetKin(), adjacency_map, world_to_base, link);
+
+      //auto weighted_coeffs = coeffs;
+      //weighted_coeffs *= 1.0/(std::pow((displacements[iStep-1]+displacements[iStep])/2.0,2.0));
+      auto temp = concat(prob.GetVarRow(iStep - 1, 0, n_dof), prob.GetVarRow(iStep, 0, n_dof));
+      temp = concat(temp, prob.GetVarRow(iStep + 1, 0, n_dof));
+      temp = concat(temp, prob.GetVarRow(iStep, vars.cols()-1, 1));
+      temp = concat(temp, prob.GetVarRow(iStep+1, vars.cols()-1, 1));
+      prob.addCost(std::make_shared<TrajOptCostFromErrFunc>(
+          f,
+          //dfdx,
+          temp,
+          coeffs,
+          penalty_type,
+          "Acc: " + std::to_string(iStep)));
+    }
   }
   else if (term_type == (TT_CNT | TT_USE_TIME))
   {
@@ -455,7 +479,7 @@ VectorXd CartAccErrCalculator::operator()(const VectorXd& dof_vals) const
 
     manip_->calcFwdKin(pose0, dof_vals.topRows(n_dof), kin_link_->link_name);
     manip_->calcFwdKin(pose1, dof_vals.segment(n_dof, n_dof), kin_link_->link_name);
-    manip_->calcFwdKin(pose2, dof_vals.bottomRows(n_dof), kin_link_->link_name);
+    manip_->calcFwdKin(pose2, dof_vals.segment(n_dof*2, n_dof), kin_link_->link_name);
 
 
     pose0 = world_to_base_ * pose0 * kin_link_->transform * tcp_;
@@ -471,6 +495,7 @@ VectorXd CartAccErrCalculator::operator()(const VectorXd& dof_vals) const
     auto p2_rot = rpy(pose2);
 
     VectorXd out(6);
+   
     /*std::cout << std::endl << "p0: " << p0_rot.y() << std::endl;
     std::cout << std::endl << "p1: " << p1_rot.y()<< std::endl;
     std::cout << std::endl << "p2: " << p2_rot.y() << std::endl;*/

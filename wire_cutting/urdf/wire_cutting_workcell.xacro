@@ -5,7 +5,7 @@
   
   <xacro:irb6400r_robot prefix=""/>
   <xacro:carbon_hotwire prefix=""/>
-  
+    
    <joint type="fixed" name="tool">
   	<parent link="tool0"/>
   	<child link="carbon_hotwire_mount"/>

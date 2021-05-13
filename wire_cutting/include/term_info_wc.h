@@ -137,7 +137,7 @@ struct CartAccTermInfoWC : public TermInfo
   DEFINE_CREATE(CartAccTermInfoWC)
 
   /** @brief Initialize term with it's supported types */
-  CartAccTermInfoWC() : TermInfo(trajopt::TermType::TT_COST | trajopt::TermType::TT_CNT) {}
+  CartAccTermInfoWC() : TermInfo(trajopt::TermType::TT_COST | trajopt::TermType::TT_CNT | trajopt::TermType::TT_USE_TIME) {}
 };
 
 struct CartAccErrCalculator : sco::VectorOfVector
