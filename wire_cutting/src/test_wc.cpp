@@ -33,7 +33,7 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
     double average_acc_trans_cost = 0;
 
     int pose_num = 0;
-    Eigen::Isometry3d transformsub1, transformsub2;
+    Eigen::Isometry3d transformsub1, transformsub2, noninvtranssub1;
     double length = 0, lengthsub1;
     double disp_rot_cost_sub1, disp_trans_cost_sub1, disp_rot_cost, disp_trans_cost;
     double y_translation_sub1;
@@ -49,25 +49,36 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
         double segment_length = std::sqrt(std::pow(end_transform.translation().x(),2.0)
                                 +std::pow(end_transform.translation().z(),2.0));
 
+        std::cout << "seg length: " << segment_length << std::endl;
+
         double length_acum = 0;
         for(std::size_t j = 0; j < path[i].size(); j++)
         {
             pose_num++;
+            auto noninvtrans = path[i][j];
+            //std::cout << "non inv: " << std::endl << noninvtrans.translation() << std::endl << "transform: " << std::endl << (noninvtranssub1.inverse()*noninvtrans).translation() << std::endl;
             auto transform = segment_start.inverse()*path[i][j];
+            //std::cout << pose_num << std::endl << path[i][j].translation() << std::endl << std::endl;
             auto translation = transform.translation();
            
             // Length
             if(pose_num > 1)
             {
-                length = std::sqrt(std::pow(transformsub1.translation().x()-transform.translation().x(),2.0)
-                    +std::pow(transformsub1.translation().z()-transform.translation().z(),2.0));
-                length_acum+=length;
+                //auto translation_from_last = (transformsub1.inverse()*transform).translation();
+                /*length = std::sqrt(std::pow(noninvtranssub1.translation().x()-noninvtrans.translation().x(),2.0)
+                    +std::pow(noninvtranssub1.translation().y()-noninvtrans.translation().y(),2.0)
+                    +std::pow(noninvtranssub1.translation().z()-noninvtrans.translation().z(),2.0));*/
+                //length = std::sqrt(std::pow(translation_from_last.x(),2.0)
+                //    +std::pow(translation_from_last.z(),2.0));
+                length = segment_length/(double)path[i].size();
+                length_acum += length;
+1;
                 length_acum_vec.push_back(length+length_acum_vec.back());
             }
 
             
             // Position
-            double y_rotation = pitch(transform);
+            double y_rotation = trajopt::calcRotationalError(transform.rotation())[1];
             rot_util.push_back(y_rotation);
             //std::cout << y_rotation << std::endl;
             average_rot_cost = runningAverage(average_rot_cost, std::abs(y_rotation), pose_num);
@@ -97,6 +108,7 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
                 average_acc_trans_cost = runningAverage(average_disp_trans_cost, std::abs(acc_trans_cost), pose_num-2);
             }
             
+            noninvtranssub1 = noninvtrans;
             y_translation_sub1 = y_translation;
             lengthsub1 = length;
             disp_rot_cost_sub1 = disp_rot_cost;
@@ -123,12 +135,14 @@ void evaluate_path(tesseract_common::VectorIsometry3d tool_poses,
             ofile2 << ", ";
     }
     ofile2 << std::endl;
-    for(std::size_t i = 0; i < length_acum_vec.size(); i++)
+        for(std::size_t i = 0; i < length_acum_vec.size(); i++)
     {
         ofile2 << length_acum_vec[i];
         if(length_acum_vec.size()-1 != i)
             ofile2 << ", ";
     }
+    ofile2.close();
+
     
 
     std::cout << "Rot cost: " << average_rot_cost << " Trans cost: " << average_trans_cost << std::endl;

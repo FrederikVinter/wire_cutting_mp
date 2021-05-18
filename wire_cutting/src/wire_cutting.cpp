@@ -98,6 +98,8 @@ namespace tesseract_ros_examples
 tesseract_environment::Command::Ptr WireCutting::addBoundingBox(Eigen::VectorXd position, Eigen::VectorXd size)
 {
   auto link_bounding_box = std::make_shared<Link>("bounding_box");
+  //for(std::size_t i = 0; i < position.size(); i++)
+    //position[i] = position[i]-size[i]/2.0;
 
   Visual::Ptr visual = std::make_shared<Visual>();
   visual->origin = Eigen::Isometry3d::Identity();
@@ -355,18 +357,16 @@ bool WireCutting::run()
 
   assert(!tool_poses.empty());
 
-  // Eigen::VectorXd pos(3), size(3);
-  // pos << 0, 1.8, -0.5;
-  // size << 0.2, 0.3, 0.4;
-  // if(pathData.has_bbox)
-  // {
-  //   std::cout << "Adding bbox with pos: " << std::endl << pathData.bbox_pos << std::endl << "size: " << std::endl << pathData.bbox_size << std::endl;
-  //   Command::Ptr cmd = addBoundingBox(pathData.bbox_pos, pathData.bbox_size);
-  //   if (!monitor_->applyCommand(*cmd))
-  //     return false;
-  //   if (!monitor_freespace->applyCommand(*cmd))
-  //     return false;
-  // }
+
+  if(path_data.has_bbox)
+  {
+     std::cout << "Adding bbox with pos: " << std::endl << path_data.bbox_pos << std::endl << "size: " << std::endl << path_data.bbox_size << std::endl;
+     Command::Ptr cmd = addBoundingBox(path_data.bbox_pos, path_data.bbox_size);
+     if (!monitor_->applyCommand(*cmd))
+       return false;
+     if (!monitor_freespace->applyCommand(*cmd))
+       return false;
+   }
 
   std::cout << "Path loaded" << std::endl;
   
@@ -450,7 +450,11 @@ bool WireCutting::run()
   saveInstructionsAsXML(cis, test_name);
  
   std::vector<std::vector<std::vector<Isometry3d>>> segment_coordinates = loadInstructionsFromXML(cis, env_, test_name);
-
+  auto angles = loadJointAnglesFromXML(cis, env_, test_name);
+  auto total_joint_disp = calculate_joint_displacement(angles);
+  double total_disp = 0;
+  for(std::size_t i = 0; i < total_joint_disp.size(); i++)
+    total_disp += total_joint_disp[i];
   for(std::size_t i = 0; i < segment_coordinates.size(); i++)
   {
     std::string file_path2 = ros::package::getPath("wire_cutting") + "/test/" + test_name + "/redundancy_util_" + poses_path;
@@ -461,6 +465,8 @@ bool WireCutting::run()
     ofile << "Init time: " << timers_init[i].count() << std::endl << std::endl;
   }
   ofile << "Total trajopt time: " << timer.count() << std::endl;
+  ofile << "Total joint displacement: " << total_disp << std::endl; 
+
   
   
 

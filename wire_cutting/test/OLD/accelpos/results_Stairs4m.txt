@@ -1,0 +1,7 @@
+Cut_1
+0.114779, 0.525913, 0.52363
+0.22684, 0.000581134, 0.000579583
+Init time: 154
+
+Total trajopt time: 101840
+Total joint displacement: 7.56691

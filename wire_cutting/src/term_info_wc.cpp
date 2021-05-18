@@ -354,13 +354,13 @@ void CartVelTermInfoWC::hatch(TrajOptProb& prob)
     for (int iStep = first_step; iStep <= last_step; ++iStep)
     {
       auto f =
-          std::make_shared<CartVelErrCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
+          std::make_shared<CartVelErrCalculatorWC>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
       auto dfdx =
           std::make_shared<CartVelJacCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
       
       prob.addCost(std::make_shared<TrajOptCostFromErrFunc>(
           f,
-          dfdx,
+          //dfdx,
           concat(prob.GetVarRow(iStep, 0, n_dof), prob.GetVarRow(iStep + 1, 0, n_dof)),
           coeffs,
           penalty_type,
@@ -375,11 +375,15 @@ void CartVelTermInfoWC::hatch(TrajOptProb& prob)
           std::make_shared<CartVelErrCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
       auto dfdx =
           std::make_shared<CartVelJacCalculator>(prob.GetKin(), adjacency_map, world_to_base, link, max_displacement);
+      
+      VectorXd coeff;
+      coeff << 0, 0, 0, 0, 0, 0;
+      
       prob.addConstraint(std::make_shared<TrajOptConstraintFromErrFunc>(
           f,
           dfdx,
           concat(prob.GetVarRow(iStep, 0, n_dof), prob.GetVarRow(iStep + 1, 0, n_dof)),
-          Eigen::VectorXd::Ones(0),
+          coeff,
           sco::INEQ,
           "CartVel"));
     }
@@ -486,27 +490,62 @@ VectorXd CartAccErrCalculator::operator()(const VectorXd& dof_vals) const
     pose1 = world_to_base_ * pose1 * kin_link_->transform * tcp_;
     pose2 = world_to_base_ * pose2 * kin_link_->transform * tcp_;
 
-    auto p0_trans = pose0.translation();
-    auto p1_trans = pose1.translation();
-    auto p2_trans = pose2.translation();
+    auto pose_err0 = pose1.inverse()*pose0;
+    auto pose_err1 = pose2.inverse()*pose1;
 
-    auto p0_rot = rpy(pose0);
+    auto e1 = calcRotationalError(pose_err0.rotation());
+    auto e2 = calcRotationalError(pose_err1.rotation());
+    if(e2.y()-e1.y() > 0.2)
+      std::cout << "e1: " << std::endl << e2.y()- e1.y() << std::endl << std::endl;
+
+    /*auto p0_rot = rpy(pose0);
     auto p1_rot = rpy(pose1);
-    auto p2_rot = rpy(pose2);
+    auto p2_rot = rpy(pose2);*/
 
     VectorXd out(6);
    
     /*std::cout << std::endl << "p0: " << p0_rot.y() << std::endl;
     std::cout << std::endl << "p1: " << p1_rot.y()<< std::endl;
     std::cout << std::endl << "p2: " << p2_rot.y() << std::endl;*/
-    out[0] = p2_trans.x() - 2*p1_trans.x() + p0_trans.x();
-    out[1] = (p2_trans.y() - 2*p1_trans.y() + p0_trans.y());
-    out[2] = p2_trans.z() - 2*p1_trans.z() + p0_trans.z();
+    out[0] = 0;
+    out[1] = (pose_err1.translation().y()-pose_err0.translation().y());
+    out[2] = 0;
 
-    out[3] = p2_rot.x() - 2*p1_rot.x() + p0_rot.x();
-    out[4] = (p2_rot.y() - 2*p1_rot.y() + p0_rot.y());
-    out[5] = p2_rot.z() - 2*p1_rot.z() + p0_rot.z();
+    out[3] = 0;
+    out[4] = (e2.y()-e1.y());
+    out[5] = 0;
     //std::cout << std::endl << "out y: " << out[4] << std::endl;
+
+    return out;
+}
+
+VectorXd CartVelErrCalculatorWC::operator()(const VectorXd& dof_vals) const
+{
+    auto n_dof = static_cast<int>(manip_->numJoints());
+    Isometry3d pose0, pose1;
+
+    manip_->calcFwdKin(pose0, dof_vals.topRows(n_dof), kin_link_->link_name);
+    manip_->calcFwdKin(pose1, dof_vals.bottomRows(n_dof), kin_link_->link_name);
+
+    pose0 = world_to_base_ * pose0 * kin_link_->transform * tcp_;
+    pose1 = world_to_base_ * pose1 * kin_link_->transform * tcp_;
+    
+    //double zxlength = std::sqrt(std::pow(pose0.translation().x() + pose1.translation().x(),2.0)
+    //  +std::pow(pose0.translation().z() + pose1.translation().z(),2.0));
+    auto pose_err0 = pose0.inverse()*pose1;
+    auto pose_err1 = pose1.inverse()*pose0;
+    
+    auto top = pose_err0.translation();
+    auto bottom = pose_err1.translation();
+
+    VectorXd out(6);
+    out.topRows(3) = (top);
+    out.bottomRows(3) = (bottom);
+    //out[1] = out[1]/zxlength;
+    //out[4] = out[4]/zxlength;
+
+    /*for(std::size_t i = 0; i < 6; i++)
+      out[i] = std::pow(out[i],2);*/
 
     return out;
 }
@@ -524,11 +563,17 @@ VectorXd CartRotVelErrCalculator::operator()(const VectorXd& dof_vals) const
     
     //double zxlength = std::sqrt(std::pow(pose0.translation().x() + pose1.translation().x(),2.0)
     //  +std::pow(pose0.translation().z() + pose1.translation().z(),2.0));
+    auto pose_err0 = pose0.inverse()*pose1;
+    auto pose_err1 = pose1.inverse()*pose0;
     
+    auto top = calcRotationalError(pose_err0.rotation());
+    auto bottom = calcRotationalError(pose_err1.rotation());
+    if(top.y() > 0.2)
+      std::cout << "vel rot y: " << top.y() << std::endl << std::endl;
 
     VectorXd out(6);
-    out.topRows(3) = (rpy(pose1) - rpy(pose0));
-    out.bottomRows(3) = (rpy(pose0) - rpy(pose1));
+    out.topRows(3) = (top);
+    out.bottomRows(3) = (bottom);
     //out[1] = out[1]/zxlength;
     //out[4] = out[4]/zxlength;
 

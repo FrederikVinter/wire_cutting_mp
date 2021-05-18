@@ -220,7 +220,7 @@
       <parent link="${prefix}base"/>
       <child link="${prefix}pedestal"/>
     </joint>
-    <joint name="${prefix}base_fllor" type="fixed">
+    <joint name="${prefix}base_floor" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${prefix}base"/>
       <child link="${prefix}floor"/>

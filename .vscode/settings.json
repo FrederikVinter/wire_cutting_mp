@@ -76,6 +76,11 @@
         "typeinfo": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "bit": "cpp"
-    }
+        "bit": "cpp",
+        "*.ipp": "cpp"
+    },
+    "python.analysis.extraPaths": [
+        "/home/frederik/ws_tesseract/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ]
 }

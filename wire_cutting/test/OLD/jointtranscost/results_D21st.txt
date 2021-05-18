@@ -1,0 +1,13 @@
+Cut_1
+0.0899927, -nan, -nan
+0.804684, -nan, -nan
+Init time: 143
+
+Cut_2
+0.434708, 0.668285, 0.66753
+0.55833, 0.00187186, 0.00186577
+Init time: 152
+
+Total trajopt time: 173061
+Total joint displacement: 5.27817
+Total p2p time: 2789

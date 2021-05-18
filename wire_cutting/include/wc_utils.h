@@ -105,4 +105,9 @@ void loadTestData(TestType &test_type,
 
 std::vector<double> createDisplacementVector(const tesseract_common::VectorIsometry3d& tool_path);
 
+std::vector<std::vector<std::vector<VectorXd>>> loadJointAnglesFromXML(const std::vector<const tesseract_planning::CompositeInstruction*>& cis,
+                                                                          const tesseract_environment::Environment::Ptr& env, 
+                                                                          std::string test_name);
+VectorXd calculate_joint_displacement(std::vector<std::vector<std::vector<VectorXd>>> segment_coordinates);
+
 #endif

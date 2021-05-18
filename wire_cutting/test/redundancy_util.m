@@ -2,34 +2,27 @@ clear;
 close all;
 
 name1 = "cut_basic";
-name2 = "cut_trans_pos";
+name2 = "accelvel";
 name3 = "cut_joint_only";
 name4 = "cut_rot_accel";
+name5 = "jointtranscost";
+name6 = "accelpos";
+name7 = "accelveltrans";
+name8 = "jointtranscost_descartes";
+name9 = "joint_only_rot_only"
 
-path1 = "/redundancy_util_";
-path2 = "ex";
-path3 = ".txt";
+names = ["joint only" "pose" "pose+vel" "pose+vel+accel"];
+shownnames = ["LVS p_{j}" "LVS p_{j,p}" "LVS p_{j,p,v}" "LVS p_{j,p,v,a}"];
 
-A1 = readmatrix(name1+path1+path2+path3);
-A2 = readmatrix(name2+path1+path2+path3);
-A3 = readmatrix(name3+path1+path2+path3);
-A4 = readmatrix(name4+path1+path2+path3);
+%names = [name3 name1 name2];
+%x = plot_redundancy(names, ["Joint cost" "Pose cost" "Acceleration + Velocity"],"square");
+%names = [name3 name5 name9 name2 "All"];
+x = plot_redundancy(names, shownnames,"rectangle", "Rectangle");
 
-figure(1)
-plot(A1(3,:),A1(2,:));
-hold on
-plot(A2(3,:),A2(2,:));
-hold on
-plot(A3(3,:),A3(2,:));
-hold on
-plot(A4(3,:),A4(2,:));
-hold off
 
-figure(2)
-plot(A1(3,:),A1(1,:));
-hold on
-plot(A2(3,:),A2(1,:));
-hold on
-plot(A3(3,:),A3(1,:));
-hold on
-plot(A4(3,:),A4(1,:));
+%names = [name1 name2 name3];
+%x = plot_redundancy(names, ["Pose" "Acceleration + velocity", "Joint only"],"Stairs4m");
+
+%names = [name3 name5 name9];
+%x = plot_redundancy(names, ["Joint cost" "Translation cost + joint cost" "Joint cost + Rotation only"],"saddel_short");
+

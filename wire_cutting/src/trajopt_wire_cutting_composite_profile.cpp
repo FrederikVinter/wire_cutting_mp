@@ -353,6 +353,10 @@ void TrajOptWireCuttingCompositeProfile::apply(trajopt::ProblemConstructionInfo&
   if (constrain_velocity)
     addVelocityConstraint(pci, 0, start_index, end_index, pci.kin->getTipLinkName(), trajopt::TermType::TT_COST, fixed_indices);
   
+  //if (true)
+  //  addVelocityConstraint(pci, 0.01, start_index, end_index, pci.kin->getTipLinkName(), trajopt::TermType::TT_CNT, fixed_indices);
+  
+
   if (cart_acceleration)
     addCartAcceleration(pci, displacements, start_index, end_index, pci.kin->getTipLinkName(), trajopt::TermType::TT_COST , fixed_indices);
 
