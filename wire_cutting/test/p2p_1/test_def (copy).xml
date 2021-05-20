@@ -3,11 +3,11 @@
 	<ShowIterations>false</ShowIterations>	
 	<p2p>
 		<Method type="0" />
-		<Start>-1.2 2.0 -1.0 0 0 1 0</Start>
-		<End>1.2 2.0 -1.0 0 0 1 0</End>
+		<Start>-0.8 2.5 -0.5 0 0 1 0</Start>
+		<End>0.8 2.5 -0.5 0 0 1 0</End>
 		<BboxEnabled>true</BboxEnabled>
-		<BboxPos>0 2.0 -1.0</BboxPos>
-		<BboxSize>1.5 1 1</BboxSize>
+		<BboxPos>0 2.0 -0.3</BboxPos>
+		<BboxSize>1 2.0 0.3</BboxSize>
 	</p2p>
 </Test>
 

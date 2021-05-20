@@ -230,8 +230,6 @@ bool WireCutting::run()
   joint_pos(3) = 0;
   joint_pos(4) = M_PI/2.0;
   joint_pos(5) = 0;
-
-
   env_->setState(joint_names, joint_pos);
 
   if(rviz_)
@@ -587,6 +585,16 @@ bool WireCutting::run()
       case Methodp2p::rrt_trajopt :
         p2p_requests.push_back(problem_generator.construct_request_p2p(s, e, "FREESPACE_OMPL", mi_freespace, false));
         break;
+
+      case Methodp2p::naive_trajopt : 
+        p2p_requests.push_back(problem_generator.construct_request_p2p(s, e, "FREESPACE_TRAJOPT", mi_freespace, true));
+
+        VectorIsometry3d tool_poses;
+        tool_poses.push_back(p2p_start);
+        tool_poses.push_back(p2p_end);
+        
+        CompositeInstruction p2p_naive_seed = problem_generator.generate_naive_seed(tool_poses, mi_freespace, env_);
+        p2p_requests[0].seed = p2p_naive_seed;
     
     }   
 
@@ -597,7 +605,7 @@ bool WireCutting::run()
     size_t init, p2p;
     timer.start();
 
-    if(method_p2p == Methodp2p::trajopt_only || method_p2p == Methodp2p::rrt_only)  {
+    if(method_p2p == Methodp2p::trajopt_only || method_p2p == Methodp2p::rrt_only || method_p2p == Methodp2p::naive_trajopt)  {
       if(problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
         ROS_INFO("p2p request succeeded");
           ofile << "success: " << 1 << std::endl;
@@ -610,12 +618,24 @@ bool WireCutting::run()
     }
 
     // Trajopt after seed
-    if(method_p2p == Methodp2p::rrt_trajopt || method_p2p == Methodp2p::naive_trajopt ) {
+    if(method_p2p == Methodp2p::rrt_trajopt ) {
       if(problem_generator.run_request_p2p(p2p_requests, plotter, planning_server_freespace, p2p_responses)) {
         ROS_INFO("p2p request succeeded");
 
         timer.stop();  
         init = timer.count();
+
+
+    std::vector<const CompositeInstruction*> cis_p2p(p2p_responses.size());
+    for (size_t i = 0; i < cis_p2p.size(); i++) {
+      cis_p2p[0] = p2p_responses[0].results->cast_const<tesseract_planning::CompositeInstruction>();
+    }
+    saveInstructionsAsXML(cis_p2p, test_name);
+    // Load them
+    std::vector<std::vector<std::vector<VectorXd>>> segment_coordinates = loadJointAnglesFromXML(cis_p2p, env_, test_name);
+    VectorXd total_displacement = calculate_joint_displacement(segment_coordinates);
+    ofile << "total joint displacement w rrt: " << total_displacement.sum() << std::endl;
+
         
         p2p_requests.clear();
         ProcessPlanningRequest request = problem_generator.construct_request_p2p_cart(p2p_start, p2p_end, "FREESPACE_TRAJOPT", mi_freespace, true);
@@ -642,18 +662,16 @@ bool WireCutting::run()
     ofile << "p2p time: " << p2p << std::endl;
 
 
-    std::cout << "P2P responses SIZE: " << p2p_responses.size() << "\n";
     std::vector<const CompositeInstruction*> cis_p2p(p2p_responses.size());
     for (size_t i = 0; i < cis_p2p.size(); i++) {
       cis_p2p[0] = p2p_responses[0].results->cast_const<tesseract_planning::CompositeInstruction>();
     }
     saveInstructionsAsXML(cis_p2p, test_name);
-
     // Load them
     std::vector<std::vector<std::vector<VectorXd>>> segment_coordinates = loadJointAnglesFromXML(cis_p2p, env_, test_name);
     VectorXd total_displacement = calculate_joint_displacement(segment_coordinates);
 
-     ofile << "total joint displacement: " << total_displacement.sum() << std::endl;
+     ofile << "total joint displacement w trajopt: " << total_displacement.sum() << std::endl;
 
 
     if(iterationDebug && rviz_) {  

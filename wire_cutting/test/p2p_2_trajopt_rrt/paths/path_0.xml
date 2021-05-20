@@ -2,7 +2,7 @@
     <Instruction type="30">
         <CompositeInstruction order="0">
             <Description>Tesseract Composite Instruction</Description>
-            <Profile>FREESPACE_TRAJOPT</Profile>
+            <Profile>FREESPACE_OMPL</Profile>
             <ManipulatorInfo>
                 <Manipulator>manipulator</Manipulator>
                 <ManipulatorIKSolver></ManipulatorIKSolver>
@@ -13,13 +13,13 @@
                 <Instruction type="20">
                     <MoveInstruction type="3">
                         <Description></Description>
-                        <Profile>FREESPACE_TRAJOPT</Profile>
+                        <Profile>FREESPACE_OMPL</Profile>
                         <Waypoint type="3">
                             <StateWaypoint>
                                 <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                <Position>2.11122 0.501629 0.0501889 -1.08717e-17 1.01977 2.11122</Position>
+                                <Position>1.99932 0.380681 0.196039 0.158369 0.941326 1.90933</Position>
                                 <Velocity>0 0 0 0 0 0</Velocity>
-                                <Acceleration>-4.48919e-13 -5.44287e-14 2.63178e-13 6.37684e-14 3.2585e-14 -4.9255e-13</Acceleration>
+                                <Acceleration>-2.35811e-13 -1.10745e-14 -1.09635e-15 5.7454e-14 1.18239e-13 -9.03722e-14</Acceleration>
                                 <TimeFromStart>0.000000</TimeFromStart>
                             </StateWaypoint>
                         </Waypoint>
@@ -33,14 +33,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>2.08995 0.490894 0.016376 0.00946497 1.05141 2.06848</Position>
-                                    <Velocity>-0.126529 -0.0641456 -0.201741 0.056573 0.188619 -0.254805</Velocity>
-                                    <Acceleration>-0.375915 -0.192895 -0.603995 0.170283 0.563648 -0.761237</Acceleration>
-                                    <TimeFromStart>0.352779</TimeFromStart>
+                                    <Position>1.93899 0.382384 0.163551 0.220287 0.929056 1.84782</Position>
+                                    <Velocity>-0.309316 -0.0272199 -0.0358299 0.383106 -0.131973 -0.377516</Velocity>
+                                    <Acceleration>-0.659487 -0.0580351 -0.0763925 0.816815 -0.281378 -0.804897</Acceleration>
+                                    <TimeFromStart>0.454397</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -48,14 +48,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>2.06874 0.480129 -0.0174595 0.0189556 1.08304 2.02575</Position>
-                                    <Velocity>-0.137348 -0.069683 -0.218962 0.0613802 0.204765 -0.276511</Velocity>
-                                    <Acceleration>0.23345 0.119979 0.377227 -0.106982 -0.351041 0.475421</Acceleration>
-                                    <TimeFromStart>0.504663</TimeFromStart>
+                                    <Position>1.87867 0.384085 0.131061 0.282207 0.916786 1.78631</Position>
+                                    <Velocity>-0.440643 -0.0387766 -0.0510423 0.545763 -0.188005 -0.5378</Velocity>
+                                    <Acceleration>-0.769936 -0.0677543 -0.0891862 0.95361 -0.328502 -0.939698</Acceleration>
+                                    <TimeFromStart>0.638146</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -63,14 +63,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>2.04752 0.469287 -0.0513316 0.0284566 1.11465 1.98304</Position>
-                                    <Velocity>-0.147948 -0.0765734 -0.236869 0.0666078 0.220141 -0.29777</Velocity>
-                                    <Acceleration>-0.368026 -0.207463 -0.604576 0.173355 0.546258 -0.745338</Acceleration>
-                                    <TimeFromStart>0.662188</TimeFromStart>
+                                    <Position>1.81835 0.385782 0.0985675 0.344133 0.904516 1.7248</Position>
+                                    <Velocity>-0.468259 -0.0412069 -0.0542413 0.579967 -0.199788 -0.571505</Velocity>
+                                    <Acceleration>0.392578 0.0345457 0.045474 -0.486224 0.167498 0.479136</Acceleration>
+                                    <TimeFromStart>0.784511</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -78,14 +78,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>2.02604 0.458158 -0.0852999 0.037928 1.14607 1.94042</Position>
-                                    <Velocity>-0.183521 -0.0942333 -0.283126 0.0775167 0.260669 -0.355085</Velocity>
-                                    <Acceleration>-0.187419 -0.0682826 -0.117698 -0.00302141 0.0865571 -0.149589</Acceleration>
-                                    <TimeFromStart>0.790276</TimeFromStart>
+                                    <Position>1.75804 0.387472 0.0660675 0.406068 0.892248 1.6633</Position>
+                                    <Velocity>-0.496001 -0.043648 -0.0574547 0.614326 -0.211625 -0.605363</Velocity>
+                                    <Acceleration>-0.77108 -0.0678506 -0.0893161 0.955 -0.328988 -0.941089</Acceleration>
+                                    <TimeFromStart>0.931100</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -93,14 +93,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>2.00328 0.446477 -0.119328 0.0470325 1.17701 1.8979</Position>
-                                    <Velocity>-0.1742 -0.0910447 -0.253069 0.0663116 0.224924 -0.313321</Velocity>
-                                    <Acceleration>0.338361 0.11992 0.604448 -0.178435 -0.665412 0.825917</Acceleration>
-                                    <TimeFromStart>0.913778</TimeFromStart>
+                                    <Position>1.69774 0.389149 0.0335565 0.46802 0.879981 1.6018</Position>
+                                    <Velocity>-0.593096 -0.0521933 -0.0687024 0.73459 -0.253052 -0.723868</Velocity>
+                                    <Acceleration>-0.770621 -0.0678336 -0.0892776 0.954582 -0.328806 -0.94056</Acceleration>
+                                    <TimeFromStart>1.057058</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -108,14 +108,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.97714 0.43323 -0.153535 0.0552144 1.20635 1.85579</Position>
-                                    <Velocity>-0.20669 -0.0953914 -0.232174 0.0464746 0.194227 -0.288376</Velocity>
-                                    <Acceleration>-0.777545 -0.178678 -0.321996 -0.0897123 0.25046 -0.488718</Acceleration>
-                                    <TimeFromStart>1.061734</TimeFromStart>
+                                    <Position>1.63745 0.390822 0.00104083 0.529979 0.867713 1.54031</Position>
+                                    <Velocity>-0.676382 -0.0595194 -0.078348 0.837725 -0.288585 -0.825514</Velocity>
+                                    <Acceleration>-0.770828 -0.0677573 -0.0892422 0.954232 -0.32884 -0.940688</Acceleration>
+                                    <TimeFromStart>1.165120</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -123,14 +123,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.94184 0.418318 -0.187052 0.0602797 1.23302 1.81383</Position>
-                                    <Velocity>-0.284231 -0.114424 -0.227242 0.0213091 0.162302 -0.282966</Velocity>
-                                    <Acceleration>-0.324065 -0.0917084 0.392064 -0.267811 -0.704003 0.565569</Acceleration>
-                                    <TimeFromStart>1.202511</TimeFromStart>
+                                    <Position>1.57712 0.392517 -0.0314553 0.591911 0.85544 1.47879</Position>
+                                    <Velocity>-0.688166 -0.0605674 -0.0797199 0.852391 -0.293619 -0.839911</Velocity>
+                                    <Acceleration>0.532696 0.0465809 0.0615191 -0.657875 0.227112 0.64976</Acceleration>
+                                    <TimeFromStart>1.264094</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -138,14 +138,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.89048 0.399492 -0.219653 0.0602184 1.25303 1.77284</Position>
-                                    <Velocity>-0.286545 -0.0869267 -0.140397 -0.0203138 0.0809125 -0.188369</Velocity>
-                                    <Acceleration>0.297527 0.406977 0.60367 -0.209424 -0.229185 0.519051</Acceleration>
-                                    <TimeFromStart>1.376945</TimeFromStart>
+                                    <Position>1.51662 0.394386 -0.0637979 0.653616 0.843138 1.41712</Position>
+                                    <Velocity>-0.620377 -0.0545608 -0.0718417 0.768166 -0.264673 -0.757121</Velocity>
+                                    <Acceleration>0.76454 0.0683625 0.089242 -0.953873 0.326819 0.934538</Acceleration>
+                                    <TimeFromStart>1.368607</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -153,14 +153,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.80845 0.386339 -0.244566 0.0471797 1.2693 1.72886</Position>
-                                    <Velocity>-0.351626 -0.0244665 -0.0715656 -0.0706022 0.0452942 -0.169145</Velocity>
-                                    <Acceleration>-0.764721 0.0414079 -0.109549 -0.151583 -0.0265095 -0.381047</Acceleration>
-                                    <TimeFromStart>1.655545</TimeFromStart>
+                                    <Position>1.45566 0.396716 -0.0957243 0.714731 0.830766 1.35505</Position>
+                                    <Velocity>-0.538604 -0.0475266 -0.0624711 0.667923 -0.229876 -0.65753</Velocity>
+                                    <Acceleration>0.613627 0.0501878 0.0686845 -0.735573 0.259634 0.743912</Acceleration>
+                                    <TimeFromStart>1.487277</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -168,14 +168,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.71218 0.382952 -0.261487 0.0270994 1.27863 1.68337</Position>
-                                    <Velocity>-0.522041 -0.001718 -0.0749736 -0.115246 0.0392096 -0.238561</Velocity>
-                                    <Acceleration>-0.780791 0.1649 0.0786412 -0.253294 -0.0286719 -0.248487</Acceleration>
-                                    <TimeFromStart>1.876075</TimeFromStart>
+                                    <Position>1.3933 0.400442 -0.126404 0.773983 0.818191 1.2918</Position>
+                                    <Velocity>-0.447291 -0.0388383 -0.0514835 0.550641 -0.190543 -0.545225</Velocity>
+                                    <Acceleration>0.701569 0.074951 0.089572 -0.953664 0.306881 0.873638</Acceleration>
+                                    <TimeFromStart>1.626135</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -183,14 +183,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.60782 0.385355 -0.273738 0.00308981 1.285 1.63689</Position>
-                                    <Velocity>-0.651235 0.0294354 -0.0641751 -0.153001 0.0317798 -0.286787</Velocity>
-                                    <Acceleration>-0.67551 0.186269 0.0430825 -0.172287 -0.0550791 -0.295128</Acceleration>
-                                    <TimeFromStart>2.053502</TimeFromStart>
+                                    <Position>1.32857 0.406604 -0.154864 0.830095 0.805297 1.22664</Position>
+                                    <Velocity>-0.320009 -0.0303877 -0.0384682 0.41063 -0.137808 -0.393496</Velocity>
+                                    <Acceleration>0.723494 0.0196636 0.056148 -0.613911 0.283548 0.825133</Acceleration>
+                                    <TimeFromStart>1.804769</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -198,14 +198,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.5018 0.39242 -0.282615 -0.0218797 1.28914 1.59023</Position>
-                                    <Velocity>-0.642686 0.0595161 -0.0424436 -0.151067 0.01898 -0.282547</Velocity>
-                                    <Acceleration>0.782958 0.191826 0.230068 0.196588 -0.105805 0.348418</Acceleration>
-                                    <TimeFromStart>2.212619</TimeFromStart>
+                                    <Position>1.25859 0.418139 -0.1785 0.878837 0.791722 1.15728</Position>
+                                    <Velocity>-0.213541 -0.00834107 -0.018167 0.197468 -0.0851393 -0.246877</Velocity>
+                                    <Acceleration>0.0577442 0.14211 0.0928178 -0.950226 0.102922 0.250724</Acceleration>
+                                    <TimeFromStart>2.077330</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -213,14 +213,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.39767 0.40572 -0.287093 -0.0458874 1.29093 1.54397</Position>
-                                    <Velocity>-0.499784 0.0823917 -0.00978427 -0.110909 0.0011056 -0.227999</Velocity>
-                                    <Acceleration>0.785 0.0591708 0.128278 0.24404 -0.0903172 0.25009</Acceleration>
-                                    <TimeFromStart>2.394897</TimeFromStart>
+                                    <Position>1.18597 0.432926 -0.198977 0.923565 0.778033 1.08635</Position>
+                                    <Velocity>-0.352662 0.0140318 -0.0117791 0.144982 -0.125858 -0.368403</Velocity>
+                                    <Acceleration>-0.779459 -0.0260464 -0.0596792 0.677948 -0.314156 -0.881158</Acceleration>
+                                    <TimeFromStart>2.462860</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -228,14 +228,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.302 0.426238 -0.286198 -0.065939 1.28872 1.49899</Position>
-                                    <Velocity>-0.348719 0.0984332 0.016724 -0.0698337 -0.021023 -0.164456</Velocity>
-                                    <Acceleration>0.540095 0.08154 0.104243 0.116258 -0.103787 0.307292</Acceleration>
-                                    <TimeFromStart>2.622904</TimeFromStart>
+                                    <Position>1.11196 0.449812 -0.217596 0.963392 0.764677 1.01563</Position>
+                                    <Velocity>-0.438594 0.0148855 -0.0179432 0.203119 -0.155427 -0.467717</Velocity>
+                                    <Acceleration>0.0618615 0.0331757 0.00820449 -0.192464 0.0672326 0.0518115</Acceleration>
+                                    <TimeFromStart>2.702359</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -243,14 +243,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.22096 0.46058 -0.274902 -0.0786622 1.27732 1.45625</Position>
-                                    <Velocity>-0.289099 0.179921 0.0801998 -0.0193898 -0.0728446 -0.194332</Velocity>
-                                    <Acceleration>-0.0914746 0.531631 0.373395 0.263318 -0.286156 -0.532103</Acceleration>
-                                    <TimeFromStart>2.888695</TimeFromStart>
+                                    <Position>1.03864 0.468301 -0.235055 0.994559 0.7531 0.94813</Position>
+                                    <Velocity>-0.335301 0.00493726 -0.0124975 0.176669 -0.130538 -0.346698</Velocity>
+                                    <Acceleration>0.778142 -0.114077 0.0360812 -0.0226305 0.135169 0.932342</Acceleration>
+                                    <TimeFromStart>2.948294</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -258,14 +258,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.17106 0.498315 -0.255917 -0.0785517 1.26101 1.4165</Position>
-                                    <Velocity>-0.226402 0.206071 0.114563 0.0163392 -0.0935959 -0.209914</Velocity>
-                                    <Acceleration>0.772539 -0.247562 -0.000112429 0.124799 0.0607394 0.362841</Acceleration>
-                                    <TimeFromStart>3.072809</TimeFromStart>
+                                    <Position>0.968152 0.489713 -0.250789 1.00647 0.745297 0.889669</Position>
+                                    <Velocity>-0.173233 0.0369084 -0.00939269 -0.0362767 -0.0104078 -0.223971</Velocity>
+                                    <Acceleration>-0.0426705 0.259164 -0.0219915 -0.943732 0.409989 -0.375402</Acceleration>
+                                    <TimeFromStart>3.389011</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -273,14 +273,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.13549 0.531194 -0.231455 -0.0726082 1.23969 1.37632</Position>
-                                    <Velocity>-0.176076 0.12425 0.152249 0.0479703 -0.151014 -0.241584</Velocity>
-                                    <Acceleration>-0.249497 -0.602813 0.391781 0.203946 -0.657486 -0.691988</Acceleration>
-                                    <TimeFromStart>3.265245</TimeFromStart>
+                                    <Position>0.907404 0.515985 -0.264342 0.983338 0.746987 0.84795</Position>
+                                    <Velocity>-0.118957 0.0518573 -0.0101029 -0.12057 0.0308838 -0.169255</Velocity>
+                                    <Acceleration>0.609184 -0.103133 0.0145787 0.0639116 0.0209982 0.946513</Acceleration>
+                                    <TimeFromStart>3.580625</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -288,14 +288,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.10715 0.54453 -0.203 -0.0632802 1.21046 1.33214</Position>
-                                    <Velocity>-0.131649 0.0398606 0.169478 0.053078 -0.16343 -0.245704</Velocity>
-                                    <Acceleration>0.777183 -0.399517 -0.187144 -0.14328 0.510009 0.643054</Acceleration>
-                                    <TimeFromStart>3.433631</TimeFromStart>
+                                    <Position>0.862493 0.552574 -0.272675 0.907211 0.760192 0.835389</Position>
+                                    <Velocity>0.0740704 0.1201 -0.0297542 -0.434793 0.148429 0.158747</Velocity>
+                                    <Acceleration>-0.0673596 0.294688 -0.0697395 -0.94593 0.308948 -0.0258197</Acceleration>
+                                    <TimeFromStart>4.293135</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -303,14 +303,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.08905 0.545714 -0.165807 -0.0530062 1.17972 1.2843</Position>
-                                    <Velocity>-0.0773132 -0.0209206 0.213197 0.0559634 -0.166694 -0.260924</Velocity>
-                                    <Acceleration>-0.258509 -0.180685 0.604483 0.170824 -0.54117 -0.788338</Acceleration>
-                                    <TimeFromStart>3.643149</TimeFromStart>
+                                    <Position>0.855924 0.596276 -0.280895 0.808919 0.793177 0.838325</Position>
+                                    <Velocity>0.0824627 0.193236 -0.0472282 -0.683145 0.230767 0.197221</Velocity>
+                                    <Acceleration>0.131287 0.262416 -0.0633664 -0.945864 0.318255 0.318888</Acceleration>
+                                    <TimeFromStart>4.555693</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -318,14 +318,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.07495 0.539957 -0.12496 -0.0423767 1.1478 1.23452</Position>
-                                    <Velocity>-0.0904238 -0.052169 0.294632 0.0746271 -0.224559 -0.352718</Velocity>
-                                    <Acceleration>0.0939205 -0.211603 0.417832 0.0634769 -0.185253 -0.364025</Acceleration>
-                                    <TimeFromStart>3.802462</TimeFromStart>
+                                    <Position>0.866266 0.64376 -0.288614 0.697862 0.83495 0.849833</Position>
+                                    <Velocity>0.12926 0.241463 -0.0597826 -0.862737 0.293932 0.282342</Velocity>
+                                    <Acceleration>0.361641 0.245576 -0.0688724 -0.94583 0.347076 0.57772</Acceleration>
+                                    <TimeFromStart>4.745567</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -333,14 +333,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.06316 0.531361 -0.0818731 -0.0317407 1.11581 1.18381</Position>
-                                    <Velocity>-0.0723151 -0.0601399 0.281224 0.068472 -0.206239 -0.328278</Velocity>
-                                    <Acceleration>0.158382 0.100548 -0.604635 -0.149235 0.440497 0.704537</Acceleration>
-                                    <TimeFromStart>3.946010</TimeFromStart>
+                                    <Position>0.886908 0.692871 -0.296503 0.582876 0.881813 0.864527</Position>
+                                    <Velocity>0.157327 0.248959 -0.0625332 -0.897975 0.308631 0.321957</Velocity>
+                                    <Acceleration>0.717774 0.0427127 -0.0369112 -0.409353 0.218215 0.945774</Acceleration>
+                                    <TimeFromStart>4.797572</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -348,14 +348,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.05202 0.521681 -0.0380873 -0.0211291 1.08375 1.13276</Position>
-                                    <Velocity>-0.0637854 -0.0577684 0.255833 0.0615997 -0.186396 -0.29749</Velocity>
-                                    <Acceleration>-0.058841 -0.0728727 0.308313 0.069036 -0.208921 -0.345246</Acceleration>
-                                    <TimeFromStart>4.117389</TimeFromStart>
+                                    <Position>0.910938 0.742571 -0.304409 0.466411 0.930341 0.880394</Position>
+                                    <Velocity>0.196027 0.254889 -0.0653724 -0.932747 0.324596 0.374478</Velocity>
+                                    <Acceleration>0.225425 0.10181 -0.0322874 -0.438117 0.170891 0.334306</Acceleration>
+                                    <TimeFromStart>4.879632</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -363,14 +363,14 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.04118 0.511688 0.00602295 -0.0105558 1.05176 1.08158</Position>
-                                    <Velocity>-0.0562454 -0.052327 0.230384 0.0550911 -0.166778 -0.267009</Velocity>
-                                    <Acceleration>0.146428 0.13608 -0.60393 -0.144642 0.436807 0.699324</Acceleration>
-                                    <TimeFromStart>4.289562</TimeFromStart>
+                                    <Position>0.936323 0.792425 -0.31238 0.349819 0.979502 0.896486</Position>
+                                    <Velocity>0.194686 0.238201 -0.0615748 -0.8768 0.306565 0.364391</Velocity>
+                                    <Acceleration>-0.237592 -0.253204 0.0667393 0.945677 -0.334463 -0.425818</Acceleration>
+                                    <TimeFromStart>5.100087</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>
@@ -378,14 +378,29 @@
                     <Instruction type="20">
                         <MoveInstruction type="1">
                             <Description>Tesseract Plan Instruction</Description>
-                            <Profile>FREESPACE_TRAJOPT</Profile>
+                            <Profile>FREESPACE_OMPL</Profile>
                             <Waypoint type="3">
                                 <StateWaypoint>
                                     <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
-                                    <Position>1.03038 0.501629 0.0501889 -1.34638e-17 1.01977 1.03038</Position>
+                                    <Position>0.96195 0.842298 -0.320369 0.23328 1.02877 0.912583</Position>
+                                    <Velocity>0.13486 0.168636 -0.0434677 -0.619414 0.216203 0.254245</Velocity>
+                                    <Acceleration>-0.198719 -0.254136 0.0653167 0.931451 -0.324554 -0.37748</Acceleration>
+                                    <TimeFromStart>5.374321</TimeFromStart>
+                                </StateWaypoint>
+                            </Waypoint>
+                        </MoveInstruction>
+                    </Instruction>
+                    <Instruction type="20">
+                        <MoveInstruction type="1">
+                            <Description>Tesseract Plan Instruction</Description>
+                            <Profile>FREESPACE_OMPL</Profile>
+                            <Waypoint type="3">
+                                <StateWaypoint>
+                                    <Names>joint_1 joint_2 joint_3 joint_4 joint_5 joint_6</Names>
+                                    <Position>0.987616 0.892157 -0.328371 0.116848 1.07804 0.928631</Position>
                                     <Velocity>0 0 0 0 0 0</Velocity>
-                                    <Acceleration>2.25151e-13 8.08361e-14 2.41266e-13 -6.53081e-14 -2.24597e-13 2.44564e-13</Acceleration>
-                                    <TimeFromStart>4.693216</TimeFromStart>
+                                    <Acceleration>-9.07306e-14 -3.85425e-14 -4.15806e-15 8.0329e-15 -3.86197e-14 1.54736e-14</Acceleration>
+                                    <TimeFromStart>6.068861</TimeFromStart>
                                 </StateWaypoint>
                             </Waypoint>
                         </MoveInstruction>

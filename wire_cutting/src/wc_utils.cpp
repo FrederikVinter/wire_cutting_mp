@@ -709,7 +709,7 @@ std::vector<std::vector<std::vector<VectorXd>>> loadJointAnglesFromXML(const std
 
   // SEGMENTS
   //  -> WAYPOINTS
-  //  --> COORDINATES    
+  //  --> JOINT ANGLES    
 
     std::vector<std::vector<std::vector<VectorXd>>> segment_coordinates;
 

@@ -1,0 +1,5 @@
+total joint displacement w rrt: 7.10609
+success: 1
+Init time: 9484
+p2p time: 2367
+total joint displacement w trajopt: 6.82562

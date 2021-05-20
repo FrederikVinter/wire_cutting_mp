@@ -2,7 +2,7 @@
 	<InitMethodCut type="1"/>
 	<ShowIterations>false</ShowIterations>	
 	<p2p>
-		<Method type="0" />
+		<Method type="2" />
 		<Start>-1.2 2.0 -1.0 0 0 1 0</Start>
 		<End>1.2 2.0 -1.0 0 0 1 0</End>
 		<BboxEnabled>true</BboxEnabled>

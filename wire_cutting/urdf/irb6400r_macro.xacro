@@ -172,7 +172,7 @@
       <axis xyz="0 1 0"/>
       <parent link="${prefix}link_2"/>
       <child link="${prefix}link_3"/>
-      <limit effort="0" lower="-3.14" upper="3.14" velocity="1.22"/> <!-- Limits defined by constraints due to parallel link-->
+      <limit effort="0" lower="-1.57" upper="1.57" velocity="1.22"/> <!-- Limits defined by constraints due to parallel link-->
     </joint>
     <joint type="revolute" name="${prefix}joint_4">
       <origin xyz="0.0 0 0.225" rpy="0 0 0"/>

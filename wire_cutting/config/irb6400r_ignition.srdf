@@ -23,7 +23,7 @@
         <joint name="joint_2" value="0"/>
     </group_state>
 
-    <group_opw group="manipulator" a1="0.240" a2="-0.225" b="0.0" c1="0.800" c2="1.05" c3="1.725" c4="0.1482" offsets="0.000000 0.000000 -1.570000 0.000000 0.000000 0.000000" sign_corrections="1 1 1 1 1 1"/>
+<!-- <group_opw group="manipulator" a1="0.240" a2="-0.225" b="0.0" c1="0.800" c2="1.05" c3="1.725" c4="0.1482" offsets="0.000000 0.000000 -1.570000 0.000000 0.000000 0.000000" sign_corrections="1 1 1 1 1 1"/> -->
     
     <disable_collisions link1="CH_left" link2="CH_right" reason="Never"/>
     <disable_collisions link1="base_link" link2="link_2" reason="Never"/>

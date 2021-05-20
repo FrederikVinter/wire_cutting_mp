@@ -177,8 +177,8 @@ CompositeInstruction WireCuttingProblemGenerator::generate_conf_interpolated_see
 }
 
 CompositeInstruction WireCuttingProblemGenerator::generate_naive_seed(const VectorIsometry3d& tool_poses,
-                                                                                  ManipulatorInfo& mi, 
-                                                                                  const tesseract_environment::Environment::Ptr& env)
+                                                                      ManipulatorInfo& mi, 
+                                                                      const tesseract_environment::Environment::Ptr& env)
 {
   CompositeInstruction program("DEFAULT", CompositeInstructionOrder::ORDERED, mi);
 
@@ -285,8 +285,6 @@ bool WireCuttingProblemGenerator::run_request_p2p(std::vector<ProcessPlanningReq
                                                   const tesseract_rosutils::ROSPlottingPtr& plotter,
                                                   ProcessPlanningServer& planning_server_freespace,
                                                   std::vector<ProcessPlanningFuture>& p2p_responses) {
-  
-  plotter->waitForInput();
 
   std::size_t p2p_moves = p2p_requests.size();
   p2p_responses.resize(p2p_moves);
