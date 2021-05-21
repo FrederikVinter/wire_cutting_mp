@@ -1,9 +1,0 @@
-<Planner type="1">
-	<TrajoptPlanProfile>
-	    <CartesianCoefficientsConstraint>0.2 0 0.2 0.318 0 0.318</CartesianCoefficientsConstraint>
-	    <CartesianCoefficientsCost>0 0.2 0 0 0.318 0</CartesianCoefficientsCost>
-	    <PenaltyType type="0"/>
-	    <JointCoefficients>1</JointCoefficients>
-	</TrajoptPlanProfile>
-</Planner>
-

@@ -2,8 +2,9 @@
 
 source ../../../devel/setup.bash
 
-declare -a planners=("joint only" "pose" "pose+vel" "pose+vel+accel")
-declare -a programs=("rectangle.txt")
+#declare -a planners=("j" "j_d" "jp" "jp_d" "jpv" "jpv_d" "jpva" "jpva_d")
+declare -a planners=("jpva")
+declare -a programs=("rectangle.txt" "stairs.txt" "cone.txt" "sweep.txt")
 
 for i in "${planners[@]}"
 do

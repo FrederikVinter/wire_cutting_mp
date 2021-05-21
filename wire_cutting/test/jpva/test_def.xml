@@ -1,6 +1,6 @@
 <Test type="0">
 	<InitMethodCut type="1"/>
-	<ShowIterations>false</ShowIterations>	
+	<ShowIterations>true</ShowIterations>	
 	<p2p>
 		<Method type="1" />
 		<Start>-0.8 2.5 -0.5 0 0 1 0</Start>

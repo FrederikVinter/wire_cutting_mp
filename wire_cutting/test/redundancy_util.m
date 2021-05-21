@@ -11,13 +11,13 @@ name7 = "accelveltrans";
 name8 = "jointtranscost_descartes";
 name9 = "joint_only_rot_only"
 
-names = ["joint only" "pose" "pose+vel" "pose+vel+accel"];
-shownnames = ["LVS p_{j}" "LVS p_{j,p}" "LVS p_{j,p,v}" "LVS p_{j,p,v,a}"];
+names = ["j" "jp" "jpv" "jpva"];
+shownnames = ["LJI p_{j}" "LJI p_{j,p}" "LJI p_{j,p,v}" "LJI p_{j,p,v,a}"];
 
 %names = [name3 name1 name2];
 %x = plot_redundancy(names, ["Joint cost" "Pose cost" "Acceleration + Velocity"],"square");
 %names = [name3 name5 name9 name2 "All"];
-x = plot_redundancy(names, shownnames,"rectangle", "Rectangle");
+x = plot_redundancy(names, shownnames,"sweep", "Rectangle");
 
 
 %names = [name1 name2 name3];
