@@ -1,0 +1,57 @@
+<Planner type="1">
+	<TrajoptCompositeProfile>
+	    <ContactTest type="2"/>
+	    <CollisionCostConfig>
+		<Enabled>true</Enabled>
+		<UseWeightedSum>false</UseWeightedSum>
+		<CollisionEvaluator type="3"/>
+		<BufferMargin>0.015</BufferMargin>
+		<SafetyMarginBuffer>0.10</SafetyMarginBuffer>
+		<Coefficient>20</Coefficient>
+	    </CollisionCostConfig>
+	    <CollisionConstraintConfig>
+		<Enabled>false</Enabled>
+		<UseWeightedSum>false</UseWeightedSum>
+		<CollisionEvaluator type="1"/>
+		<SafetyMargin>0.01</SafetyMargin>
+		<SafetyMarginBuffer>0.050000000000000003</SafetyMarginBuffer>
+		<Coefficient>20</Coefficient>
+	    </CollisionConstraintConfig>
+	    
+	    <LinearCartesianVelocity>
+		<Enabled>true</Enabled>
+		<Coefficients>0 50 0 0 0 0</Coefficients>
+		<PenaltyType type="0"/>
+	    </LinearCartesianVelocity>
+    	    <RotationalCartesianVelocity>
+		<Enabled>true</Enabled>
+		<Coefficients>0 31.18 0 0 0 0</Coefficients>
+		<PenaltyType type="0"/>
+	    </RotationalCartesianVelocity>	    
+     	    <CartesianAcceleration>
+		<Enabled>false</Enabled>
+		<Coefficients>0 0 0 0 1 0</Coefficients>
+		<PenaltyType type="0"/>
+	    </CartesianAcceleration>	
+	    
+	    <SmoothVelocities>
+		<Enabled>true</Enabled>
+		<Coefficients>1</Coefficients>
+	    </SmoothVelocities>
+	    <SmoothAccelerations>
+		<Enabled>false</Enabled>
+		<Coefficients>1</Coefficients>
+	    </SmoothAccelerations>
+	    <SmoothJerks>
+		<Enabled>false</Enabled>
+		<Coefficients>1</Coefficients>
+	    </SmoothJerks>
+	    <AvoidSingularity>
+		<Enabled>false</Enabled>
+		<Coefficient>5</Coefficient>
+	    </AvoidSingularity>
+	    <LongestValidSegmentFraction>0.01</LongestValidSegmentFraction>
+	    <LongestValidSegmentLength>0.10000000000000001</LongestValidSegmentLength>
+	</TrajoptCompositeProfile>
+</Planner>
+

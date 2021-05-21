@@ -17,7 +17,7 @@ shownnames = ["LJI p_{j}" "LJI p_{j,p}" "LJI p_{j,p,v}" "LJI p_{j,p,v,a}"];
 %names = [name3 name1 name2];
 %x = plot_redundancy(names, ["Joint cost" "Pose cost" "Acceleration + Velocity"],"square");
 %names = [name3 name5 name9 name2 "All"];
-x = plot_redundancy(names, shownnames,"saddel", "Hyperbolic Paraboloid");
+x = plot_redundancy(names, shownnames,"cone", "Con");
 
 
 %names = [name1 name2 name3];
