@@ -4,6 +4,8 @@ The code is developed in the motion planning framework `Tesseract` (https://gith
 
 ## Demonstration
 Wire cutting in simulated environment
-![Alt Text](https://raw.githubusercontent.com/FrederikVinter/wire_cutting_mp/master/demos/wc_simulation.gif)
+<img src="https://raw.githubusercontent.com/FrederikVinter/wire_cutting_mp/master/demos/wc_simulation.gif" width="40" height="40" />
+
 Wire cutting on hardware
-![Alt Text](https://raw.githubusercontent.com/FrederikVinter/wire_cutting_mp/master/demos/wire_cutting_100x.gif)
+<img src="https://raw.githubusercontent.com/FrederikVinter/wire_cutting_mp/master/demos/wire_cutting_100x.gif" width="40" height="40" />
+
