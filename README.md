@@ -4,3 +4,4 @@ The code is developed in the motion planning framework `Tesseract` (https://gith
 
 ## Demonstration
 A selection of .gifs showcasing wire cutting in both a simulated and a physical environment are located in `/demos`
+![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
