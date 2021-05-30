@@ -3,7 +3,7 @@ This repository contains the source code for a BSc project concerning motion pla
 The code is developed in the motion planning framework `Tesseract` (https://github.com/ros-industrial-consortium/tesseract).
 
 ## Demonstration
-This demonstration shows the same problem in a simulated environment and on hardware \
+This demonstration shows the same problem in a simulated environment and on hardware
 
 Wire cutting in simulated environment \
 <img src="https://raw.githubusercontent.com/FrederikVinter/wire_cutting_mp/master/demos/wc_simulation.gif" width="680" height="420" />
