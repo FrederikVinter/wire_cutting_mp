@@ -3,9 +3,9 @@ This repository contains the source code for a BSc project concerning motion pla
 The code is developed in the motion planning framework `Tesseract` (https://github.com/ros-industrial-consortium/tesseract).
 
 ## Demonstration
-Wire cutting in simulated environment
-<img src="https://raw.githubusercontent.com/FrederikVinter/wire_cutting_mp/master/demos/wc_simulation.gif" width="40" height="40" />
+Wire cutting in simulated environment \\
+<img src="https://raw.githubusercontent.com/FrederikVinter/wire_cutting_mp/master/demos/wc_simulation.gif" width="400" height="400" />
 
-Wire cutting on hardware
-<img src="https://raw.githubusercontent.com/FrederikVinter/wire_cutting_mp/master/demos/wire_cutting_100x.gif" width="40" height="40" />
+Wire cutting on hardware \\
+<img src="https://raw.githubusercontent.com/FrederikVinter/wire_cutting_mp/master/demos/wire_cutting_100x.gif" width="400" height="400" />
 
