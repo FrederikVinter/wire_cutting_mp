@@ -8,6 +8,6 @@ This demonstration shows the same problem in a simulated environment and on hard
 Wire cutting in simulated environment \
 <img src="https://raw.githubusercontent.com/FrederikVinter/wire_cutting_mp/master/demos/wc_simulation.gif" width="680" height="420" />
 
-Wire cutting on hardware \
+Wire cutting on hardware speeded up 100x\
 <img src="https://raw.githubusercontent.com/FrederikVinter/wire_cutting_mp/master/demos/wire_cutting_100x.gif" width="680" height="420" />
 
